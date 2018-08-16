@@ -1,4 +1,4 @@
-package langtonsant
+package fields
 
 sealed trait Dir2D {
   def index: Int

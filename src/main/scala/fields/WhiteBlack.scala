@@ -1,4 +1,4 @@
-package langtonsant
+package fields
 
 sealed trait WhiteBlack {
   def toggle: WhiteBlack
