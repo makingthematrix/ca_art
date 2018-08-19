@@ -1,17 +1,26 @@
-import engine.{Automaton, Grid}
+import engine.{Automaton, Board}
 import fields.{Pos2D, Up}
 import langtonscell.LangtonsCell
+import visualisation.BoardWindow
 
 object Main {
-  private def init(grid: Grid[LangtonsCell]) = grid.update(Pos2D(50, 50)){ _.copy(dir = Some(Up)) }
+  val dim = 200
+
+  private def init(board: Board[LangtonsCell]) =
+    board.update(Pos2D(dim / 2, dim / 2)){ _.copy(dir = Some(Up)) }
 
   def main(args: Array[String]): Unit = {
-    val ca = new Automaton(100, init, LangtonsCell.apply)
-    val it = ca.iterator
+    val auto = new Automaton(dim, init, LangtonsCell.apply)
+    val world = BoardWindow("Random Points", dim = dim, scale = 4)
 
-    val grid1 = it.next()
-    val grid2 = it.next()
+    val it = auto.iterator
+
+    for(i <- 1 to 100) {
+      it.next()
+    }
 
     println("Hello, world!")
+    world.draw(it.next())
+
   }
 }

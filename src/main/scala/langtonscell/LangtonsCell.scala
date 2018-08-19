@@ -6,8 +6,8 @@ import fields._
 case class LangtonsCell(color: WhiteBlack,
                         dir: Option[Dir2D],
                         override val pos: Pos2D,
-                        private val ca: Automaton[LangtonsCell],
-                        private val gen: Int) extends AutomatonCell[LangtonsCell] {
+                        private val auto: Automaton[LangtonsCell],
+                        override val generation: Int) extends AutomatonCell[LangtonsCell] {
 
   def updateColor: WhiteBlack = dir match {
     case Some(_) => color.toggle
@@ -15,7 +15,7 @@ case class LangtonsCell(color: WhiteBlack,
   }
 
   def updateDir: Option[Dir2D] = dir match {
-    case Some(antDir) if ca.grid(gen).near(this).exists { case (d, c) => c.dir.contains(d.turnAround) } =>
+    case Some(antDir) if auto.near(this).exists { case (d, c) => c.dir.contains(d.turnAround) } =>
       Some(color match {
         case White => antDir.turnLeft
         case Black => antDir.turnRight
@@ -23,7 +23,7 @@ case class LangtonsCell(color: WhiteBlack,
     case _ => None
   }
 
-  override  def update: LangtonsCell = copy(color = updateColor, dir = updateDir, gen = gen + 1)
+  override  def update: LangtonsCell = copy(color = updateColor, dir = updateDir, generation = generation + 1)
 }
 
 object LangtonsCell {
