@@ -15,15 +15,41 @@ case class LangtonsCell(color: WhiteBlack,
   }
 
   def updateDir: Option[Dir2D] = dir match {
-    case Some(antDir) if auto.near(this).exists { case (d, c) => c.dir.contains(d.turnAround) } =>
-      Some(color match {
-        case White => antDir.turnLeft
-        case Black => antDir.turnRight
-      })
+    case None =>
+      auto.near(this).find { case (d, c) => c.dir.contains(d.turnAround) } match {
+        case Some((d, _)) =>
+          Some(color match {
+            case White => d.turnLeft
+            case Black => d.turnRight
+          })
+        case _=> None
+      }
     case _ => None
   }
 
-  override  def update: LangtonsCell = copy(color = updateColor, dir = updateDir, generation = generation + 1)
+  override  def update: LangtonsCell = {
+   // println(s"update! $pos: dir = $dir, color = $color")
+    val res = copy(color = updateColor, dir = updateDir, generation = generation + 1)
+    //if (color != res.color) println(s"($generation) $pos changed from $color to ${res.color}")
+    //if (dir != res.dir) println(s"($generation) $pos changed from $dir to ${res.dir}")
+    res
+  }
+
+  override def hashCode(): Int = {
+    val colorHash = color match {
+      case White => 1
+      case Black => 2
+    }
+
+    colorHash * 6 + dir.fold(0)(_.index + 1)
+  }
+
+  override def canEqual(that: Any): Boolean = that.isInstanceOf[LangtonsCell]
+
+  override def equals(obj: scala.Any): Boolean = {
+    val cell = obj.asInstanceOf[LangtonsCell]
+    color == cell.color && dir == cell.dir
+  }
 }
 
 object LangtonsCell {

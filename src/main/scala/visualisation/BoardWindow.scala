@@ -21,12 +21,18 @@ class BoardWindow(window: World, scale: Int, withBorder: Boolean) {
   }
 
   def draw(lc: LangtonsCell): Unit =
-    draw(lc.pos.x, lc.pos. y, lc.color match {
-      case White => Color(255, 255, 255)
-      case Black => Color(0, 0, 0)
+    draw(lc.pos.x, lc.pos. y, (lc.color, lc.dir) match {
+      case (_, Some(_)) => Color(255, 0, 0)
+      case (White, _) => Color(255, 255, 255)
+      case (Black, _) => Color(0, 0, 0)
     })
 
-  def draw(board: Board[LangtonsCell]): Unit = board.iterator.foreach(draw)
+  private var oldBoard = Option.empty[Board[LangtonsCell]]
+  def draw(board: Board[LangtonsCell]): Unit = {
+    oldBoard.fold(board.values)(board - _).foreach(draw)
+    oldBoard = Some(board)
+    //board.values.foreach(draw)
+  }
 }
 
 object BoardWindow {

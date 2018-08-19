@@ -7,15 +7,24 @@ case class Board[CA <: AutomatonCell[CA]](dim: Int, map: Map[Int, CA]) {
 
   def get(pos: Pos2D): CA = map(id(pos))
 
-  def update: Board[CA] = copy(map = map.mapValues(_.update))
+  def update: Board[CA] = copy(map = map.transform((_, v) => v.update)) // note: don't use mapValues, we need a new map
 
   def update(pos: Pos2D)(updater: CA => CA): Board[CA] = id(pos) match {
-    case id => copy(map = map + (id -> map(id)))
+    case id => copy(map = map + (id -> updater(map(id))))
   }
 
   def near(cell: CA): Map[Dir2D, CA] = Dir2D.dirs.map(dir => dir -> get(cell.pos.move(dir))).toMap
 
-  def iterator: Iterator[CA] = map.valuesIterator
+  def values: Iterable[CA] = map.values
+
+  def -(board: Board[CA]): List[CA] =
+    (0 until math.min(dim, board.dim))
+      .flatMap(x => (0 until math.min(dim, board.dim)).map(y => Pos2D(x, y)))
+      .flatMap { p =>
+        val cell = get(p)
+        if (cell == board.get(p)) None
+        else Some(cell)
+      }.toList
 }
 
 object Board {

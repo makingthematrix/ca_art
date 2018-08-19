@@ -9,8 +9,24 @@ class Automaton[CA <: AutomatonCell[CA]](gridDimension: Int,
                                          build: (Pos2D, Automaton[CA]) => CA) {
   def near(ca: CA): Map[Dir2D, CA] = boards(ca.generation).near(ca)
 
-  private lazy val boards: Stream[Board[CA]] =
-    init(Board(gridDimension){ build(_, this) }) #:: boards.map(_.update)
+  lazy val boards: Stream[Board[CA]] = {
+    init(Board(gridDimension) {
+      build(_, this)
+    }) #:: boards.map(_.update)
+  }
 
-  lazy val iterator = new StreamIterator[Board[CA]](boards)
+  val iterator = new StreamIterator[Board[CA]](boards)
+/*
+  private var board: Board[CA] = init(Board(gridDimension){ build(_, this) })
+
+  val iterator = new Iterator[Board[CA]] {
+    override def hasNext: Boolean = true
+
+    override def next(): Board[CA] = {
+      board = board.update
+      board
+    }
+  }
+
+  def near(ca: CA): Map[Dir2D, CA] = board.near(ca)*/
 }
