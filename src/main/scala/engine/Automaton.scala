@@ -2,24 +2,13 @@ package engine
 
 import fields.{Dir2D, Pos2D}
 
-import scala.collection.immutable.StreamIterator
-
-class Automaton[CA <: AutomatonCell[CA]](gridDimension: Int,
+class Automaton[CA <: AutomatonCell[CA]](dim: Int,
                                          init: Board[CA] => Board[CA],
                                          build: (Pos2D, Automaton[CA]) => CA) {
-  def near(ca: CA): Map[Dir2D, CA] = boards(ca.generation).near(ca)
 
-  lazy val boards: Stream[Board[CA]] = {
-    init(Board(gridDimension) {
-      build(_, this)
-    }) #:: boards.map(_.update)
-  }
+  private var board: Board[CA] = init(Board(dim){ build(_, this) })
 
-  val iterator = new StreamIterator[Board[CA]](boards)
-/*
-  private var board: Board[CA] = init(Board(gridDimension){ build(_, this) })
-
-  val iterator = new Iterator[Board[CA]] {
+  val iterator: Iterator[Board[CA]] = new Iterator[Board[CA]] {
     override def hasNext: Boolean = true
 
     override def next(): Board[CA] = {
@@ -28,5 +17,5 @@ class Automaton[CA <: AutomatonCell[CA]](gridDimension: Int,
     }
   }
 
-  def near(ca: CA): Map[Dir2D, CA] = board.near(ca)*/
+  def near(ca: CA): Map[Dir2D, CA] = board.near(ca)
 }
