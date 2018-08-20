@@ -8,3 +8,7 @@ case class Pos2D(x: Int, y: Int) {
     case Left  => copy(x = x - 1)
   }
 }
+
+object Pos2D {
+  def apply(dim: Int): IndexedSeq[Pos2D] = (0 until dim).flatMap(x => (0 until dim).map(Pos2D(x, _)))
+}

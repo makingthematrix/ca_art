@@ -1,10 +1,9 @@
 package visualisation
 
-import de.h2b.scala.lib.simgraf.{Color, Point, World}
 import de.h2b.scala.lib.simgraf.layout.GridLayout
 import de.h2b.scala.lib.simgraf.shapes.Rectangle
+import de.h2b.scala.lib.simgraf.{Color, Point, World}
 import engine.Board
-import fields.{Black, White}
 import langtonscell.LangtonsCell
 
 class BoardWindow(window: World, scale: Int, withBorder: Boolean) {
@@ -23,8 +22,8 @@ class BoardWindow(window: World, scale: Int, withBorder: Boolean) {
   def draw(lc: LangtonsCell): Unit =
     draw(lc.pos.x, lc.pos. y, (lc.color, lc.dir) match {
       case (_, Some(_)) => Color(255, 0, 0)
-      case (White, _)   => Color(255, 255, 255)
-      case (Black, _)   => Color(0, 0, 0)
+      case (false, _)   => Color(255, 255, 255)
+      case (true, _)    => Color(0, 0, 0)
     })
 
   private var oldBoard = Option.empty[Board[LangtonsCell]]

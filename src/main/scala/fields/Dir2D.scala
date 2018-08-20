@@ -2,7 +2,7 @@ package fields
 
 sealed trait Dir2D {
   def turnRight: Dir2D
-  def turnLeft: Dir2D
+  def turnLeft:  Dir2D
   def turnAround:Dir2D
 }
 

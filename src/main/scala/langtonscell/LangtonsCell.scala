@@ -1,35 +1,34 @@
 package langtonscell
 
-import engine.{Automaton, AutomatonCell}
+import engine.AutomatonCell
+import engine.Near.near4
 import fields._
 
-case class LangtonsCell(color: WhiteBlack,
+case class LangtonsCell(color: Boolean,
                         dir: Option[Dir2D],
                         override val pos: Pos2D,
-                        private val auto: Automaton[LangtonsCell])
+                        override val neighbor: (Pos2D) => LangtonsCell
+                       )
   extends AutomatonCell[LangtonsCell] {
 
-  def newColor: WhiteBlack = dir.fold(color)(_ => color.toggle)
+  override  def update: LangtonsCell = (newColor, newDir(near4(this, neighbor))) match {
+    case (c, d) if c == color && d == dir => this
+    case (c, d)                           => copy(color = c, dir = d)
+  }
 
-  def newDir(near: Map[Dir2D, LangtonsCell]): Option[Dir2D] = dir match {
+  private def newColor = if (dir.isEmpty) color else !color
+
+  private def newDir(near: Map[Dir2D, LangtonsCell]) = dir match {
     case None =>
       near.find {
         case (d, c) => c.dir.contains(d.turnAround)
       }.map {
-        case (d, _) => color match {
-          case White => d.turnRight
-          case Black => d.turnLeft
-        }
+        case (d, _) => if (color) d.turnLeft else d.turnRight
       }
     case _ => None
-  }
-
-  override  def update: LangtonsCell = auto.near(this) match {
-    case near if dir.isEmpty && near.values.forall(_.dir.isEmpty) => this
-    case near => copy(color = newColor, dir = newDir(near))
   }
 }
 
 object LangtonsCell {
-  def apply(pos: Pos2D, world: Automaton[LangtonsCell]): LangtonsCell = LangtonsCell(White, None, pos, world)
+  def apply(pos: Pos2D, neighbor: (Pos2D) => LangtonsCell): LangtonsCell = LangtonsCell(false, None, pos, neighbor)
 }

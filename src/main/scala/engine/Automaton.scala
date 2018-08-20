@@ -1,12 +1,12 @@
 package engine
 
-import fields.{Dir2D, Pos2D}
+import fields.Pos2D
 
 class Automaton[CA <: AutomatonCell[CA]](dim: Int,
                                          init: Board[CA] => Board[CA],
-                                         build: (Pos2D, Automaton[CA]) => CA) {
+                                         build: (Pos2D, (Pos2D) => CA) => CA) {
 
-  private var board: Board[CA] = init(Board(dim){ build(_, this) })
+  private var board: Board[CA] = init(Board(dim){ build(_, board.get(_)) })
 
   val iterator: Iterator[Board[CA]] = new Iterator[Board[CA]] {
     override def hasNext: Boolean = true
@@ -16,6 +16,4 @@ class Automaton[CA <: AutomatonCell[CA]](dim: Int,
       board
     }
   }
-
-  def near(ca: CA): Map[Dir2D, CA] = board.near(ca)
 }

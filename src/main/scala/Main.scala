@@ -11,7 +11,6 @@ object Main {
       _.copy(dir = Some(Up))
     }
 
-
   def main(args: Array[String]): Unit = {
     val auto = new Automaton(dim, init, LangtonsCell.apply)
     val world = BoardWindow("Langtons Ant", dim = dim, scale = 4)
