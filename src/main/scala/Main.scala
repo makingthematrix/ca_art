@@ -1,6 +1,6 @@
 import engine.{Automaton, Board}
 import fields.{Pos2D, Up}
-import langtonscell.LangtonsCell
+import langtonscell.{LangtonsBoard, LangtonsCell}
 import visualisation.BoardWindow
 
 object Main {
@@ -14,9 +14,9 @@ object Main {
       case x => println(s"x = ${x.toList}");
     }
 
-    val init = (board: Board[LangtonsCell]) => board.update(Pos2D(dim / 2, dim / 2)) { _.copy(dir = Some(Up)) }
+    val init = (board: Board[LangtonsCell]) => board.copy(Pos2D(dim / 2, dim / 2)) { _.copy(dir = Some(Up)) }
 
-    val auto = new Automaton(dim, init, LangtonsCell.apply)
+    val auto = new Automaton(dim, init, LangtonsBoard.apply, LangtonsCell.apply)
     val world = BoardWindow("Langtons Ant", dim = dim, scale = 4)
 
     val timestamp = System.currentTimeMillis()

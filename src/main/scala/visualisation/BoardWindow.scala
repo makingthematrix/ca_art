@@ -4,6 +4,7 @@ import de.h2b.scala.lib.simgraf.layout.GridLayout
 import de.h2b.scala.lib.simgraf.shapes.Rectangle
 import de.h2b.scala.lib.simgraf.{Color, Point, World}
 import engine.Board
+import fields.Pos2D
 import langtonscell.LangtonsCell
 
 class BoardWindow(window: World, scale: Int, withBorder: Boolean) {
@@ -25,6 +26,15 @@ class BoardWindow(window: World, scale: Int, withBorder: Boolean) {
       case (false, _)   => Color(255, 255, 255)
       case (true, _)    => Color(0, 0, 0)
     })
+
+  private var colorMap = Map.empty[Pos2D, Color]
+
+  private def toColorMap(board: Board[LangtonsCell]): Map[Pos2D, Color] =
+    board.values.map(c => c.pos -> (c.color, c.dir)).toMap.mapValues {
+      case (_, Some(_)) => Color.Red
+      case (false, _)   => Color.White
+      case (true, _)    => Color.Black
+    }
 
   private var oldBoard = Option.empty[Board[LangtonsCell]]
 

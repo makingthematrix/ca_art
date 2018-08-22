@@ -7,13 +7,17 @@ import fields._
 case class LangtonsCell(color: Boolean,
                         dir: Option[Dir2D],
                         override val pos: Pos2D,
-                        override val neighbor: (Pos2D) => LangtonsCell
+                        override val findCell: (Pos2D) => LangtonsCell
                        )
   extends AutomatonCell[LangtonsCell] {
 
-  override  def update: LangtonsCell = (newColor, newDir(near4(this, neighbor))) match {
-    case (c, d) if c == color && d == dir => this
-    case (c, d)                           => copy(color = c, dir = d)
+  override  def update: Option[LangtonsCell] = {
+    val near = near4(this, findCell)
+    if (dir.isEmpty && near.forall(_._2.dir.isEmpty)) None
+    else (newColor, newDir(near)) match {
+      case (c, d) if c == color && d == dir => None
+      case (c, d)                           => Some(copy(color = c, dir = d))
+    }
   }
 
   private def newColor = if (dir.isEmpty) color else !color
