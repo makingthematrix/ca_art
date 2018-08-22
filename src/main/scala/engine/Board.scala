@@ -3,17 +3,14 @@ package engine
 import fields.Pos2D
 import scala.collection.parallel.immutable.ParMap
 
-class Board[CA <: AutomatonCell[CA]](dim: Int,
-                                     private val map: ParMap[Int, CA]
-                                    ) {
+class Board[CA <: AutomatonCell[CA]](dim: Int, protected val map: ParMap[Int, CA]) {
   def findCell(pos: Pos2D): CA = map(Board.id(pos, dim))
-  protected def newBoard(map: ParMap[Int, CA]): Board[CA] = new Board(dim, map)
 
-  def next: Board[CA] = newBoard(map.map { case (k, c) => k -> c.update.getOrElse(c) })
+  def next: Board[CA] = new Board(dim, map.map { case (k, c) => k -> c.update.getOrElse(c) })
 
   def copy(pos: Pos2D)(updater: CA => CA): Board[CA] = {
     val id = Board.id(pos, dim)
-    newBoard(map = map + (id -> updater(map(id))))
+    new Board(dim, map.updated(id, updater(map(id))))
   }
 
   def values: IndexedSeq[CA] = map.values.toIndexedSeq
