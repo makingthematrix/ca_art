@@ -25,15 +25,12 @@ case class LangtonsCell(color: Boolean,
 
   private def newColor = if (dir.isEmpty) color else !color
 
-  private def newDir(near: Map[Dir2D, LangtonsCell]) = dir match {
-    case None =>
-      near.find {
-        case (d, c) => c.dir.contains(d.turnAround)
-      }.map {
-        case (d, _) => if (color) d.turnLeft else d.turnRight
-      }
-    case _ => None
-  }
+  private def newDir(near: Map[Dir2D, LangtonsCell]) =
+    near.find {
+      case (d, c) => c.dir.contains(d.turnAround)
+    }.map {
+      case (d, _) => if (color) d.turnLeft else d.turnRight
+    }
 }
 
 class LangtonsBoard(dim: Int, map: ParMap[Int, LangtonsCell]) extends Board[LangtonsCell](dim, map) {
@@ -62,7 +59,6 @@ object LangtonsBoard {
 object LangtonsCell {
   def apply(pos: Pos2D, findCell: Pos2D => LangtonsCell): LangtonsCell = LangtonsCell(false, None, pos, findCell)
 
-  def automaton(dim: Int)(init: Board[LangtonsCell] => Board[LangtonsCell]): Automaton[LangtonsCell] = {
-    new Automaton[LangtonsCell](dim, init, LangtonsBoard.apply, LangtonsCell.apply)
-  }
+  def automaton(dim: Int)(init: Board[LangtonsCell] => Board[LangtonsCell]): Automaton[LangtonsCell] =
+    new Automaton[LangtonsCell](dim, init, LangtonsBoard.apply, apply)
 }

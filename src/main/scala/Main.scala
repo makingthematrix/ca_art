@@ -1,6 +1,7 @@
 import de.h2b.scala.lib.simgraf.Color
 import fields.{Pos2D, Up}
 import langtonscell.LangtonsCell
+import langtonscolors.LangtonsColors
 import visualisation.BoardWindow
 
 object Main {
@@ -19,11 +20,15 @@ object Main {
       case x => println(s"unrecognized parameters: ${x.toList}");
     }
 
+    langtonsColors(dim, it, step, scale)
+  }
+
+  private def langtonsCell(dim:Int, it: Int, step: Int, scale: Int) = {
     val auto = LangtonsCell.automaton(dim) { board =>
-      board.copy(Pos2D(dim /2, dim /2))(_.copy(dir = Some(Up)))
+      board.copy(Pos2D(dim / 2, dim / 2))(_.copy(dir = Some(Up)))
     }
 
-    val world = BoardWindow("Langtons Ant", toColor, dim = dim, scale = scale)
+    val world = BoardWindow[LangtonsCell]("Langtons Cell", toColor, dim = dim, scale = scale)
 
     val timestamp = System.currentTimeMillis()
     for (i <- 0 until it){
@@ -42,4 +47,27 @@ object Main {
     case (true, _)    => Color.Black
   }
 
+
+  private def langtonsColors(dim:Int, it: Int, step: Int, scale: Int) = {
+    val auto = LangtonsColors.automaton(dim) { board =>
+      board.copy(Pos2D(dim / 2, dim / 2))(_.copy(dirs = List((Up, fields.Color.Blue))))
+    }
+
+    val world = BoardWindow[LangtonsColors]("Langtons Cell", toColor, dim = dim, scale = scale)
+
+    val timestamp = System.currentTimeMillis()
+    for (i <- 0 until it){
+      val board = auto.next()
+      if (i % step == 0) world.draw(board)
+    }
+
+    world.draw(auto.next())
+
+    println(s"${System.currentTimeMillis() - timestamp}")
+  }
+
+  private def toColor(c: LangtonsColors) = {
+    val color = if (c.colors.isEmpty) fields.Color.White else c.colors.fold(fields.Color.Black)(_ + _)
+    Color(color.r, color.g, color.b)
+  }
 }
