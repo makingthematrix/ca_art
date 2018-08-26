@@ -3,11 +3,12 @@ package visualisation
 import de.h2b.scala.lib.simgraf.layout.GridLayout
 import de.h2b.scala.lib.simgraf.shapes.Rectangle
 import de.h2b.scala.lib.simgraf.{Color, Point, World}
-import engine.Board
-import fields.Pos2D
-import langtonscell.LangtonsCell
+import engine.{AutomatonCell, Board}
 
-class BoardWindow(window: World, scale: Int, withBorder: Boolean) {
+class BoardWindow[CA <: AutomatonCell[CA]](window: World,
+                                           toColor: CA => Color,
+                                           scale: Int,
+                                           withBorder: Boolean) {
 
   def draw(x: Int, y: Int, c: Color): Unit = {
     window.activeColor = c
@@ -20,32 +21,20 @@ class BoardWindow(window: World, scale: Int, withBorder: Boolean) {
       ).fill(window)
   }
 
-  def draw(lc: LangtonsCell): Unit =
-    draw(lc.pos.x, lc.pos. y, (lc.color, lc.dir) match {
-      case (_, Some(_)) => Color(255, 0, 0)
-      case (false, _)   => Color(255, 255, 255)
-      case (true, _)    => Color(0, 0, 0)
-    })
+  private var oldBoard = Option.empty[Board[CA]]
 
-  private var colorMap = Map.empty[Pos2D, Color]
-
-  private def toColorMap(board: Board[LangtonsCell]): Map[Pos2D, Color] =
-    board.values.map(c => c.pos -> (c.color, c.dir)).toMap.mapValues {
-      case (_, Some(_)) => Color.Red
-      case (false, _)   => Color.White
-      case (true, _)    => Color.Black
-    }
-
-  private var oldBoard = Option.empty[Board[LangtonsCell]]
-
-  def draw(board: Board[LangtonsCell]): Unit = {
-    oldBoard.fold(board.values)(board - _).foreach(draw)
+  def draw(board: Board[CA]): Unit = {
+    oldBoard.fold(board.values)(board - _).foreach { c => draw(c.pos.x, c.pos.y, toColor(c))}
     oldBoard = Some(board)
   }
 }
 
 object BoardWindow {
-  def apply(title: String, dim: Int = 800, scale: Int = 1, withBorder: Boolean = false): BoardWindow = {
+  def apply[CA <: AutomatonCell[CA]](title: String,
+                                     toColor: CA => Color,
+                                     dim: Int = 100,
+                                     scale: Int = 1,
+                                     withBorder: Boolean = false): BoardWindow[CA] = {
     val window =
       World(
         Rectangle(Point(0, 0), Point(dim * scale, dim * scale))
@@ -54,7 +43,7 @@ object BoardWindow {
         title
       )
     window.clear(Color.White)
-    new BoardWindow(window, scale, withBorder)
+    new BoardWindow[CA](window, toColor, scale, withBorder)
   }
 
 }

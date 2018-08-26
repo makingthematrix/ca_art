@@ -1,13 +1,16 @@
 package langtonscell
 
-import engine.AutomatonCell
+import engine.Board.buildMap
+import engine.{Automaton, AutomatonCell, Board}
 import engine.Near.near4
 import fields._
+
+import scala.collection.parallel.immutable.ParMap
 
 case class LangtonsCell(color: Boolean,
                         dir: Option[Dir2D],
                         override val pos: Pos2D,
-                        override val findCell: (Pos2D) => LangtonsCell
+                        override val findCell: Pos2D => LangtonsCell
                        )
   extends AutomatonCell[LangtonsCell] {
 
@@ -33,6 +36,33 @@ case class LangtonsCell(color: Boolean,
   }
 }
 
+class LangtonsBoard(dim: Int, map: ParMap[Int, LangtonsCell]) extends Board[LangtonsCell](dim, map) {
+  override def next: LangtonsBoard = {
+    val updated = map.valuesIterator
+      .filter(_.dir.isDefined)
+      .flatMap { c => Seq(c, findCell(c.pos.move(c.dir.get))) }
+      .flatMap(_.update)
+      .map(c => c.pos -> c).toMap
+
+    val (toUpdate, toStay) = map.partition { case (id, c) => updated.keySet.contains(c.pos) }
+
+    new LangtonsBoard(dim, toStay ++ toUpdate.map { case (id, c) => id -> updated(c.pos) })
+  }
+
+  override def copy(pos: Pos2D)(updater: LangtonsCell => LangtonsCell): LangtonsBoard = {
+    val id = Board.id(pos, dim)
+    new LangtonsBoard(dim, map.updated(id, updater(map(id))))
+  }
+}
+
+object LangtonsBoard {
+  def apply(dim: Int, build: Pos2D => LangtonsCell): LangtonsBoard = new LangtonsBoard(dim, buildMap(dim, build))
+}
+
 object LangtonsCell {
-  def apply(pos: Pos2D, neighbor: (Pos2D) => LangtonsCell): LangtonsCell = LangtonsCell(false, None, pos, neighbor)
+  def apply(pos: Pos2D, findCell: Pos2D => LangtonsCell): LangtonsCell = LangtonsCell(false, None, pos, findCell)
+
+  def automaton(dim: Int)(init: Board[LangtonsCell] => Board[LangtonsCell]): Automaton[LangtonsCell] = {
+    new Automaton[LangtonsCell](dim, init, LangtonsBoard.apply, LangtonsCell.apply)
+  }
 }
