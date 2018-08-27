@@ -1,5 +1,5 @@
 import de.h2b.scala.lib.simgraf.Color
-import fields.{Pos2D, Up}
+import fields.{CMYK, Pos2D, RGB, Up}
 import langtonscell.LangtonsCell
 import langtonscolors.LangtonsColors
 import visualisation.BoardWindow
@@ -7,20 +7,26 @@ import visualisation.BoardWindow
 object Main {
 
   def main(args: Array[String]): Unit = {
-    var dim   = 200
-    var it    = 100
+    var dim   = 100
+    var it    = 10000
     var step  = 1
     var scale = 4
+    var example = "langtonsColors"
 
     args.sliding(2, 2).foreach {
-      case Array("dim", d)   => println(s"dim  = $d");  dim   = Integer.parseInt(d)
-      case Array("it", i)    => println(s"it   = $i");  it    = Integer.parseInt(i)
-      case Array("step", s)  => println(s"step = $s");  step  = Integer.parseInt(s)
-      case Array("scale", s) => println(s"scale = $s"); scale = Integer.parseInt(s)
+      case Array("dim", d)     => println(s"dim  = $d");  dim   = Integer.parseInt(d)
+      case Array("it", i)      => println(s"it   = $i");  it    = Integer.parseInt(i)
+      case Array("step", s)    => println(s"step = $s");  step  = Integer.parseInt(s)
+      case Array("scale", s)   => println(s"scale = $s"); scale = Integer.parseInt(s)
+      case Array("example", e) => println(s"example = $e"); example = e;
       case x => println(s"unrecognized parameters: ${x.toList}");
     }
 
-    langtonsColors(dim, it, step, scale)
+    example match {
+      case "langtonsCell"   => langtonsCell(dim, it, step, scale)
+      case "langtonsColors" => langtonsColors(dim, it, step, scale)
+      case x => println(s"unrecognized example: $x")
+    }
   }
 
   private def langtonsCell(dim:Int, it: Int, step: Int, scale: Int) = {
@@ -50,10 +56,15 @@ object Main {
 
   private def langtonsColors(dim:Int, it: Int, step: Int, scale: Int) = {
     val auto = LangtonsColors.automaton(dim) { board =>
-      board.copy(Pos2D(dim / 2, dim / 2))(_.copy(dirs = List((Up, fields.Color.Blue))))
+      board
+        .copy(Pos2D(dim / 4    , dim / 4    ))(_.copy(dirs = List((Up, RGB.Red.toCMYK))))
+        .copy(Pos2D(dim / 4 * 3, dim / 4    ))(_.copy(dirs = List((Up, RGB.Orange.toCMYK))))
+        .copy(Pos2D(dim / 4    , dim / 4 * 3))(_.copy(dirs = List((Up, RGB.Yellow.toCMYK))))
+        .copy(Pos2D(dim / 4 * 3, dim / 4 * 3))(_.copy(dirs = List((Up, RGB.Green.toCMYK))))
+        .copy(Pos2D(dim / 2    , dim / 2    ))(_.copy(dirs = List((Up, RGB.Blue.toCMYK))))
     }
 
-    val world = BoardWindow[LangtonsColors]("Langtons Cell", toColor, dim = dim, scale = scale)
+    val world = BoardWindow[LangtonsColors]("Langtons Colors", toColor, dim = dim, scale = scale)
 
     val timestamp = System.currentTimeMillis()
     for (i <- 0 until it){
@@ -66,8 +77,9 @@ object Main {
     println(s"${System.currentTimeMillis() - timestamp}")
   }
 
-  private def toColor(c: LangtonsColors) = {
-    val color = if (c.colors.isEmpty) fields.Color.White else c.colors.fold(fields.Color.Black)(_ + _)
-    Color(color.r, color.g, color.b)
-  }
+  private def toColor(c: LangtonsColors) =
+    if (c.colors.isEmpty) Color.White else {
+      val color = CMYK.sum(c.colors).toRGB
+      Color(color.r, color.g, color.b)
+    }
 }

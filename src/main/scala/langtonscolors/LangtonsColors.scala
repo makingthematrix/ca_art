@@ -1,13 +1,13 @@
 package langtonscolors
 
 import engine.{Automaton, AutomatonCell, Board}
-import fields.{Color, Dir2D, Pos2D}
+import fields.{CMYK, Dir2D, Pos2D}
 import engine.Near.near4
 
-case class LangtonsColors(colors: Set[Color],
-                     dirs: List[(Dir2D, Color)],
-                     override val pos: Pos2D,
-                     override val findCell: Pos2D => LangtonsColors)
+case class LangtonsColors(colors: Set[CMYK],
+                          dirs: List[(Dir2D, CMYK)],
+                          override val pos: Pos2D,
+                          override val findCell: Pos2D => LangtonsColors)
   extends AutomatonCell[LangtonsColors] {
 
   override  def update: Option[LangtonsColors] = {
