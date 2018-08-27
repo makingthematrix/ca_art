@@ -7,10 +7,10 @@ import visualisation.BoardWindow
 object Main {
 
   def main(args: Array[String]): Unit = {
-    var dim   = 100
+    var dim   = 50
     var it    = 10000
     var step  = 1
-    var scale = 4
+    var scale = 8
     var example = "langtonsColors"
 
     args.sliding(2, 2).foreach {
@@ -57,11 +57,9 @@ object Main {
   private def langtonsColors(dim:Int, it: Int, step: Int, scale: Int) = {
     val auto = LangtonsColors.automaton(dim) { board =>
       board
-        .copy(Pos2D(dim / 4    , dim / 4    ))(_.copy(dirs = List((Up, RGB.Red.toCMYK))))
-        .copy(Pos2D(dim / 4 * 3, dim / 4    ))(_.copy(dirs = List((Up, RGB.Orange.toCMYK))))
-        .copy(Pos2D(dim / 4    , dim / 4 * 3))(_.copy(dirs = List((Up, RGB.Yellow.toCMYK))))
-        .copy(Pos2D(dim / 4 * 3, dim / 4 * 3))(_.copy(dirs = List((Up, RGB.Green.toCMYK))))
-        .copy(Pos2D(dim / 2    , dim / 2    ))(_.copy(dirs = List((Up, RGB.Blue.toCMYK))))
+        .copy(Pos2D.random(dim))(_.copy(dirs = List((Up, CMYK.Cyan))))
+        .copy(Pos2D.random(dim))(_.copy(dirs = List((Up, CMYK.Magenta))))
+        .copy(Pos2D.random(dim))(_.copy(dirs = List((Up, CMYK.Yellow))))
     }
 
     val world = BoardWindow[LangtonsColors]("Langtons Colors", toColor, dim = dim, scale = scale)
