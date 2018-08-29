@@ -16,6 +16,10 @@ class Automaton[CA <: AutomatonCell[CA]](dim: Int,
   }
 
   override def hasNext: Boolean = true
+
+  def update(updater: Board[CA] => Board[CA]): Unit = {
+    board = updater(board)
+  }
 }
 
 object Automaton {

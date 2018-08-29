@@ -1,9 +1,11 @@
 package visualisation
 
+import de.h2b.scala.lib.simgraf.event._
 import de.h2b.scala.lib.simgraf.layout.GridLayout
 import de.h2b.scala.lib.simgraf.shapes.Rectangle
 import de.h2b.scala.lib.simgraf.{Color, Point, World}
 import engine.{AutomatonCell, Board}
+import fields.Pos2D
 
 class BoardWindow[CA <: AutomatonCell[CA]](window: World,
                                            toColor: CA => Color,
@@ -34,15 +36,23 @@ object BoardWindow {
                                      toColor: CA => Color,
                                      dim: Int = 100,
                                      scale: Int = 1,
-                                     withBorder: Boolean = false): BoardWindow[CA] = {
-    val window =
-      World(
-        Rectangle(Point(0, 0), Point(dim * scale, dim * scale))
-      )(
-        GridLayout.onScreen(1, 1).iterator.next().fit(dim * scale, dim * scale),
-        title
-      )
+                                     withBorder: Boolean = false,
+                                     left: Pos2D => Unit = _ => (),
+                                     right: Pos2D => Unit = _ => ()): BoardWindow[CA] = {
+    val window = World.withEvents(
+      Rectangle(Point(0, 0), Point(dim * scale, dim * scale))
+    )(
+      GridLayout.onScreen(1, 1).iterator.next().fit(dim * scale, dim * scale),
+      title
+    )
     window.clear(Color.White)
+
+    Subscriber.to(window) {
+      case MouseEvent(LeftButton, _, _, pixel)  => left(Pos2D(dim - pixel.x, pixel.y))
+      case MouseEvent(RightButton, _, _, pixel) => right(Pos2D(dim - pixel.x, pixel.y))
+      case e: Event ⇒ println(e)
+    }
+
     new BoardWindow[CA](window, toColor, scale, withBorder)
   }
 

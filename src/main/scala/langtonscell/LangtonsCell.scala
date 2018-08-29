@@ -20,7 +20,8 @@ case class LangtonsCell(color: Boolean,
   private def newDir = Near.near4(this, findCell).find {
     case (thisDir, cell) => cell.dir.contains(thisDir.turnAround)
   }.map {
-    case (thisDir, _) => if (color) thisDir.turnLeft else thisDir.turnRight
+    case (thisDir, _) if color => thisDir.turnLeft
+    case (thisDir, _)          => thisDir.turnRight
   }
 }
 
