@@ -8,6 +8,11 @@ case class Pos2D(x: Int, y: Int) {
     case Right => copy(x = x + 1)
     case Down  => copy(y = y + 1)
     case Left  => copy(x = x - 1)
+
+    case UpLeft    => copy(x = x - 1, y = y - 1)
+    case UpRight   => copy(x = x + 1, y = y - 1)
+    case DownRight => copy(x = x + 1, y = y + 1)
+    case DownLeft  => copy(x = x - 1, y = y + 1)
   }
 }
 

@@ -19,7 +19,7 @@ case class LangtonsColors(colors: Set[CMYK],
     (colors | newColors) &~ (colors & newColors) // no generic xor?
   }
 
-  private def newDirs = Near.near4(this, findCell).toList.flatMap {
+  private def newDirs = Near.near4(this).toList.flatMap {
     case (thisDir, cell) => cell.dirs.filter(_._1 == thisDir.turnAround)
   }.map {
     case (thatDir, color) if colors.contains(color) => (thatDir.turnRight, color)
