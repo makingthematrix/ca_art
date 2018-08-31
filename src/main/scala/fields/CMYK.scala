@@ -24,6 +24,8 @@ object CMYK {
   val Magenta = CMYK(0.0, 1.0, 0.0)
   val Yellow = CMYK(0.0, 0.0, 1.0)
 
+  val colors = Array(Cyan, Magenta, Yellow)
+
   val Black = CMYK(0.0, 0.0, 0.0, 1.0)
   val White = CMYK(0.0, 0.0, 0.0)
 

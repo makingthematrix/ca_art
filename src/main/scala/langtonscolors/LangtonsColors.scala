@@ -30,7 +30,7 @@ case class LangtonsColors(colors: Set[CMYK],
 object LangtonsColors {
   def apply(pos: Pos2D, findCell: Pos2D => LangtonsColors): LangtonsColors = LangtonsColors(Set.empty, List.empty, pos, findCell)
 
-  def automaton(dim: Int)(init: Board[LangtonsColors] => Board[LangtonsColors]): Automaton[LangtonsColors] =
+  def automaton(dim: Int)(init: Board[LangtonsColors] => Board[LangtonsColors] = board => board): Automaton[LangtonsColors] =
     new Automaton[LangtonsColors](dim, init, LColorsBoard.apply, apply)
 
   import scala.collection.parallel.immutable.ParMap

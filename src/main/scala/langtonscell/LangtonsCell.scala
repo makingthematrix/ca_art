@@ -28,7 +28,7 @@ case class LangtonsCell(color: Boolean,
 object LangtonsCell {
   def apply(pos: Pos2D, findCell: Pos2D => LangtonsCell): LangtonsCell = LangtonsCell(false, None, pos, findCell)
 
-  def automaton(dim: Int)(init: Board[LangtonsCell] => Board[LangtonsCell]): Automaton[LangtonsCell] =
+  def automaton(dim: Int)(init: Board[LangtonsCell] => Board[LangtonsCell] = board => board): Automaton[LangtonsCell] =
     new Automaton[LangtonsCell](dim, init, LangtonsBoard.apply, apply)
 
   import scala.collection.parallel.immutable.ParMap

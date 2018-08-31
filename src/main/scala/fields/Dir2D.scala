@@ -31,5 +31,5 @@ case object Left  extends Dir2D {
 }
 
 object Dir2D {
-  val dirs = List(Up, Right, Down, Left)
+  val dirs = Array(Up, Right, Down, Left)
 }

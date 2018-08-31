@@ -25,4 +25,5 @@ class Automaton[CA <: AutomatonCell[CA]](dim: Int,
 object Automaton {
   def apply[CA <: AutomatonCell[CA]](dim: Int, init: Board[CA] => Board[CA], buildCell: (Pos2D, Pos2D => CA) => CA): Automaton[CA] =
     new Automaton[CA](dim, init, Board.apply[CA], buildCell)
+
 }
