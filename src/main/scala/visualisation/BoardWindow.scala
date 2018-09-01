@@ -42,6 +42,8 @@ class BoardWindow[CA <: AutomatonCell[CA]](window: World,
   Subscriber.to(window) {
     case MouseEvent(LeftButton, _, _, pixel)  => left.add(Pos2D(pixel.x / scale, pixel.y / scale))
     case MouseEvent(RightButton, _, _, pixel) => right.add(Pos2D(pixel.x / scale, pixel.y / scale))
+    case DragEvent(LeftButton, _, start, end) =>
+      left.addAll(Pos2D.range(Pos2D(start.x / scale, start.y / scale), Pos2D(end.x / scale, end.y / scale)).asJavaCollection)
     case e: Event ⇒ println(e)
   }
 

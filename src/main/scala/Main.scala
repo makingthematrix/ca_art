@@ -108,7 +108,7 @@ object Main {
   private def gameOfLifeInteractive(dim: Int, scale: Int) = {
     val auto = GameOfLife.automaton(dim)()
     val boardWindow = BoardWindow[GameOfLife]("Game of Life", toColor, dim, scale)
-    mainLoop[GameOfLife](auto, boardWindow, _.copy(life = true))
+    mainLoop[GameOfLife](auto, boardWindow, c => c.copy(life = !c.life))
   }
 
   private def toColor(c: GameOfLife) = if (c.life) Color.Black else Color.White

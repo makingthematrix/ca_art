@@ -13,9 +13,9 @@ class Board[CA <: AutomatonCell[CA]](dim: Int, protected val map: ParMap[Int, CA
     new Board(dim, map.updated(id, updater(map(id))))
   }
 
-  def values: IndexedSeq[CA] = map.values.toIndexedSeq
+  def values: List[CA] = map.values.toList
 
-  def -(board: Board[CA]): IndexedSeq[CA] = Pos2D(dim).flatMap { p =>
+  def -(board: Board[CA]): List[CA] = Pos2D(dim).flatMap { p =>
     val c = findCell(p)
     if (c != board.findCell(p)) Some(c) else None
   }
