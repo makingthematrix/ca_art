@@ -1,15 +1,22 @@
 package visualisation
 
+import java.util
+
 import de.h2b.scala.lib.simgraf.event._
 import de.h2b.scala.lib.simgraf.layout.GridLayout
 import de.h2b.scala.lib.simgraf.shapes.Rectangle
 import de.h2b.scala.lib.simgraf.{Color, Point, World}
 import engine.{AutomatonCell, Board}
 import fields.Pos2D
+import java.util.concurrent.{BlockingQueue, LinkedBlockingQueue}
+
+import scala.collection.JavaConverters._
 
 class BoardWindow[CA <: AutomatonCell[CA]](window: World,
                                            toColor: CA => Color,
                                            scale: Int) {
+  lazy val leftClicks: BoardWindow.Clicks = getClicks(left)
+  lazy val rightClicks: BoardWindow.Clicks = getClicks(right)
 
   def draw(x: Int, y: Int, c: Color): Unit = {
     window.activeColor = c
@@ -22,22 +29,45 @@ class BoardWindow[CA <: AutomatonCell[CA]](window: World,
       ).fill(window)
   }
 
-  private var oldBoard = Option.empty[Board[CA]]
-
   def draw(board: Board[CA]): Unit = {
     oldBoard.fold(board.values)(board - _).foreach { c => draw(c.pos.x, c.pos.y, toColor(c))}
     oldBoard = Some(board)
   }
 
-  def subscribe(left: Pos2D => Unit = _ => (), right: Pos2D => Unit = _ => ()): Unit = Subscriber.to(window) {
-    case MouseEvent(LeftButton, _, _, pixel)  => left(Pos2D(pixel.x / scale, pixel.y / scale))
-    case MouseEvent(RightButton, _, _, pixel) => right(Pos2D(pixel.x / scale, pixel.y / scale))
+  private var oldBoard = Option.empty[Board[CA]]
+
+  private val left = new LinkedBlockingQueue[Pos2D]()
+  private val right = new LinkedBlockingQueue[Pos2D]()
+
+  Subscriber.to(window) {
+    case MouseEvent(LeftButton, _, _, pixel)  => left.add(Pos2D(pixel.x / scale, pixel.y / scale))
+    case MouseEvent(RightButton, _, _, pixel) => right.add(Pos2D(pixel.x / scale, pixel.y / scale))
     case e: Event ⇒ println(e)
+  }
+
+  private def getClicks(queue: BlockingQueue[Pos2D]): BoardWindow.Clicks = new BoardWindow.Clicks {
+    override def isEmpty: Boolean = queue.isEmpty
+    override def size: Int = queue.size()
+    override def peek: Pos2D = queue.peek()
+    override def take: Pos2D = queue.take()
+    override def takeAll: List[Pos2D] = if (!isEmpty) {
+      val col = new util.ArrayList[Pos2D]()
+      queue.drainTo(col)
+      col.asScala.toList
+    } else List.empty
   }
 
 }
 
 object BoardWindow {
+
+  trait Clicks {
+    def isEmpty: Boolean
+    def size: Int
+    def peek: Pos2D
+    def take: Pos2D
+    def takeAll: List[Pos2D]
+  }
 
   def apply[CA <: AutomatonCell[CA]](title: String,
                                      toColor: CA => Color,

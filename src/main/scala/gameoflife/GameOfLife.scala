@@ -21,5 +21,4 @@ object GameOfLife {
 
   def automaton(dim: Int)(init: Board[GameOfLife] => Board[GameOfLife] = board => board): Automaton[GameOfLife] =
     new Automaton[GameOfLife](dim, init, Board.apply[GameOfLife], apply)
-
 }

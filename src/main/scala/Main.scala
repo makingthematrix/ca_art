@@ -1,4 +1,5 @@
 import de.h2b.scala.lib.simgraf.Color
+import engine.{Automaton, AutomatonCell, Board}
 import fields.{CMYK, Dir2D, Pos2D, Up}
 import gameoflife.GameOfLife
 import langtonscell.LangtonsCell
@@ -55,21 +56,8 @@ object Main {
 
   private def langtonsCellInteractive(dim: Int, scale: Int) = {
     val auto = LangtonsCell.automaton(dim)()
-
-    var start = false
-    var end = false
-
     val boardWindow = BoardWindow[LangtonsCell]("Langtons Cell", toColor, dim, scale)
-    boardWindow.subscribe(
-      left = (p: Pos2D) =>
-        boardWindow.draw(
-          auto.update(_.copy(p)(_.copy(color = true, dir = Some(Up))))
-        ),
-      right = (_: Pos2D) => if (!start) start = true else end = true
-    )
-
-    while(!start) Thread.sleep(500)
-    while(!end) boardWindow.draw(auto.next())
+    mainLoop[LangtonsCell](auto, boardWindow, _.copy(color = true, dir = Some(Up)))
   }
 
   private def toColor(c: LangtonsCell) = (c.color, c.dir) match {
@@ -107,21 +95,8 @@ object Main {
     }
 
     val auto = LangtonsColors.automaton(dim)()
-
-    var start = false
-    var end = false
-
     val boardWindow = BoardWindow[LangtonsColors]("Langtons Colors", toColor, dim, scale)
-    boardWindow.subscribe(
-      left = (p: Pos2D) =>
-        boardWindow.draw(
-          auto.update(_.copy(p)(_.copy(dirs = randomDirs)))
-        ),
-      right = (_: Pos2D) => if (!start) start = true else end = true
-    )
-
-    while(!start) Thread.sleep(500)
-    while(!end) boardWindow.draw(auto.next())
+    mainLoop[LangtonsColors](auto, boardWindow, _.copy(dirs = randomDirs))
   }
 
   private def toColor(c: LangtonsColors) =
@@ -132,23 +107,23 @@ object Main {
 
   private def gameOfLifeInteractive(dim: Int, scale: Int) = {
     val auto = GameOfLife.automaton(dim)()
-
-    var start = false
-    var end = false
-
     val boardWindow = BoardWindow[GameOfLife]("Game of Life", toColor, dim, scale)
-    boardWindow.subscribe(
-      left = (p: Pos2D) =>
-        boardWindow.draw(
-          auto.update(_.copy(p)(_.copy(life = true)))
-        ),
-      right = (_: Pos2D) => if (!start) start = true else end = true
-    )
-
-    while(!start) Thread.sleep(500)
-    while(!end) boardWindow.draw(auto.next())
+    mainLoop[GameOfLife](auto, boardWindow, _.copy(life = true))
   }
 
   private def toColor(c: GameOfLife) = if (c.life) Color.Black else Color.White
 
+  private def mainLoop[CA <: AutomatonCell[CA]](auto: Automaton[CA],
+                                                boardWindow: BoardWindow[CA],
+                                                leftClickUpdate: CA => CA,
+                                                sleep: Long = 250L) = {
+    while(boardWindow.rightClicks.size < 2) {
+      boardWindow.leftClicks.takeAll.foreach { p =>
+        boardWindow.draw(auto.update(_.copy(p)(leftClickUpdate)))
+      }
+
+      if (boardWindow.rightClicks.isEmpty) Thread.sleep(sleep)
+      else boardWindow.draw(auto.next())
+    }
+  }
 }
