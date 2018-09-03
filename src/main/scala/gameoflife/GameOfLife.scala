@@ -19,6 +19,5 @@ case class GameOfLife(life: Boolean,
 object GameOfLife {
   def apply(pos: Pos2D, findCell: Pos2D => GameOfLife): GameOfLife = GameOfLife(life = false, pos, findCell)
 
-  def automaton(dim: Int)(init: Board[GameOfLife] => Board[GameOfLife] = board => board): Automaton[GameOfLife] =
-    new Automaton[GameOfLife](dim, init, Board.apply, apply)
+  def automaton(dim: Int): Automaton[GameOfLife] = new Automaton[GameOfLife](dim, Board.apply, apply)
 }

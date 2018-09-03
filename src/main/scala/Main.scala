@@ -15,7 +15,7 @@ object Main {
     var it    = 100
     var step  = 1
     var scale = 8
-    var example = "gameOfLifeInteractive"
+    var example = "1i"
 
     args.sliding(2, 2).foreach {
       case Array("dim", d)     => println(s"dim  = $d");  dim   = Integer.parseInt(d)
@@ -27,17 +27,18 @@ object Main {
     }
 
     example match {
-      case "langtonsCell"   => langtonsCell(dim, it, step, scale)
-      case "langtonsCellInteractive"   => langtonsCellInteractive(dim, scale)
-      case "langtonsColors" => langtonsColors(dim, it, step, scale)
-      case "langtonsColorsInteractive"   => langtonsColorsInteractive(dim, scale)
-      case "gameOfLifeInteractive"   => gameOfLifeInteractive(dim, scale)
-      case x => println(s"unrecognized example: $x")
+      case "1i" => gameOfLifeInteractive(dim, scale)
+      case "2"  => langtonsCell(dim, it, step, scale)
+      case "2i" => langtonsCellInteractive(dim, scale)
+      case "3"  => langtonsColors(dim, it, step, scale)
+      case "3i" => langtonsColorsInteractive(dim, scale)
+      case x    => println(s"unrecognized example: $x")
     }
   }
 
   private def langtonsCell(dim: Int, it: Int, step: Int, scale: Int) = {
-    val auto = LangtonsCell.automaton(dim) { board =>
+    val auto = LangtonsCell.automaton(dim)
+    auto.update { board =>
       board.copy(Pos2D(dim / 2, dim / 2))(_.copy(dir = Some(Up)))
     }
 
@@ -55,7 +56,7 @@ object Main {
   }
 
   private def langtonsCellInteractive(dim: Int, scale: Int) = {
-    val auto = LangtonsCell.automaton(dim)()
+    val auto = LangtonsCell.automaton(dim)
     val boardWindow = BoardWindow[LangtonsCell]("Langtons Cell", toColor, dim, scale)
     mainLoop[LangtonsCell](auto, boardWindow, _.copy(color = true, dir = Some(Up)))
   }
@@ -67,11 +68,11 @@ object Main {
   }
 
   private def langtonsColors(dim:Int, it: Int, step: Int, scale: Int) = {
-    val auto = LangtonsColors.automaton(dim) { board =>
-      board
-        .copy(Pos2D.random(dim))(_.copy(dirs = List((Up, CMYK.Cyan))))
-        .copy(Pos2D.random(dim))(_.copy(dirs = List((Up, CMYK.Magenta))))
-        .copy(Pos2D.random(dim))(_.copy(dirs = List((Up, CMYK.Yellow))))
+    val auto = LangtonsColors.automaton(dim)
+    auto.update {
+      _.copy(Pos2D.random(dim))(_.copy(dirs = List((Up, CMYK.Cyan))))
+       .copy(Pos2D.random(dim))(_.copy(dirs = List((Up, CMYK.Magenta))))
+       .copy(Pos2D.random(dim))(_.copy(dirs = List((Up, CMYK.Yellow))))
     }
 
     val boardWindow = BoardWindow[LangtonsColors]("Langtons Colors", toColor, dim = dim, scale = scale)
@@ -94,7 +95,7 @@ object Main {
       List((d, c))
     }
 
-    val auto = LangtonsColors.automaton(dim)()
+    val auto = LangtonsColors.automaton(dim)
     val boardWindow = BoardWindow[LangtonsColors]("Langtons Colors", toColor, dim, scale)
     mainLoop[LangtonsColors](auto, boardWindow, _.copy(dirs = randomDirs))
   }
@@ -106,7 +107,7 @@ object Main {
     }
 
   private def gameOfLifeInteractive(dim: Int, scale: Int) = {
-    val auto = GameOfLife.automaton(dim)()
+    val auto = GameOfLife.automaton(dim)
     val boardWindow = BoardWindow[GameOfLife]("Game of Life", toColor, dim, scale)
     mainLoop[GameOfLife](auto, boardWindow, c => c.copy(life = !c.life))
   }
