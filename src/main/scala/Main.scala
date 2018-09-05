@@ -1,5 +1,5 @@
 import de.h2b.scala.lib.simgraf.Color
-import engine.{Automaton, AutomatonCell, Board}
+import engine.Automaton
 import fields.{CMYK, Dir2D, Pos2D, Up}
 import gameoflife.GameOfLife
 import langtonscell.LangtonsCell
@@ -34,6 +34,8 @@ object Main {
       case "3i" => langtonsColorsInteractive(dim, scale)
       case x    => println(s"unrecognized example: $x")
     }
+
+    System.exit(0)
   }
 
   private def langtonsCell(dim: Int, it: Int, step: Int, scale: Int) = {
@@ -58,7 +60,7 @@ object Main {
   private def langtonsCellInteractive(dim: Int, scale: Int) = {
     val auto = LangtonsCell.automaton(dim)
     val boardWindow = BoardWindow[LangtonsCell]("Langtons Cell", toColor, dim, scale)
-    mainLoop[LangtonsCell](auto, boardWindow, _.copy(color = true, dir = Some(Up)))
+    boardWindow.mainLoop(auto, _.copy(color = true, dir = Some(Up)))
   }
 
   private def toColor(c: LangtonsCell) = (c.color, c.dir) match {
@@ -97,7 +99,7 @@ object Main {
 
     val auto = LangtonsColors.automaton(dim)
     val boardWindow = BoardWindow[LangtonsColors]("Langtons Colors", toColor, dim, scale)
-    mainLoop[LangtonsColors](auto, boardWindow, _.copy(dirs = randomDirs))
+    boardWindow.mainLoop(auto, _.copy(dirs = randomDirs))
   }
 
   private def toColor(c: LangtonsColors) =
@@ -107,24 +109,10 @@ object Main {
     }
 
   private def gameOfLifeInteractive(dim: Int, scale: Int) = {
-    val auto = GameOfLife.automaton(dim)
+    val auto = new Automaton[GameOfLife](dim, GameOfLife.apply)
     val boardWindow = BoardWindow[GameOfLife]("Game of Life", toColor, dim, scale)
-    mainLoop[GameOfLife](auto, boardWindow, c => c.copy(life = !c.life))
+    boardWindow.mainLoop(auto, c => c.copy(life = !c.life))
   }
 
   private def toColor(c: GameOfLife) = if (c.life) Color.Black else Color.White
-
-  private def mainLoop[CA <: AutomatonCell[CA]](auto: Automaton[CA],
-                                                boardWindow: BoardWindow[CA],
-                                                leftClickUpdate: CA => CA,
-                                                sleep: Long = 250L) = {
-    while(boardWindow.rightClicks.size < 2) {
-      boardWindow.leftClicks.takeAll.foreach { p =>
-        boardWindow.draw(auto.update(_.copy(p)(leftClickUpdate)))
-      }
-
-      if (boardWindow.rightClicks.isEmpty) Thread.sleep(sleep)
-      else boardWindow.draw(auto.next())
-    }
-  }
 }

@@ -1,22 +1,22 @@
 package visualisation
 
 import java.util
+import java.util.concurrent.LinkedBlockingQueue
 
 import de.h2b.scala.lib.simgraf.event._
 import de.h2b.scala.lib.simgraf.layout.GridLayout
 import de.h2b.scala.lib.simgraf.shapes.Rectangle
 import de.h2b.scala.lib.simgraf.{Color, Point, World}
-import engine.{AutomatonCell, Board}
+import engine.{Automaton, AutomatonCell, Board}
 import fields.Pos2D
-import java.util.concurrent.{BlockingQueue, LinkedBlockingQueue}
 
 import scala.collection.JavaConverters._
 
 class BoardWindow[CA <: AutomatonCell[CA]](window: World,
                                            toColor: CA => Color,
+                                           dim: Int,
                                            scale: Int) {
-  lazy val leftClicks: BoardWindow.Clicks = getClicks(left)
-  lazy val rightClicks: BoardWindow.Clicks = getClicks(right)
+  import BoardWindow._
 
   def draw(x: Int, y: Int, c: Color): Unit = {
     window.activeColor = c
@@ -36,40 +36,44 @@ class BoardWindow[CA <: AutomatonCell[CA]](window: World,
 
   private var oldBoard = Option.empty[Board[CA]]
 
-  private val left = new LinkedBlockingQueue[Pos2D]()
-  private val right = new LinkedBlockingQueue[Pos2D]()
+  private val clicksQueue = new LinkedBlockingQueue[ClickType]()
 
-  Subscriber.to(window) {
-    case MouseEvent(LeftButton, _, _, pixel)  => left.add(Pos2D(pixel.x / scale, pixel.y / scale))
-    case MouseEvent(RightButton, _, _, pixel) => right.add(Pos2D(pixel.x / scale, pixel.y / scale))
-    case DragEvent(LeftButton, _, start, end) =>
-      left.addAll(Pos2D.range(Pos2D(start.x / scale, start.y / scale), Pos2D(end.x / scale, end.y / scale)).asJavaCollection)
-    case e: Event ⇒ println(e)
+  private def clicks = if (!clicksQueue.isEmpty) {
+    val col = new util.ArrayList[ClickType]()
+    clicksQueue.drainTo(col)
+    col.asScala.toList
+  } else List.empty
+
+
+  def mainLoop(auto: Automaton[CA], leftClickUpdate: CA => CA, sleep: Long = 100L): Unit = {
+    var pause = true
+    var stop = false
+
+    Subscriber.to(window) {
+      case MouseEvent(LeftButton, _, _, pixel)  =>
+        val p = Pos2D(pixel.x / scale, pixel.y / scale)
+        draw(auto.update(_.copy(p)(leftClickUpdate)))
+      case DragEvent(LeftButton, _, start, end) =>
+        // TODO: auto is an iterator, there must some fold way to do this so that draw is called only at the end
+        Pos2D.range(Pos2D(start.x / scale, start.y / scale), Pos2D(end.x / scale, end.y / scale))
+             .foreach(p => draw(auto.update(_.copy(p)(leftClickUpdate))))
+      case MouseEvent(RightButton, _, _, _) =>
+        pause = ! pause
+      case KeyEvent('q') =>
+        pause = true
+        stop = true
+        system.terminate()
+      case e: Event =>
+        println(e)
+    }
+
+    while(!stop){
+      if (!pause) draw(auto.next()) else Thread.sleep(sleep)
+    }
   }
-
-  private def getClicks(queue: BlockingQueue[Pos2D]): BoardWindow.Clicks = new BoardWindow.Clicks {
-    override def isEmpty: Boolean = queue.isEmpty
-    override def size: Int = queue.size()
-    override def peek: Pos2D = queue.peek()
-    override def take: Pos2D = queue.take()
-    override def takeAll: List[Pos2D] = if (!isEmpty) {
-      val col = new util.ArrayList[Pos2D]()
-      queue.drainTo(col)
-      col.asScala.toList
-    } else List.empty
-  }
-
 }
 
 object BoardWindow {
-
-  trait Clicks {
-    def isEmpty: Boolean
-    def size: Int
-    def peek: Pos2D
-    def take: Pos2D
-    def takeAll: List[Pos2D]
-  }
 
   def apply[CA <: AutomatonCell[CA]](title: String,
                                      toColor: CA => Color,
@@ -84,6 +88,11 @@ object BoardWindow {
 
     window.clear(Color.White)
 
-    new BoardWindow[CA](window, toColor, scale)
+    new BoardWindow[CA](window, toColor, dim, scale)
   }
+
+  sealed trait ClickType
+  case class LeftClick(pos: Pos2D) extends ClickType
+  case class RightClick(pos: Pos2D) extends ClickType
+  case object ExitClick extends ClickType
 }

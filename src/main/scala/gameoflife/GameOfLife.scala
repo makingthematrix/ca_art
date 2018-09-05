@@ -1,6 +1,6 @@
 package gameoflife
 
-import engine.{Automaton, AutomatonCell, Board, Near}
+import engine.{AutomatonCell, Near}
 import fields.Pos2D
 
 case class GameOfLife(life: Boolean,
@@ -18,6 +18,4 @@ case class GameOfLife(life: Boolean,
 
 object GameOfLife {
   def apply(pos: Pos2D, findCell: Pos2D => GameOfLife): GameOfLife = GameOfLife(life = false, pos, findCell)
-
-  def automaton(dim: Int): Automaton[GameOfLife] = new Automaton[GameOfLife](dim, Board.apply, apply)
 }
