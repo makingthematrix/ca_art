@@ -5,6 +5,8 @@ import math.round
 case class CMYK(c: Double, m: Double, y: Double, k: Double) {
   def +(other: CMYK): CMYK = CMYK.sum(Seq(this, other))
 
+  def *(coeff: Double): CMYK = CMYK.sum(Vector((c + k) * coeff, (m + k) * coeff, (y + k) * coeff))
+
   def toRGB: RGB = this match {
     case CMYK.White => RGB.White
     case CMYK.Black => RGB.Black
@@ -15,6 +17,8 @@ case class CMYK(c: Double, m: Double, y: Double, k: Double) {
         round(255.0 * (1.0 - y) * (1.0 -k)).toInt
       )
   }
+
+  lazy val abs = math.sqrt(c *c + m * m + y * y + k * k)
 }
 
 object CMYK {

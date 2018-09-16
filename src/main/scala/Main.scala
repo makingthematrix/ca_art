@@ -1,3 +1,4 @@
+import brush.Brush
 import de.h2b.scala.lib.simgraf.Color
 import engine.Automaton
 import fields.{CMYK, Dir2D, Pos2D, Up}
@@ -11,11 +12,11 @@ import scala.util.Random
 object Main {
 
   def main(args: Array[String]): Unit = {
-    var dim   = 50
+    var dim   = 200
     var it    = 100
     var step  = 1
-    var scale = 8
-    var example = "1i"
+    var scale = 4
+    var example = "3i"
 
     args.sliding(2, 2).foreach {
       case Array("dim", d)     => println(s"dim  = $d");  dim   = Integer.parseInt(d)
@@ -32,6 +33,7 @@ object Main {
       case "2i" => langtonsCellInteractive(dim, scale)
       case "3"  => langtonsColors(dim, it, step, scale)
       case "3i" => langtonsColorsInteractive(dim, scale)
+      case "4i" => brushInteractive(dim, scale)
       case x    => println(s"unrecognized example: $x")
     }
 
@@ -115,4 +117,20 @@ object Main {
   }
 
   private def toColor(c: GameOfLife) = if (c.life) Color.Black else Color.White
+
+  private def brushInteractive(dim: Int, scale: Int) = {
+    val auto = Brush.automaton(dim)
+    // TODO: select random colored points
+    val boardWindow = BoardWindow[Brush]("Brush", toColor, dim, scale)
+    boardWindow.mainLoop(auto, c => {
+      auto.update(_.copy(_.copy(center = Some(c.pos))))
+      c
+    })
+  }
+
+  private def toColor(c: Brush) = {
+    val rgb = c.color.toRGB
+    Color(rgb.r, rgb.g, rgb.b)
+  }
+
 }

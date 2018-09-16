@@ -3,17 +3,10 @@ package fields
 import scala.util.Random
 
 case class Pos2D(x: Int, y: Int) {
-  def move(dir: Dir2D): Pos2D = dir match {
-    case Up    => copy(y = y - 1)
-    case Right => copy(x = x + 1)
-    case Down  => copy(y = y + 1)
-    case Left  => copy(x = x - 1)
+  def move(dir: Dir2D): Pos2D = copy(x + dir.x.toInt, y + dir.y.toInt)
 
-    case UpLeft    => copy(x = x - 1, y = y - 1)
-    case UpRight   => copy(x = x + 1, y = y - 1)
-    case DownRight => copy(x = x + 1, y = y + 1)
-    case DownLeft  => copy(x = x - 1, y = y + 1)
-  }
+  def dir(other: Pos2D) = Dir2D(other.x - x, other.y - y)
+  def -(other: Pos2D) = other.dir(this)
 }
 
 object Pos2D {

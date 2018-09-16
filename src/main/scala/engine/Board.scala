@@ -13,6 +13,8 @@ class Board[CA <: AutomatonCell[CA]](dim: Int, protected val map: ParMap[Int, CA
     new Board(dim, map.updated(id, updater(map(id))))
   }
 
+  def copy(updater: CA => CA): Board[CA] = new Board(dim, map.map { case (id, cell) => (id, updater(cell)) })
+
   def values: List[CA] = map.values.toList
 
   def -(board: Board[CA]): List[CA] = Pos2D(dim).flatMap { p =>
