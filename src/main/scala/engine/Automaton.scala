@@ -2,25 +2,22 @@ package engine
 
 import fields.Pos2D
 
-class Automaton[CA <: AutomatonCell[CA]](dim: Int,
-                                         buildCell: (Pos2D, Pos2D => CA) => CA,
-                                         buildBoard: (Int, Pos2D => CA) => Board[CA] = Board.apply[CA](_, _)
-                                        )
-  extends Iterator[Board[CA]] {
+class Automaton[C <: AutomatonCell[C]](dim: Int,
+                                       applyCell:  (Pos2D, Pos2D => C) => C,
+                                       applyBoard: (Int, Pos2D => C)   => Board[C] = Board.apply[C] _
+                                      ) extends Iterator[Board[C]] {
+  private var board: Board[C] = applyBoard(dim, applyCell(_, board.findCell(_)))
 
-  private var board: Board[CA] = buildBoard(dim, buildCell(_, board.findCell(_)))
-
-  override def next(): Board[CA] = {
+  override def next(): Board[C] = {
     board = board.next
     board
   }
 
   override def hasNext: Boolean = true
 
-  def update(updater: Board[CA] => Board[CA]): Board[CA] = {
-    board = updater(board)
+  def update(updater: C => C): Board[C] = {
+    board = board.copy(updater)
     board
   }
-
 }
 

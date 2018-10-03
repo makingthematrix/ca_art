@@ -1,6 +1,7 @@
 package langtonscolors
 
-import engine.{Automaton, AutomatonCell, Board, Near}
+import engine.{Automaton, AutomatonCell, Board}
+import engine.Neighborhood.neumann
 import fields.{CMYK, Dir2D, Pos2D}
 
 case class LangtonsColors(colors: Set[CMYK],
@@ -19,7 +20,7 @@ case class LangtonsColors(colors: Set[CMYK],
     (colors | newColors) &~ (colors & newColors) // no generic xor?
   }
 
-  private def newDirs = Near.near4(this).toList.flatMap {
+  private def newDirs = neumann(this).toList.flatMap {
     case (thisDir, cell) => cell.dirs.filter(_._1 == thisDir.turnAround)
   }.map {
     case (thatDir, color) if colors.contains(color) => (thatDir.turnRight, color)

@@ -12,10 +12,10 @@ import fields.Pos2D
 
 import scala.collection.JavaConverters._
 
-class BoardWindow[CA <: AutomatonCell[CA]](window: World,
-                                           toColor: CA => Color,
-                                           dim: Int,
-                                           scale: Int) {
+class BoardWindow[C <: AutomatonCell[C]](window: World,
+                                         toColor: C => Color,
+                                         dim: Int,
+                                         scale: Int) {
   import BoardWindow._
 
   def draw(x: Int, y: Int, c: Color): Unit = {
@@ -29,12 +29,12 @@ class BoardWindow[CA <: AutomatonCell[CA]](window: World,
       ).fill(window)
   }
 
-  def draw(board: Board[CA]): Unit = {
+  def draw(board: Board[C]): Unit = {
     oldBoard.fold(board.values)(board - _).foreach { c => draw(c.pos.x, c.pos.y, toColor(c))}
     oldBoard = Some(board)
   }
 
-  private var oldBoard = Option.empty[Board[CA]]
+  private var oldBoard = Option.empty[Board[C]]
 
   private val clicksQueue = new LinkedBlockingQueue[ClickType]()
 
@@ -45,20 +45,22 @@ class BoardWindow[CA <: AutomatonCell[CA]](window: World,
   } else List.empty
 
 
-  def mainLoop(auto: Automaton[CA], leftClickUpdate: CA => CA, sleep: Long = 100L): Unit = {
+  def mainLoop(auto: Automaton[C], leftClickUpdate: C => C, sleep: Long = 100L): Unit = {
     var pause = true
     var stop = false
 
     Subscriber.to(window) {
       case MouseEvent(LeftButton, _, _, pixel)  =>
         val p = Pos2D(pixel.x / scale, pixel.y / scale)
-        draw(auto.update(_.copy(p)(leftClickUpdate)))
+        draw(auto.update(cell => if (cell.pos == p) leftClickUpdate(cell) else cell))
       case DragEvent(LeftButton, _, start, end) =>
-        // TODO: auto is an iterator, there must some fold way to do this so that draw is called only at the end
-        Pos2D.range(Pos2D(start.x / scale, start.y / scale), Pos2D(end.x / scale, end.y / scale))
-             .foreach(p => draw(auto.update(_.copy(p)(leftClickUpdate))))
+        val range = Pos2D.range(Pos2D(start.x / scale, start.y / scale), Pos2D(end.x / scale, end.y / scale)).toSet
+        val updated = auto.update(cell => if (range.contains(cell.pos)) leftClickUpdate(cell) else cell)
+        draw(updated)
       case MouseEvent(RightButton, _, _, _) =>
-        pause = ! pause
+        pause = !pause
+      case KeyEvent('p') =>
+        pause = !pause
       case KeyEvent('q') =>
         pause = true
         stop = true

@@ -1,6 +1,6 @@
 package brush
 
-import engine.{Automaton, AutomatonCell, Board, Near}
+import engine.{Automaton, AutomatonCell, Board, Neighborhood}
 import fields._
 
 case class Brush(color: CMYK,
@@ -23,7 +23,7 @@ case class Brush(color: CMYK,
 
 
   private def newDirs(cDir: Dir2D) =
-    Near.near8(this).toList.flatMap {
+    Neighborhood.moore(this).toList.flatMap {
       case (thisDir, cell) => cell.dirs.filter(dir => Brush.angle(dir._1) == thisDir.turnAround)
     }.map {
       case (thatDir, c) => (cDir, c) // TODO: calculate the new dir taking into account the max allowed rotation
