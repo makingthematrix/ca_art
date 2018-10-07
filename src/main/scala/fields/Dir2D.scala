@@ -8,6 +8,16 @@ class Dir2D(val x: Double, val y: Double) {
   def crossZ(other: Dir2D): Double = x * (other.y - y) - y * (other.x - x)
   def rightOf(other: Dir2D): Boolean = crossZ(other) < 0
   def leftOf(other: Dir2D): Boolean = crossZ(other) > 0
+
+  def approx4: Dir2D = Dir2D.approx4(x, y)
+  def approx8: Dir2D = Dir2D.approx8(x, y)
+
+  override def equals(obj: scala.Any): Boolean = obj match {
+    case dir: Dir2D => dir.x == x && dir.y == y
+    case _ => false
+  }
+
+  override def hashCode: Int = x.hashCode + y.hashCode
 }
 
 case object Up    extends Dir2D(0.0, -1.0) {
@@ -63,17 +73,49 @@ object Dir2D {
   val dirs8 = Array(Up, UpRight, Right, DownRight, Down, DownLeft, Left, UpLeft)
 
   def apply(x: Double, y: Double): Dir2D = {
-    require(x != 0.0 || y != 0.0)
-    (x / (x + y), y / (x + y)) match {
-      case (0.0, -1.0)  => Up
-      case (1.0, 0.0)   => Right
-      case (0.0, 1.0)   => Down
-      case (-1.0, 0.0)  => Left
-      case (-1.0, -1.0) => UpLeft
-      case (1.0, -1.0)  => UpRight
-      case (1.0, 1.0)   => DownRight
-      case (-1.0, 1.0)  => DownLeft
-      case (xi, yi)     => new Dir2D(xi, yi)
+    require(x != 0.0 || y != 0.0, "Unable to create a Dir2D from (x = 0.0, y = 0.0)")
+    (x, y) match {
+      case (0.0, yi) if yi < 0.0 => Up
+      case (xi, 0.0) if xi > 0.0 => Right
+      case (0.0, yi) if yi > 0.0 => Down
+      case (xi, 0.0) if xi < 0.0 => Left
+      case (xi, yi) if xi == yi && xi < 0.0  => UpLeft
+      case (xi, yi) if xi == -yi && xi > 0.0 => UpRight
+      case (xi, yi) if xi == yi && xi > 0.0  => DownRight
+      case (xi, yi) if xi == -yi && xi <0.0  => DownLeft
+      case (xi, yi)  =>
+        val den = math.sqrt(xi * xi + yi * yi)
+        new Dir2D(xi / den, yi / den)
+    }
+  }
+
+  def approx4(x: Double, y: Double) =
+    if (x > 0.0) {
+      if (y > x) Down
+      else if (y < -x) Up
+      else Right
+    } else {
+      if (y < x) Up
+      else if (y > -x) Down
+      else Left
+    }
+
+  def approx8(x: Double, y: Double) = {
+    val absX = math.abs(x)
+    if (y < 0.0) {
+      if (2.0 * absX < -y) Up
+      else if (absX < -2.0 * y) {
+        if (x < 0.0) UpLeft else UpRight
+      } else {
+        if (x < 0.0) Left else Right
+      }
+    } else {
+      if (2.0 * absX < y) Down
+      else if (absX < 2.0 * y) {
+        if (x < 0.0) DownLeft else DownRight
+      } else {
+        if (x < 0.0) Left else Right
+      }
     }
   }
 

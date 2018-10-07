@@ -2,29 +2,45 @@ package brush
 
 import engine.{Automaton, AutomatonCell, Board, Neighborhood}
 import fields._
+import Neighborhood.moore
 
 case class Brush(color: CMYK,
                  center: Option[Pos2D],
-                 dirs: List[(Dir2D, CMYK)],
+                 brushes: List[CMYK],
                  override val pos: Pos2D,
                  override val findCell: Pos2D => Brush
                 ) extends AutomatonCell[Brush] {
 
-  private lazy val dirToCenter = center.map(_ - pos)
+  private[Brush] lazy val dirToCenter = center.map(cPos => (cPos - pos).approx8)
 
   override def update: Option[Brush] = dirToCenter.fold(Option.empty[Brush]){ cDir =>
-    Some(copy(color = newColor, dirs = newDirs(cDir)))
+    Some(copy(color = newColor, brushes = newBrushes(cDir)))
   }
 
   private def newColor =
-    if (dirs.nonEmpty) CMYK.sum(dirs.map(_._2))
+    if (brushes.nonEmpty) CMYK.sum(brushes)
     else if (color.abs < 0.1) CMYK.White
     else color * 0.75
 
 
-  private def newDirs(cDir: Dir2D) =
+  private def newBrushes(cDir: Dir2D): List[CMYK] = {
+    val near = moore(this)
+    val dirsToCheck = cDir match {
+      case Up => (DownLeft, Down, DownRight)
+      case UpRight => (Left, DownLeft, Down)
+      case Right => (UpLeft, Left, DownLeft)
+      case DownRight => (Left, UpLeft, Up)
+      case Down => (DownLeft, Down, DownRight)
+      case DownLeft => (DownLeft, Down, DownRight)
+      case Left => (DownLeft, Down, DownRight)
+      case UpLeft => (DownLeft, Down, DownRight)
+        val c1 = near(DownLeft)
+        val c2 = near(Down)
+        val c3 = near(DownRight)
+    }
+  }
     Neighborhood.moore(this).toList.flatMap {
-      case (thisDir, cell) => cell.dirs.filter(dir => Brush.angle(dir._1) == thisDir.turnAround)
+      case (thisDir, cell) => cell.dirs.filter(dir => dir._1.approx8 == thisDir.turnAround)
     }.map {
       case (thatDir, c) => (cDir, c) // TODO: calculate the new dir taking into account the max allowed rotation
     }
