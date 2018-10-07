@@ -12,10 +12,10 @@ import scala.util.Random
 object Main {
 
   def main(args: Array[String]): Unit = {
-    var dim   = 200
+    var dim   = 100
     var it    = 100
     var step  = 1
-    var scale = 4
+    var scale = 8
     var example = "2i"
 
     args.sliding(2, 2).foreach {
@@ -30,14 +30,13 @@ object Main {
     example match {
       case "1i" => gameOfLifeInteractive(dim, scale)
       case "2"  => langtonsAnt(dim, it, step, scale)
-      case "2i" => langtonsAnt(dim, scale)
+      case "2i" => langtonsAntInteractive(dim, scale)
       case "3"  => langtonsColors(dim, it, step, scale)
       case "3i" => langtonsColorsInteractive(dim, scale)
       case "4i" => brushInteractive(dim, scale)
       case x    => println(s"unrecognized example: $x")
     }
 
-    System.exit(0)
   }
 
   private def langtonsAnt(dim: Int, it: Int, step: Int, scale: Int): Unit = {
@@ -58,10 +57,12 @@ object Main {
     println(s"${System.currentTimeMillis() - timestamp}")
   }
 
-  private def langtonsAnt(dim: Int, scale: Int): Unit = {
+  private def langtonsAntInteractive(dim: Int, scale: Int): Unit = {
     val auto = LangtonsAnt.automaton(dim)
     val boardWindow = BoardWindow[LangtonsAnt]("Langtons Ant", toColor, dim, scale)
     boardWindow.mainLoop(auto, _.copy(color = true, dir = Some(Up)))
+
+    System.exit(0)
   }
 
   private def toColor(c: LangtonsAnt) = (c.color, c.dir) match {
@@ -105,6 +106,8 @@ object Main {
     val auto = LangtonsColors.automaton(dim)
     val boardWindow = BoardWindow[LangtonsColors]("Langtons Colors", toColor, dim, scale)
     boardWindow.mainLoop(auto, _.copy(dirs = randomDirs))
+
+    System.exit(0)
   }
 
   private def toColor(c: LangtonsColors) =
@@ -117,6 +120,8 @@ object Main {
     val auto = new Automaton[GameOfLife](dim, GameOfLife.apply)
     val boardWindow = BoardWindow[GameOfLife]("Game of Life", toColor, dim, scale)
     boardWindow.mainLoop(auto, c => c.copy(life = !c.life))
+
+    System.exit(0)
   }
 
   private def toColor(c: GameOfLife) = if (c.life) Color.Black else Color.White
@@ -129,6 +134,8 @@ object Main {
       auto.update(_.copy(center = Some(c.pos)))
       c
     })
+
+    System.exit(0)
   }
 
   private def toColor(c: Brush) = {

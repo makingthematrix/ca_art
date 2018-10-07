@@ -26,7 +26,7 @@ case class LangtonsAnt(color: Boolean,
 }
 
 object LangtonsAnt {
-  def apply(pos: Pos2D, findCell: Pos2D => LangtonsAnt): LangtonsAnt = LangtonsAnt(color = false, dir = None, pos, findCell)
+  def apply(pos: Pos2D, findCell: Pos2D => LangtonsAnt): LangtonsAnt = LangtonsAnt(false, None, pos, findCell)
 
   def automaton(dim: Int): Automaton[LangtonsAnt] = new Automaton[LangtonsAnt](dim, apply, LangtonsBoard.apply)
 

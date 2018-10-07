@@ -72,6 +72,7 @@ class BoardWindow[C <: AutomatonCell[C]](window: World,
     while(!stop){
       if (!pause) draw(auto.next()) else Thread.sleep(sleep)
     }
+
   }
 }
 
