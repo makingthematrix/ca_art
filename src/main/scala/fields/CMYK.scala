@@ -5,7 +5,11 @@ import math.round
 case class CMYK(c: Double, m: Double, y: Double, k: Double) {
   def +(other: CMYK): CMYK = CMYK.sum(Seq(this, other))
 
-  def *(coeff: Double): CMYK = CMYK.sum(Vector((c + k) * coeff, (m + k) * coeff, (y + k) * coeff))
+  // this is certainly wrong
+  def *(coeff: Double): CMYK = {
+    val nc = CMYK(c * coeff, m * coeff, y * coeff, k * coeff)
+    if (nc.c > 1.0 || nc.m > 1.0 || nc.y >1.0 || nc.k > 1.0) CMYK.sum(Seq(nc)) else nc
+  }
 
   def toRGB: RGB = this match {
     case CMYK.White => RGB.White
@@ -19,10 +23,14 @@ case class CMYK(c: Double, m: Double, y: Double, k: Double) {
   }
 
   lazy val abs = math.sqrt(c *c + m * m + y * y + k * k)
+
+  override def toString: String = s"CMYK(${engine.round(c, 3)}, ${engine.round(m, 3)}, ${engine.round(y, 3)}, ${engine.round(k, 3)})"
 }
 
 object CMYK {
   def apply(c: Double, m: Double, y: Double): CMYK = CMYK(c, m, y, 0.0)
+
+  def unapply(color: CMYK): Option[(Double, Double, Double, Double)] = Some((color.c, color.m, color.y, color.k))
 
   val Cyan = CMYK(1.0, 0.0, 0.0)
   val Magenta = CMYK(0.0, 1.0, 0.0)

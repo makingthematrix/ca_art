@@ -44,22 +44,36 @@ class BoardWindow[C <: AutomatonCell[C]](window: World,
     col.asScala.toList
   } else List.empty
 
+  private val identityClick: C => C = c => c
+  private val identityClick2: (C, Pos2D) => C = (c, _) => c
 
-  def mainLoop(auto: Automaton[C], leftClickUpdate: C => C, sleep: Long = 100L): Unit = {
+  def mainLoop(auto: Automaton[C],
+               leftClick: C => C = identityClick,
+               rightClick: C => C = identityClick,
+               leftClick2: (C, Pos2D) => C = identityClick2,
+               rightClick2: (C, Pos2D) => C = identityClick2,
+               sleep: Long = 0L): Unit = {
     var pause = true
     var stop = false
 
     Subscriber.to(window) {
-      case MouseEvent(LeftButton, _, _, pixel)  =>
+      case MouseEvent(LeftButton, _, _, pixel) if leftClick != identityClick =>
         val p = Pos2D(pixel.x / scale, pixel.y / scale)
-        draw(auto.update(cell => if (cell.pos == p) leftClickUpdate(cell) else cell))
+        draw(auto.update(cell => if (cell.pos == p) leftClick(cell) else cell))
+      case MouseEvent(LeftButton, _, _, pixel) if leftClick2 != identityClick2 =>
+        val p = Pos2D(pixel.x / scale, pixel.y / scale)
+        draw(auto.update(leftClick2(_, p)))
       case DragEvent(LeftButton, _, start, end) =>
         val range = Pos2D.range(Pos2D(start.x / scale, start.y / scale), Pos2D(end.x / scale, end.y / scale)).toSet
-        val updated = auto.update(cell => if (range.contains(cell.pos)) leftClickUpdate(cell) else cell)
+        val updated = auto.update(cell => if (range.contains(cell.pos)) leftClick(cell) else cell)
         draw(updated)
-      case MouseEvent(RightButton, _, _, _) =>
-        pause = !pause
-      case KeyEvent('p') =>
+      case MouseEvent(RightButton, _, _, pixel) if rightClick != identityClick =>
+        val p = Pos2D(pixel.x / scale, pixel.y / scale)
+        draw(auto.update(cell => if (cell.pos == p) rightClick(cell) else cell))
+      case MouseEvent(RightButton, _, _, pixel) if rightClick2 != identityClick2 =>
+        val p = Pos2D(pixel.x / scale, pixel.y / scale)
+        draw(auto.update(rightClick2(_, p)))
+      case KeyEvent(' ') =>
         pause = !pause
       case KeyEvent('q') =>
         pause = true
@@ -70,7 +84,10 @@ class BoardWindow[C <: AutomatonCell[C]](window: World,
     }
 
     while(!stop){
-      if (!pause) draw(auto.next()) else Thread.sleep(sleep)
+      if (!pause) {
+        draw(auto.next())
+        if (sleep > 0L) Thread.sleep(sleep)
+      } else Thread.sleep(100L)
     }
 
   }
