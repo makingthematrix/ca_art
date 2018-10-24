@@ -2,6 +2,9 @@ package fields
 
 import math.min
 
+/**
+* Please see the CMYK.scala file for a short discussion of RGB and CMYK.
+*/
 case class RGB(r: Int, g: Int, b: Int) {
   def +(c: RGB) : RGB = RGB(min(r + c.r, 255),min(b + c.b, 255), min(b + c.b, 255))
 

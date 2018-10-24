@@ -1,11 +1,24 @@
 package fields
 
+/**
+Similarly to `Pos2D` this is a simple representation of a 2D vector.
+It can be used in two ways: as a normalized vector between two positions,
+and as such it can be held as a field in a cell and used to compute
+its new state, or it can denote a spatial relation between two cells.
+In the second case we deal usually only with constants: Up, Right, Down, etc.
+*/
 class Dir2D(val x: Double, val y: Double) {
   def turnRight: Dir2D = new Dir2D(-y, x)
   def turnLeft:  Dir2D = new Dir2D(y, -x)
   def turnAround:Dir2D = new Dir2D(-x, -y)
 
+  // returns the cross product of this vector and another
   def crossZ(other: Dir2D): Double = x * (other.y - y) - y * (other.x - x)
+  
+    
+  // calculating the cross product is an easy way to tell if the other vector
+  // is clockwise or counterclockwise from this one
+  // `crossZ` is 0.0 if the vectors are parallel
   def rightOf(other: Dir2D): Boolean = crossZ(other) < 0
   def leftOf(other: Dir2D): Boolean = crossZ(other) > 0
 
@@ -93,17 +106,17 @@ object Dir2D {
   def apply(x: Double, y: Double): Dir2D = {
     require(x != 0.0 || y != 0.0, "Unable to create a Dir2D from (x = 0.0, y = 0.0)")
     (x, y) match {
-      case (0.0, yi) if yi < 0.0 => Up
-      case (xi, 0.0) if xi > 0.0 => Right
-      case (0.0, yi) if yi > 0.0 => Down
-      case (xi, 0.0) if xi < 0.0 => Left
-      case (xi, yi) if xi == yi && xi < 0.0  => UpLeft
-      case (xi, yi) if xi == -yi && xi > 0.0 => UpRight
-      case (xi, yi) if xi == yi && xi > 0.0  => DownRight
-      case (xi, yi) if xi == -yi && xi <0.0  => DownLeft
-      case (xi, yi)  =>
-        val den = math.sqrt(xi * xi + yi * yi)
-        new Dir2D(xi / den, yi / den)
+      case (0.0, _) if y < 0.0 => Up
+      case (_, 0.0) if x > 0.0 => Right
+      case (0.0, _) if y > 0.0 => Down
+      case (_, 0.0) if x < 0.0 => Left
+      case _ if x == y && x < 0.0   => UpLeft
+      case _ if x == -y && x > 0.0  => UpRight
+      case _ if x == y && x > 0.0   => DownRight
+      case _ if x == -y && x < 0.0  => DownLeft
+      case _  =>
+        val den = math.sqrt(x * x + y * y)
+        new Dir2D(x / den, y / den)
     }
   }
 

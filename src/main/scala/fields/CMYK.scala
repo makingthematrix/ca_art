@@ -2,11 +2,28 @@ package fields
 
 import math.round
 
+/**
+* While RGB is what we use to describe colors made from mixing light of different wavelength,
+* we can think of CMYK as a description of colors made from mixing paint. The main difference
+* is that in RGB the "zero" color (the identity) is black, and adding colors to it we move 
+* towards white, while in CMYK the identity is the white color of the canvas on which we paint.
+* Mixing colors on the canvas moves us towards black. However, CMYK is not a simple inversion
+* of RGB. The methods used to convert between the two can be very complex - what I use here is 
+* probably the simplest one.
+* 
+* In CA Art, CMYK is used to visualize the state of a cell. This way we can treat the white color
+* in CMYK (0.0, 0.0, 0.0) as the default state, and then use basic colors (cyan, magenta, yellow)
+* for data in the cell. Mixing the colors gives us the visualization of the whole state. At the
+* end, just before it's displayed on the screen, the result color is converted to RGB.
+* 
+* https://en.wikipedia.org/wiki/CMYK_color_model
+*/
 case class CMYK(c: Double, m: Double, y: Double, k: Double) {
   def +(other: CMYK): CMYK = CMYK.sum(Seq(this, other))
 
-  // this is certainly wrong
+  // this makes sense only for dimming the color, ie. color in <0.0, 1.0>
   def *(coeff: Double): CMYK = {
+    require(coeff >= 0.0 && coeff <= 1.0)
     val nc = CMYK(c * coeff, m * coeff, y * coeff, k * coeff)
     if (nc.c > 1.0 || nc.m > 1.0 || nc.y >1.0 || nc.k > 1.0) CMYK.sum(Seq(nc)) else nc
   }

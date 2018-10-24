@@ -12,13 +12,31 @@ import fields.Pos2D
 
 import scala.collection.JavaConverters._
 
-class BoardWindow[C <: AutomatonCell[C]](window: World,
-                                         toColor: C => Color,
-                                         dim: Int,
-                                         scale: Int) {
+/**
+  * A wrapper around Simgraf.World
+  * 
+  * Displays the board as a 2D rectangle. `dim` is the size of the board, `scale` is the size in pixels
+  * of a side of a square representing one cell. Since right now we support only 2D c.a., this is enough
+  * to display any cellular automaton with `toColor` used to interpret the state of the cell as as color. 
+  * 
+  * `BoardWindow` can be used by the automaton with calls to `draw`, or - for interactive examples -
+  * the automaton may be provided to the `mainLoop` method.
+  */
+class BoardWindow[C <: AutomatonCell[C]] private (window: World,
+                                                  toColor: C => Color,
+                                                  dim: Int,
+                                                  scale: Int) {
   import BoardWindow._
 
-  def draw(x: Int, y: Int, c: Color): Unit = {
+  /**
+    * Draws the given board in the window.
+    */
+  def draw(board: Board[C]): Unit = {
+    oldBoard.fold(board.values)(board - _).foreach { c => draw(c.pos.x, c.pos.y, toColor(c))}
+    oldBoard = Some(board)
+  }
+    
+  private def draw(x: Int, y: Int, c: Color): Unit = {
     window.activeColor = c
     if (scale == 1)
       window.plot(Point(x,y))
@@ -27,11 +45,6 @@ class BoardWindow[C <: AutomatonCell[C]](window: World,
         Point(x * scale, y * scale),
         Point(x * scale + scale, y * scale + scale)
       ).fill(window)
-  }
-
-  def draw(board: Board[C]): Unit = {
-    oldBoard.fold(board.values)(board - _).foreach { c => draw(c.pos.x, c.pos.y, toColor(c))}
-    oldBoard = Some(board)
   }
 
   private var oldBoard = Option.empty[Board[C]]
@@ -47,10 +60,27 @@ class BoardWindow[C <: AutomatonCell[C]](window: World,
   private val identityClick: C => C = c => c
   private val identityClick2: (C, Pos2D) => C = (c, _) => c
 
+  /**
+    * Runs the provided automaton in a loop and allows for the user's interference.
+    * 
+    * `auto` - an automaton in its initial state
+    * `leftClick` - a function updating a cell as a result of left-clicking on its visual representation
+    * `rightClick` - a function updating a cell as a result of right-clicking on its visual representation
+    * `leftClick2` - a function updating every cell on the board as a result of left-clicking on the given position
+    * `rightClick2` - a function updating every cell on the board as a result of right-clicking on the given position
+    * `sleep` - the time interval between two consecutive iterations
+    * 
+    * The loop starts in the paused state. The user is able to alter the board with clicks and drags (a drag
+    * is interpreted as a series of clicks on every cell in the covered rectangle). Hitting the SPACE button
+    * launches the iterations. Hitting SPACE again pauses the loop. Hitting 'q' stops the loop.
+    * 
+    * FIXME: Right now updates can be safely performed only in the paused state. Clicking and dragging while
+    * the loop is running also works, but sometimes the outcome is weird (wrong cells being updated).
+  */
   def mainLoop(auto: Automaton[C],
-               leftClick: C => C = identityClick,
-               rightClick: C => C = identityClick,
-               leftClick2: (C, Pos2D) => C = identityClick2,
+               leftClick:    C => C         = identityClick,
+               rightClick:   C => C         = identityClick,
+               leftClick2:  (C, Pos2D) => C = identityClick2,
                rightClick2: (C, Pos2D) => C = identityClick2,
                sleep: Long = 0L): Unit = {
     var pause = true
