@@ -14,6 +14,8 @@ import fields.Pos2D
   * TODO: Move away from the default board being a torus with a square surface. `dim` should be specified inside 
   * `applyBoard`, and `applyBoard` should not be optional. Instead, allow for choosing from  a list of utility methods, 
   * similar to how neighborhoods work.
+  *
+  * @constructor Takes the board edge size, a function for creating cells, and a function to create the board.
   */
 class Automaton[C <: AutomatonCell[C]](dim: Int,
                                        applyCell:  (Pos2D, Pos2D => C) => C,
@@ -29,14 +31,16 @@ class Automaton[C <: AutomatonCell[C]](dim: Int,
   override def hasNext: Boolean = true
 
   /**
-  Updates the current state of the iterator.
-  
-  Used to provide the initial state of the automaton or to perform a change in the middle of the main loop.
-  `updater` is a function which for a given cell returns its updated version (or the cell itself, without 
-  changes). It's called for every cell on the board in order to create an updated copy of the board, which 
-  in turn replaces the old one.
-  @return the updated board
-  */
+    * Updates the current state of the iterator.
+    *   
+    * Used to provide the initial state of the automaton or to perform a change in the middle of the main loop.
+    * `updater` is a function which for a given cell returns its updated version (or the cell itself, without 
+    * changes). It's called for every cell on the board in order to create an updated copy of the board, which 
+    * in turn replaces the old one.
+    * 
+    * @param updater Called for every cell; creates an updated copy or returns the old one.
+    * @return the updated board
+    */
   def update(updater: C => C): Board[C] = {
     board = board.copy(updater)
     board
