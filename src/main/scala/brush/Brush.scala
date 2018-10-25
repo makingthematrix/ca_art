@@ -25,8 +25,8 @@ case class Brush(color: CMYK,
 
   private def newColor =
     if (brushes.nonEmpty) CMYK.sum(color :: brushes)
-    else if (color.abs < 0.1) CMYK.White
-    else color * 0.75
+    else if (color.abs < 0.05) CMYK.White
+    else color * 0.95
 
   private def newBrushes(cDir: Dir2D): List[CMYK] = {
     moore(this).collect {

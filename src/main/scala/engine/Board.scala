@@ -3,6 +3,12 @@ package engine
 import fields.Pos2D
 import scala.collection.parallel.immutable.ParMap
 
+/** A 2D board; both the container for cells and the graph of their spatial relations.
+  *
+  * @param dim length of the edge
+  * @param map a map of identifiers to cells
+  * @tparam C the exact case class implementing the cell
+  */
 class Board[C <: AutomatonCell[C]](dim: Int, protected val map: ParMap[Int, C]) {
   def findCell(pos: Pos2D): C = map(Board.id(pos, dim))
 
@@ -24,6 +30,15 @@ class Board[C <: AutomatonCell[C]](dim: Int, protected val map: ParMap[Int, C]) 
 }
 
 object Board {
+  /** A method converting the given position to the identifier of a cell at that position.
+    *
+    * If the given position is outside the board, the method uses modulo(dim) to wrap it around.
+    * Essentially that means that the board is the surface of a 3D torus, with no edges in either direction.
+    *
+    * @param pos position on a 2D plane; if it's bigger than `dim` it will be wrapped around
+    * @param dim length of the edge
+    * @return the identifier
+    */
   def id(pos: Pos2D, dim: Int): Int = {
     def wrap(i: Int) = i % dim match {
       case x if x >= 0 => x
