@@ -32,7 +32,7 @@ class Dir2D(val x: Double, val y: Double) {
 
   override def hashCode: Int = x.hashCode + y.hashCode
 
-  override def toString: String = s"Dir2D(${engine.round(x, 3)}, ${engine.round(y, 3)})"
+  override def toString: String = s"Dir2D(${x.round(3)}, ${y.round(3)})"
 }
 
 case object Up    extends Dir2D(0.0, -1.0) {

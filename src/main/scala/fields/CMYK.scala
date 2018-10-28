@@ -41,7 +41,7 @@ case class CMYK(c: Double, m: Double, y: Double, k: Double) {
 
   lazy val abs = math.sqrt(c *c + m * m + y * y + k * k)
 
-  override def toString: String = s"CMYK(${engine.round(c, 3)}, ${engine.round(m, 3)}, ${engine.round(y, 3)}, ${engine.round(k, 3)})"
+  override def toString: String = s"CMYK(${c.round(3)}, ${m.round(3)}, ${y.round(3)}, ${k.round(3)})"
 }
 
 object CMYK {

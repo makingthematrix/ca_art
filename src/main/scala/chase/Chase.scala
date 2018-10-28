@@ -1,23 +1,23 @@
-package brush
+package chase
 
 import engine.{Automaton, AutomatonCell, Board, Neighborhood}
 import fields._
 import Neighborhood.moore
 
-case class Brush(color: CMYK,
-                 center: Option[Pos2D],
+case class Chase(color:   CMYK,
+                 center:  Option[Pos2D],
                  brushes: List[CMYK],
                  override val pos: Pos2D,
-                 override val findCell: Pos2D => Brush
-                ) extends AutomatonCell[Brush] {
+                 override val findCell: Pos2D => Chase
+                ) extends AutomatonCell[Chase] {
 
-  private[Brush] lazy val dirToCenter = center match {
+  private[Chase] lazy val dirToCenter = center match {
     case None                      => None
     case Some(cPos) if cPos == pos => None
     case Some(cPos)                => Some((cPos - pos).approx8)
   }
 
-  override def update: Option[Brush] = (color, dirToCenter) match {
+  override def update: Option[Chase] = (color, dirToCenter) match {
     case (CMYK.White, None) => None
     case (_, None)          => Some(copy(color = newColor))
     case (_, Some(cDir))    => Some(copy(color = newColor, brushes = newBrushes(cDir)))
@@ -28,18 +28,16 @@ case class Brush(color: CMYK,
     else if (color.abs < 0.05) CMYK.White
     else color * 0.95
 
-  private def newBrushes(cDir: Dir2D): List[CMYK] = {
-    moore(this).collect {
-      case (thisDir, cell) if cell.brushes.nonEmpty && cell.dirToCenter.contains(thisDir.turnAround) => cell.brushes
-    }.flatten.toList
-  }
+  private def newBrushes(cDir: Dir2D): List[CMYK] = moore(this).collect {
+    case (thisDir, cell) if cell.brushes.nonEmpty && cell.dirToCenter.contains(thisDir.turnAround) => cell.brushes
+  }.flatten.toList
 
   override def toString: String = s"Brush($pos, color = $color, center = $center, dir to center = $dirToCenter, brushes = $brushes)"
 }
 
-object Brush {
-  def apply(pos: Pos2D, findCell: Pos2D => Brush): Brush = Brush(CMYK.White, None, List.empty, pos, findCell)
+object Chase {
+  def apply(pos: Pos2D, findCell: Pos2D => Chase): Chase = Chase(CMYK.White, None, List.empty, pos, findCell)
 
-  def automaton(dim: Int): Automaton[Brush] = new Automaton[Brush](dim, apply, Board.apply)
+  def automaton(dim: Int): Automaton[Chase] = new Automaton[Chase](dim, apply, Board.apply)
 }
 

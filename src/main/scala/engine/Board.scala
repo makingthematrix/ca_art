@@ -48,8 +48,22 @@ object Board {
     wrap(pos.x) * dim + wrap(pos.y)
   }
 
-  def buildMap[CA <: AutomatonCell[CA]](dim: Int, applyCell: Pos2D => CA): ParMap[Int, CA] =
-    Pos2D(dim).foldLeft(ParMap.empty[Int, CA])((map, pos) => map + (id(pos, dim) -> applyCell(pos)))
+  /** Builds a map of identifiers to the automaton's cells.
+    *
+    * @param dim length of the board's edge
+    * @param applyCell a function building the cell
+    * @tparam C type of the cell
+    * @return a parallel map of identifiers (based on the given cell's position) to the cells
+    */
+  def buildMap[C <: AutomatonCell[C]](dim: Int, applyCell: Pos2D => C): ParMap[Int, C] =
+    Pos2D(dim).foldLeft(ParMap.empty[Int, C])((map, pos) => map + (id(pos, dim) -> applyCell(pos)))
 
-  def apply[CA <: AutomatonCell[CA]](dim: Int, applyCell: Pos2D => CA): Board[CA] = new Board(dim, buildMap(dim, applyCell))
+  /** Builds the board of the given automaton's cells.
+    *
+    * @param dim length of the board's edge
+    * @param applyCell a function building the cell
+    * @tparam C type of the cell
+    * @return the board
+    */
+  def apply[C <: AutomatonCell[C]](dim: Int, applyCell: Pos2D => C): Board[C] = new Board(dim, buildMap(dim, applyCell))
 }
