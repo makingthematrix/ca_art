@@ -1,4 +1,4 @@
-package langtonscell
+package langtonsant
 
 import engine.{Automaton, AutomatonCell, Board, Neighborhood}
 import fields._

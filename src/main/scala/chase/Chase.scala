@@ -25,8 +25,8 @@ case class Chase(color:   CMYK,
 
   private def newColor =
     if (brushes.nonEmpty) CMYK.sum(color :: brushes)
-    else if (color.abs < 0.05) CMYK.White
-    else color * 0.95
+    else if (color.abs < 0.02) CMYK.White
+    else color * 0.98
 
   private def newBrushes(cDir: Dir2D): List[CMYK] = moore(this).collect {
     case (thisDir, cell) if cell.brushes.nonEmpty && cell.dirToCenter.contains(thisDir.turnAround) => cell.brushes

@@ -3,7 +3,7 @@ import de.h2b.scala.lib.simgraf.Color
 import engine.Automaton
 import fields._
 import gameoflife.GameOfLife
-import langtonscell.LangtonsAnt
+import langtonsant.LangtonsAnt
 import langtonscolors.LangtonsColors
 import visualisation.BoardWindow
 
@@ -37,6 +37,16 @@ object Main {
       case x    => println(s"unrecognized example: $x")
     }
 
+  }
+
+  private def gameOfLifeInteractive(dim: Int, scale: Int): Unit = {
+    def toColor(c: GameOfLife) = if (c.life) Color.Black else Color.White
+
+    val auto = GameOfLife.automaton(dim)
+    val boardWindow = BoardWindow[GameOfLife]("Game of Life", toColor, dim, scale)
+    boardWindow.mainLoop(auto, c => c.copy(life = !c.life))
+
+    System.exit(0)
   }
 
   private def langtonsAnt(dim: Int, it: Int, step: Int, scale: Int): Unit = {
@@ -128,16 +138,6 @@ object Main {
     System.exit(0)
   }
 
-  private def gameOfLifeInteractive(dim: Int, scale: Int): Unit = {
-    def toColor(c: GameOfLife) = if (c.life) Color.Black else Color.White
-
-    val auto = GameOfLife.automaton(dim)
-    val boardWindow = BoardWindow[GameOfLife]("Game of Life", toColor, dim, scale)
-    boardWindow.mainLoop(auto, c => c.copy(life = !c.life))
-
-    System.exit(0)
-  }
-
   private def chaseInteractive(dim: Int, scale: Int): Unit = {
     def randomColor(c: Chase): Chase = {
       val color = RGB.rainbow(Random.nextInt(RGB.rainbow.size)).toCMYK
@@ -148,7 +148,6 @@ object Main {
       val rgb = c.color.toRGB
       Color(rgb.r, rgb.g, rgb.b)
     }
-
 
     val auto = Chase.automaton(dim)
     val boardWindow = BoardWindow[Chase]("Chase", toColor, dim, scale)
