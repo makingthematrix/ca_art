@@ -32,6 +32,16 @@ object LangtonsAnt {
 
   import scala.collection.parallel.immutable.ParMap
 
+  /** A board optimized for Langton's Ant
+    *
+    * In the case of Langton's Ant in every iteration only a small part of the board is updated
+    * ( `2*n / (dim*dim)` where `n` is the number of ants on the board). It is possible to check
+    * quickly and filter out all the other cells, and perform full computations only for the
+    * affected ones.
+    *
+    * @param dim length of the edge
+    * @param map a map of identifiers to cells
+    */
   private class LangtonsBoard(dim: Int, map: ParMap[Int, LangtonsAnt]) extends Board[LangtonsAnt](dim, map) {
     override def next: LangtonsBoard = {
       val updated = map.valuesIterator

@@ -1,16 +1,11 @@
 package visualisation
 
-import java.util
-import java.util.concurrent.LinkedBlockingQueue
-
 import de.h2b.scala.lib.simgraf.event._
 import de.h2b.scala.lib.simgraf.layout.GridLayout
 import de.h2b.scala.lib.simgraf.shapes.Rectangle
 import de.h2b.scala.lib.simgraf.{Color, Point, World}
 import engine.{Automaton, AutomatonCell, Board}
 import fields.Pos2D
-
-import scala.collection.JavaConverters._
 
 /** A wrapper around Simgraf.World
   *
@@ -28,8 +23,6 @@ class BoardWindow[C <: AutomatonCell[C]] private (window: World,
                                                   toColor: C => Color,
                                                   dim: Int,
                                                   scale: Int) {
-  import BoardWindow._
-
   /** Draws the given board in the window.
     *
     * @param board the current board
@@ -51,14 +44,6 @@ class BoardWindow[C <: AutomatonCell[C]] private (window: World,
   }
 
   private var oldBoard = Option.empty[Board[C]]
-
-  private val clicksQueue = new LinkedBlockingQueue[ClickType]()
-
-  private def clicks = if (!clicksQueue.isEmpty) {
-    val col = new util.ArrayList[ClickType]()
-    clicksQueue.drainTo(col)
-    col.asScala.toList
-  } else List.empty
 
   private val identityClick: C => C = c => c
   private val identityClick2: (C, Pos2D) => C = (c, _) => c
@@ -126,11 +111,10 @@ class BoardWindow[C <: AutomatonCell[C]] private (window: World,
 }
 
 object BoardWindow {
-
-  def apply[CA <: AutomatonCell[CA]](title: String,
-                                     toColor: CA => Color,
-                                     dim: Int,
-                                     scale: Int): BoardWindow[CA] = {
+  def apply[C <: AutomatonCell[C]](title: String,
+                                   toColor: C => Color,
+                                   dim: Int,
+                                   scale: Int): BoardWindow[C] = {
     val window = World.withEvents(
       Rectangle(Point(0, 0), Point(dim * scale, dim * scale))
     )(
@@ -140,11 +124,6 @@ object BoardWindow {
 
     window.clear(Color.White)
 
-    new BoardWindow[CA](window, toColor, dim, scale)
+    new BoardWindow[C](window, toColor, dim, scale)
   }
-
-  sealed trait ClickType
-  case class LeftClick(pos: Pos2D) extends ClickType
-  case class RightClick(pos: Pos2D) extends ClickType
-  case object ExitClick extends ClickType
 }

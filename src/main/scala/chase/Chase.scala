@@ -32,7 +32,7 @@ case class Chase(color:   CMYK,
     case (thisDir, cell) if cell.brushes.nonEmpty && cell.dirToCenter.contains(thisDir.turnAround) => cell.brushes
   }.flatten.toList
 
-  override def toString: String = s"Brush($pos, color = $color, center = $center, dir to center = $dirToCenter, brushes = $brushes)"
+  override def toString: String = s"Chase($pos, color = $color, center = $center, dir to center = $dirToCenter, brushes = $brushes)"
 }
 
 object Chase {
