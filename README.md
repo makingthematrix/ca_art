@@ -19,7 +19,7 @@ If you run the Game of Life example (with `run example 1i`) you will see an empt
 
 ... watch the talk (video coming soon), read the comments in the code, figure out how the Game of Life example works, and start from writing its copy. Apart from the cell's case class you will also need to tell the graphic library how to turn a cell into a colored square on the screen (the `toColor` method), and how to interpret clicks. You can also contact me on Twitter ([@makingthematrix](https://twitter.com/makingthematrix)) and Wire (@maciek - sorry, no permalinks yet).
 
-A link to the "slides" - the animation in VideoScribe that was a big part of the talk: [here] (https://drive.google.com/file/d/1wsKXR3r-_lGhPVG-KyxA7aJ_OOL5EVy2/view?usp=sharing)
+A link to the "slides" - the animation in VideoScribe that was a big part of the talk: [here](https://drive.google.com/file/d/1wsKXR3r-_lGhPVG-KyxA7aJ_OOL5EVy2/view?usp=sharing)
 
 ### My other work
 
