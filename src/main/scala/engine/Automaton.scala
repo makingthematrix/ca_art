@@ -44,3 +44,8 @@ class Automaton[C <: AutomatonCell[C]](dim: Int,
     board
   }
 }
+
+trait AutomatonCreator[C <: AutomatonCell[C]] {
+  def apply(pos: Pos2D, findCell: Pos2D => C): C
+  def automaton(dim: Int): Automaton[C]
+}

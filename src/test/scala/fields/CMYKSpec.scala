@@ -1,10 +1,8 @@
 package fields
 
-import org.scalatest.{FlatSpec, Matchers}
-
-class CMYKSpec extends FlatSpec with Matchers {
-  "CMYK color" should "multiply by a coefficient" in {
+class CMYKSpec extends munit.FunSuite {
+  test("CMYK color should multiply by a coefficient") {
     val c = CMYK(1.0, 0.0, 0.0, 0.0)
-    c * 0.5 shouldEqual CMYK(0.5, 0.0, 0.0, 0.0)
+    assertEquals(c * 0.5, CMYK(0.5, 0.0, 0.0, 0.0))
   }
 }

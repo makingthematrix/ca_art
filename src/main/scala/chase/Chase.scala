@@ -1,16 +1,14 @@
 package chase
 
-import engine.{Automaton, AutomatonCell, Board, Neighborhood}
+import engine.{Automaton, AutomatonCell, AutomatonCreator, Board, Neighborhood}
 import fields._
 import Neighborhood.moore
 
-case class Chase(color:   CMYK,
-                 center:  Option[Pos2D],
-                 brushes: List[CMYK],
-                 override val pos: Pos2D,
-                 override val findCell: Pos2D => Chase
-                ) extends AutomatonCell[Chase] {
-
+final case class Chase(color:   CMYK,
+                       center:  Option[Pos2D],
+                       brushes: List[CMYK],
+                       override val pos: Pos2D,
+                       override val findCell: Pos2D => Chase) extends AutomatonCell[Chase] {
   private[Chase] lazy val dirToCenter = center match {
     case None                      => None
     case Some(cPos) if cPos == pos => None
@@ -35,9 +33,8 @@ case class Chase(color:   CMYK,
   override def toString: String = s"Chase($pos, color = $color, center = $center, dir to center = $dirToCenter, brushes = $brushes)"
 }
 
-object Chase {
+object Chase extends AutomatonCreator[Chase] {
   def apply(pos: Pos2D, findCell: Pos2D => Chase): Chase = Chase(CMYK.White, None, List.empty, pos, findCell)
-
   def automaton(dim: Int): Automaton[Chase] = new Automaton[Chase](dim, apply, Board.apply)
 }
 

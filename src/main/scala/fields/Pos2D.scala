@@ -9,15 +9,15 @@ import scala.util.Random
 * to other representations is trivial, implementing such simple case
 * classes is totally ok. They may be reduntant, but they simplify a lot.
 */
-case class Pos2D(x: Int, y: Int) {
+final case class Pos2D(x: Int, y: Int) {
   // If Dir2D is one of the Dir2D constants, the method returns  
   // the adjacent position in the given direction. 
   // Used to collect the neighborhood of the cell with the given `pos`.
   def move(dir: Dir2D): Pos2D = copy(x + dir.x.toInt, y + dir.y.toInt)
 
   // Returns the direction (normalized) vector between the two positions.
-  def dir(other: Pos2D) = Dir2D(other.x - x, other.y - y)
-  def -(other: Pos2D) = other.dir(this)
+  def dir(other: Pos2D): Dir2D = Dir2D(other.x - x, other.y - y)
+  def -(other: Pos2D): Dir2D = other.dir(this)
 }
 
 object Pos2D {
