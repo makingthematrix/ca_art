@@ -1,7 +1,7 @@
-package gameoflife
+package caart.gameoflife
 
-import engine.{Automaton, AutomatonCell, AutomatonCreator, Board, Neighborhood}
-import fields.Pos2D
+import caart.engine.{Automaton, AutomatonCell, AutomatonCreator, Board, Neighborhood}
+import caart.fields.Pos2D
 import Neighborhood.moore
 
 final case class GameOfLife(life: Boolean,

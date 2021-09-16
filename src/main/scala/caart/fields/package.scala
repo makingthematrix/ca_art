@@ -1,3 +1,5 @@
+package caart
+
 package object fields {
 
   implicit final class RichDouble(val d: Double) extends AnyVal {

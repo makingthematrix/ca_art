@@ -1,6 +1,6 @@
-package engine
+package caart.engine
 
-import fields.Pos2D
+import caart.fields.Pos2D
 
 /** The main class of a cellular automaton.
   *

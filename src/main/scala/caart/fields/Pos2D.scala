@@ -1,4 +1,4 @@
-package fields
+package caart.fields
 
 import scala.util.Random
 

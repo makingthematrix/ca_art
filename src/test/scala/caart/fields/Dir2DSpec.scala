@@ -1,4 +1,4 @@
-package fields
+package caart.fields
 
 class Dir2DSpec extends munit.FunSuite {
   test("Dir2D should approximate to the nearest von Neumann's neighbor") {

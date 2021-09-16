@@ -1,7 +1,7 @@
-package chase
+package caart.chase
 
-import engine.{Automaton, AutomatonCell, AutomatonCreator, Board, Neighborhood}
-import fields._
+import caart.engine.{Automaton, AutomatonCell, AutomatonCreator, Board, Neighborhood}
+import caart.fields._
 import Neighborhood.moore
 
 final case class Chase(color:   CMYK,
