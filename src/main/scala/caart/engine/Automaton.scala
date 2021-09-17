@@ -20,11 +20,11 @@ class Automaton[C <: AutomatonCell[C]](dim: Int,
                                        applyCell:  (Pos2D, Pos2D => C) => C,
                                        applyBoard: (Int, Pos2D => C)   => Board[C] = Board.apply _
                                       ) extends Iterator[Board[C]] {
-  private var board: Board[C] = applyBoard(dim, applyCell(_, board.findCell(_)))
+  private var _board: Board[C] = applyBoard(dim, applyCell(_, _board.findCell(_)))
 
   override def next(): Board[C] = {
-    board = board.next
-    board
+    _board = _board.next
+    _board
   }
 
   override def hasNext: Boolean = true
@@ -40,9 +40,11 @@ class Automaton[C <: AutomatonCell[C]](dim: Int,
     * @return the updated board
     */
   def update(updater: C => C): Board[C] = {
-    board = board.copy(updater)
-    board
+    _board = _board.copy(updater)
+    _board
   }
+
+  def board: Board[C] = _board
 }
 
 trait AutomatonCreator[C <: AutomatonCell[C]] {
