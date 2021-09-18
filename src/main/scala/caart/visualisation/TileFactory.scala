@@ -1,12 +1,13 @@
 package caart.visualisation
 
 import caart.engine.AutomatonCell
-import javafx.geometry.Point2D
+import caart.fields.Pos2D
+import com.wire.signals.SourceStream
 import javafx.scene.paint.Color
 
 import scala.util.chaining.scalaUtilChainingOps
 
-class TileFactory[C <:AutomatonCell[C]](scale: Int, colorFunction: C => Color) {
-  def newTile(cell: C): Tile[C] =
-    Tile(cell, new Point2D(scale * cell.pos.x, scale * cell.pos.y), scale, colorFunction).tap { _.addToUi() }
+class TileFactory[C <:AutomatonCell[C]](scale: Int, colorFunction: C => Color, onClick: SourceStream[Pos2D]) {
+  def newTile(cell: () => C): Tile[C] =
+    Tile(cell, scale, colorFunction, onClick).tap { _.addToUi() }
 }

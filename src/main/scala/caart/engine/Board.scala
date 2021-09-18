@@ -21,7 +21,7 @@ class Board[C <: AutomatonCell[C]](dim: Int, protected val map: ParMap[Int, C]) 
 
   def copy(updater: C => C): Board[C] = new Board(dim, map.map { case (id, cell) => (id, updater(cell)) })
 
-  def values: List[C] = map.values.toList
+  def cells: List[C] = map.values.toList
 
   def -(board: Board[C]): List[C] = Pos2D(dim).flatMap { p =>
     val c = findCell(p)
