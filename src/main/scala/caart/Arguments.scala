@@ -6,6 +6,7 @@ final case class Arguments(dim:     Int = 100,  // the number of cells in one di
                            it:      Int = 100,  // the number of iterations the automaton will run
                            step:    Int = 1,    // how often the visualisation should be refresh
                            scale:   Int = 8,    // how many pixels per cell in the visualisation
+                           delay:   Long = 500L, // interval between two updates in milliseconds
                            example: Example = EmptyExample
                           ) {
   lazy val windowSize: Int = dim * scale
@@ -31,6 +32,7 @@ object Arguments {
     case (acc, Seq("it", value))      => acc.copy(it    = Integer.parseInt(value))
     case (acc, Seq("step", value))    => acc.copy(step  = Integer.parseInt(value))
     case (acc, Seq("scale", value))   => acc.copy(scale = Integer.parseInt(value))
+    case (acc, Seq("delay", value))   => acc.copy(delay = Integer.parseInt(value).toLong)
     case (acc, Seq("example", value)) =>
       examples.find(_.str == value) match {
         case Some(ex) => acc.copy(example = ex)
