@@ -9,11 +9,11 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.paint.Color
 import javafx.scene.shape.Rectangle
 
-final case class Tile[C <: AutomatonCell[C]](cell: () => C, size: Int, colorFunction: C => Color, onClick: SourceStream[Pos2D]) {
-  private val tile = new Rectangle(size, size, colorFunction(cell()))
+final case class Tile[C <: AutomatonCell[C]](cell: () => C, size: Int, toColor: C => Color, onClick: SourceStream[Pos2D]) {
+  private val tile = new Rectangle(size, size, toColor(cell()))
   val pos: Pos2D = cell().pos
 
-  def refresh(): Unit = tile.setFill(colorFunction(cell()))
+  def refresh(): Unit = tile.setFill(toColor(cell()))
 
   def addToUi(): Unit = {
     val position = new Point2D(size * pos.x, size * pos.y)
