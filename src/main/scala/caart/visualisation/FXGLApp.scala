@@ -1,6 +1,7 @@
 package caart.visualisation
 
 import caart.Arguments
+import caart.engine.AutomatonCell
 import caart.fields.Pos2D
 import com.almasb.fxgl.app.{ApplicationMode, GameApplication, GameSettings}
 import com.almasb.fxgl.dsl.FXGL
@@ -18,16 +19,7 @@ final class FXGLApp(args: Arguments) extends GameApplication {
   import com.wire.signals.ui.UiDispatchQueue.Ui
 
   private val delay        = FiniteDuration(args.delay, TimeUnit.MILLISECONDS)
-  private lazy val auto    = new GameOfLifeWrapper(args)
-  private lazy val tiles   = auto.createTiles(onClick)
-  private lazy val tileMap = tiles.map(t => t.pos -> t).toMap
-
-  private val onClick = EventStream[Pos2D]()
-  onClick.foreach { pos =>
-    println(s"click: $pos")
-    auto.updateOne(pos)
-    tileMap(pos).refresh()
-  }
+  private lazy val auto = AutoWrapper(args)
 
   private val gameState = Signal[GameState](GameState.Pause)
   gameState.foreach {
@@ -35,17 +27,21 @@ final class FXGLApp(args: Arguments) extends GameApplication {
     case _ =>
   }
 
-  private def run(): Future[Unit] = Serialized.future("auto") {
+  private def run(): Future[Unit] = {
+    /*while(gameState.currentValue.contains(GameState.Play)) {
+      auto.next()
+      Thread.sleep(args.delay)
+    }*/
+
+    val t = System.currentTimeMillis()
     for {
-      _     <- Future.successful(auto.next())
-      _     <- refreshTiles()
+      _     <- auto.next()
+      _ = println(s"refresh took ${System.currentTimeMillis() - t}ms")
       state <- gameState.head
       _     <- if (state == GameState.Play) CancellableFuture.delayed(delay)(run()).future
                else Future.successful(())
     } yield ()
   }
-
-  private def refreshTiles() = Future { tiles.foreach(_.refresh()) }(Ui)
 
   override def initSettings(gameSettings: GameSettings): Unit = {
     gameSettings.setWidth(args.windowSize)
@@ -60,13 +56,13 @@ final class FXGLApp(args: Arguments) extends GameApplication {
   override protected def initUI(): Unit = {
     println(s"args: $args")
     UiDispatchQueue.setUi(Platform.runLater)
-    tiles
+    auto.init()
     FXGL.onKeyUp(KeyCode.SPACE, () => gameState.mutate {
       case GameState.Pause => GameState.Play
       case GameState.Play  => GameState.Pause
     })
   }
 
-  override protected def initGame(): Unit = refreshTiles()
+  override protected def initGame(): Unit = {}
 }
 
