@@ -22,7 +22,7 @@ abstract class AutoWrapper[C <: AutomatonCell[C]] {
   private var currentBoard = Option.empty[Board[C]]
   private var currentTurn = 0L
 
-  def updateBoard(newBoard: Board[C]): Unit = {
+  def updateBoard(newBoard: Board[C]): Future[Unit] = {
     val t = System.currentTimeMillis()
     val toUpdate: List[C] = currentBoard.fold(newBoard.cells)(newBoard - _)
     println(s"--- gathering what to update: ${System.currentTimeMillis() - t}ms")
@@ -40,9 +40,11 @@ abstract class AutoWrapper[C <: AutomatonCell[C]] {
     println(s"--- auto next: ${System.currentTimeMillis() - t}ms")
     if (currentTurn % args.step == 0) {
       updateBoard(newBoard)
-      t = System.currentTimeMillis()
-      System.gc()
-      println(s"--- garbage collection: ${System.currentTimeMillis() - t}ms")
+      if (args.enforceGC) {
+        t = System.currentTimeMillis()
+        System.gc()
+        println(s"--- garbage collection: ${System.currentTimeMillis() - t}ms")
+      }
     }
     currentTurn += 1L
   }
@@ -62,7 +64,8 @@ abstract class AutoWrapper[C <: AutomatonCell[C]] {
 
 object AutoWrapper {
   def apply(args: Arguments): AutoWrapper[_] = args.example match {
-    case Arguments.GameOfLifeInteractiveExample => new GameOfLifeWrapper(args)
-    case _ => new GameOfLifeWrapper(args)
+    case Arguments.GameOfLifeExample  => new GameOfLifeWrapper(args)
+    case Arguments.LangtonsAntExample => new LangtonsAntWrapper(args)
+    case _                            => new GameOfLifeWrapper(args)
   }
 }

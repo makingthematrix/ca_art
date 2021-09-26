@@ -32,6 +32,13 @@ libraryDependencies ++= Seq(
   "org.scalameta" %% "munit" % "0.7.26" % "test"
 )
 
+lazy val nativeImageProject =
+  project
+    .enablePlugins(NativeImagePlugin)
+    .settings(
+      Compile / mainClass := Some("caart.Main$") // doesn't work
+    )
+
 testFrameworks += new TestFramework("munit.Framework")
 
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/releases"

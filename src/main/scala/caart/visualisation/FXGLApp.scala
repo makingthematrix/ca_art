@@ -41,12 +41,13 @@ final class FXGLApp(args: Arguments) extends GameApplication {
     println(s"args: $args")
     UiDispatchQueue.setUi(Platform.runLater)
     auto.init()
+  }
+
+  override def initInput(): Unit = {
     FXGL.onKeyUp(KeyCode.SPACE, () => gameState.mutate {
       case GameState.Pause => GameState.Play
       case GameState.Play  => GameState.Pause
     })
   }
-
-  override protected def initGame(): Unit = {}
 }
 

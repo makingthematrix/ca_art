@@ -14,8 +14,7 @@ final class GameOfLifeWrapper(override val args: Arguments) extends AutoWrapper[
     Color.rgb(rgb.r, rgb.g, rgb.b)
   }
 
-  override def updateOne(pos: Pos2D): Unit = {
-    val newBoard = auto.updateOne(pos) { cell => cell.copy(life = !cell.life) }
-    updateBoard(newBoard)
+  override def updateOne(pos: Pos2D): Unit = updateBoard {
+    auto.updateOne(pos) { cell => cell.copy(life = !cell.life) }
   }
 }
