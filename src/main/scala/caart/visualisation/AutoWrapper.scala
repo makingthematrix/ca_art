@@ -17,24 +17,34 @@ abstract class AutoWrapper[C <: AutomatonCell[C]] {
   protected def toColor(c: C): Color
 
   val onClick: SourceStream[Pos2D] = EventStream[Pos2D]()
-  onClick.foreach { pos =>
-    println(s"click: $pos")
-    updateOne(pos)
-  }
+  onClick.foreach(updateOne)
 
   private var currentBoard = Option.empty[Board[C]]
+  private var currentTurn = 0L
 
-  def next(): Future[Unit] = {
+  def updateBoard(newBoard: Board[C]): Unit = {
     val t = System.currentTimeMillis()
-    val newBoard: Board[C] = auto.next()
-    println(s"--- auto next: ${System.currentTimeMillis() - t}ms")
     val toUpdate: List[C] = currentBoard.fold(newBoard.cells)(newBoard - _)
+    println(s"--- gathering what to update: ${System.currentTimeMillis() - t}ms")
     currentBoard = Some(newBoard)
     Future {
-      val t1 = System.currentTimeMillis()
+      val t = System.currentTimeMillis()
       toUpdate.foreach(c => tileMap(c.pos).refresh())
-      println(s"--- tile refresh: ${System.currentTimeMillis() - t1}ms")
+      println(s"--- tile refresh: ${System.currentTimeMillis() - t}ms")
     }(Ui)
+  }
+
+  def next(): Unit = {
+    var t = System.currentTimeMillis()
+    val newBoard: Board[C] = auto.next()
+    println(s"--- auto next: ${System.currentTimeMillis() - t}ms")
+    if (currentTurn % args.step == 0) {
+      updateBoard(newBoard)
+      t = System.currentTimeMillis()
+      System.gc()
+      println(s"--- garbage collection: ${System.currentTimeMillis() - t}ms")
+    }
+    currentTurn += 1L
   }
 
   def init(): Unit = {

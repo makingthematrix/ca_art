@@ -1,24 +1,16 @@
 package caart.visualisation
 
 import caart.Arguments
-import caart.engine.AutomatonCell
-import caart.fields.Pos2D
 import com.almasb.fxgl.app.{ApplicationMode, GameApplication, GameSettings}
 import com.almasb.fxgl.dsl.FXGL
+import com.wire.signals.Signal
 import com.wire.signals.ui.UiDispatchQueue
-import com.wire.signals.{CancellableFuture, EventStream, Serialized, Signal}
 import javafx.application.Platform
 import javafx.scene.input.KeyCode
 
-import java.util.concurrent.TimeUnit
-import scala.concurrent.Future
-import scala.concurrent.duration.FiniteDuration
-
 final class FXGLApp(args: Arguments) extends GameApplication {
   import com.wire.signals.Threading.defaultContext
-  import com.wire.signals.ui.UiDispatchQueue.Ui
 
-  private val delay        = FiniteDuration(args.delay, TimeUnit.MILLISECONDS)
   private lazy val auto = AutoWrapper(args)
 
   private val gameState = Signal[GameState](GameState.Pause)
@@ -27,21 +19,13 @@ final class FXGLApp(args: Arguments) extends GameApplication {
     case _ =>
   }
 
-  private def run(): Future[Unit] = {
-    /*while(gameState.currentValue.contains(GameState.Play)) {
+  private def run(): Unit =
+    while(gameState.currentValue.contains(GameState.Play)) {
+      val t = System.currentTimeMillis()
       auto.next()
-      Thread.sleep(args.delay)
-    }*/
-
-    val t = System.currentTimeMillis()
-    for {
-      _     <- auto.next()
-      _ = println(s"refresh took ${System.currentTimeMillis() - t}ms")
-      state <- gameState.head
-      _     <- if (state == GameState.Play) CancellableFuture.delayed(delay)(run()).future
-               else Future.successful(())
-    } yield ()
-  }
+      println(s"the turn took ${System.currentTimeMillis() - t}ms")
+      if (args.delay > 0L) Thread.sleep(args.delay)
+    }
 
   override def initSettings(gameSettings: GameSettings): Unit = {
     gameSettings.setWidth(args.windowSize)
