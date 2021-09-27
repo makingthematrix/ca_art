@@ -7,12 +7,12 @@ import caart.langtonsant.LangtonsAnt
 import javafx.scene.paint.Color
 
 class LangtonsAntWrapper (override val args: Arguments) extends AutoWrapper[LangtonsAnt] {
-
   override val auto: Automaton[LangtonsAnt] = LangtonsAnt.automaton(args.dim)
 
-  override protected def toColor(c: LangtonsAnt): Color = {
-    val rgb = if (c.color) RGB.Black else RGB.White
-    Color.rgb(rgb.r, rgb.g, rgb.b)
+  override protected def toColor(c: LangtonsAnt): Color = (c.color, c.dir) match {
+    case (_, Some(_)) => Color.RED
+    case (false, _)   => Color.WHITE
+    case (true, _)    => Color.BLACK
   }
 
   override def updateOne(pos: Pos2D): Unit = updateBoard {
