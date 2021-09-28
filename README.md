@@ -1,7 +1,7 @@
 # CA Art
 
 Hi there. 
-This repository consists of a few examples of Cellular Automata, the common part of the coe ("the caart.engine") and a wrapper over a JavaFX and FXGL.
+This repository consists of a few examples of Cellular Automata, the common part of the code ("the engine") and a wrapper over a JavaFX and FXGL.
 
 After compilation, you can run an example from the `sbt` shield, typing eg. `run example 1`. There are four of them:
 1. Game of Life
