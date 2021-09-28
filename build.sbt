@@ -36,7 +36,8 @@ lazy val nativeImageProject =
   project
     .enablePlugins(NativeImagePlugin)
     .settings(
-      Compile / mainClass := Some("caart.Main$") // doesn't work
+      Compile / mainClass := Some("caart.Main"),
+      nativeImageInstalled := true
     )
 
 testFrameworks += new TestFramework("munit.Framework")
@@ -44,6 +45,8 @@ testFrameworks += new TestFramework("munit.Framework")
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/releases"
 
 Test / parallelExecution := true
+fork := true
+Test / fork := true
 
 developers := List(
   Developer("makingthematrix", "Maciej Gorywoda", "maciej.gorywoda@wire.com", url("https://github.com/makingthematrix"))

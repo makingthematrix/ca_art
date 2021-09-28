@@ -19,7 +19,7 @@ final case class Tile[C <: AutomatonCell[C]](cell:         () => C,
 
   def refresh(): Unit = tile.setFill(toColor(cell()))
 
-  def addToUi(): Unit = {
+  def initialize(): Unit = {
     val position = new Point2D(size * pos.x, size * pos.y)
     FXGL.addUINode(tile, position.getX, position.getY)
     tile.setOnMouseClicked { (ev: MouseEvent) =>

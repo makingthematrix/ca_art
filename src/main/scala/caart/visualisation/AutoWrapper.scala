@@ -54,7 +54,7 @@ abstract class AutoWrapper[C <: AutomatonCell[C]] {
   }
 
   def init(): Unit =
-    tiles.values.foreach { _.addToUi() }
+    tiles.values.foreach { _.initialize() }
 }
 
 object AutoWrapper {
