@@ -1,6 +1,6 @@
-package engine
+package caart.engine
 
-import fields.Pos2D
+import caart.fields.Pos2D
 
 /** The main class of a cellular automaton.
   *
@@ -43,4 +43,18 @@ class Automaton[C <: AutomatonCell[C]](dim: Int,
     board = board.copy(updater)
     board
   }
+
+  def updateOne(pos: Pos2D)(updater: C => C): Board[C] = {
+    board = board.copy(pos)(updater)
+    board
+  }
+
+  def cells: List[C] = board.cells
+  val positions: Set[Pos2D] = Pos2D(dim).toSet
+  def findCell(pos: Pos2D): C = board.findCell(pos)
+}
+
+trait AutomatonCreator[C <: AutomatonCell[C]] {
+  def apply(pos: Pos2D, findCell: Pos2D => C): C
+  def automaton(dim: Int): Automaton[C]
 }

@@ -1,7 +1,7 @@
 # CA Art
 
 Hi there. 
-This repository consists of a few examples of Cellular Automata, the common part of the coe ("the engine") and a wrapper over a graphic library [SimGraf](http://hans-hermann-bode.de/en/content/simgraf-simple-scala-graphics-library) by Hans-Hermann Bode. It's actually so simple that I think it could be a good exercise for anyone just starting to learn Scala to pull this repo and write their own cellular automata. (Which, I hope, some of you will do).
+This repository consists of a few examples of Cellular Automata, the common part of the coe ("the caart.engine") and a wrapper over a graphic library [SimGraf](http://hans-hermann-bode.de/en/content/simgraf-simple-scala-graphics-library) by Hans-Hermann Bode. It's actually so simple that I think it could be a good exercise for anyone just starting to learn Scala to pull this repo and write their own cellular automata. (Which, I hope, some of you will do).
 
 After compilation, you can run an example from the `sbt` shield, typing eg. `run example 1i`. There are four of them:
 1. Game of Life

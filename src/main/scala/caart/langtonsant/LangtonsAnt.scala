@@ -1,15 +1,12 @@
-package langtonsant
+package caart.langtonsant
 
-import engine.{Automaton, AutomatonCell, Board, Neighborhood}
-import fields._
+import caart.engine.{Automaton, AutomatonCell, AutomatonCreator, Board, Neighborhood}
+import caart.fields._
 
-case class LangtonsAnt(color: Boolean,
-                       dir: Option[Dir2D],
-                       override val pos: Pos2D,
-                       override val findCell: Pos2D => LangtonsAnt
-                       )
-  extends AutomatonCell[LangtonsAnt] {
-
+final case class LangtonsAnt(color: Boolean,
+                             dir: Option[Dir2D],
+                             override val pos: Pos2D,
+                             override val findCell: Pos2D => LangtonsAnt) extends AutomatonCell[LangtonsAnt] {
   override  def update: Option[LangtonsAnt] = (newColor, newDir) match {
     case (c, d) if c == color && d == dir => None
     case (c, d)                           => Some(copy(color = c, dir = d))
@@ -25,9 +22,8 @@ case class LangtonsAnt(color: Boolean,
   }
 }
 
-object LangtonsAnt {
-  def apply(pos: Pos2D, findCell: Pos2D => LangtonsAnt): LangtonsAnt = LangtonsAnt(false, None, pos, findCell)
-
+object LangtonsAnt extends AutomatonCreator[LangtonsAnt] {
+  def apply(pos: Pos2D, findCell: Pos2D => LangtonsAnt): LangtonsAnt = LangtonsAnt(color = false, dir = None, pos, findCell)
   def automaton(dim: Int): Automaton[LangtonsAnt] = new Automaton[LangtonsAnt](dim, apply, LangtonsBoard.apply)
 
   import scala.collection.parallel.immutable.ParMap
@@ -50,7 +46,7 @@ object LangtonsAnt {
         .flatMap(_.update)
         .map(c => c.pos -> c).toMap
 
-      val (toUpdate, toStay) = map.partition { case (id, c) => updated.keySet.contains(c.pos) }
+      val (toUpdate, toStay) = map.partition { case (_, c) => updated.keySet.contains(c.pos) }
 
       new LangtonsBoard(dim, toStay ++ toUpdate.map { case (id, c) => id -> updated(c.pos) })
     }

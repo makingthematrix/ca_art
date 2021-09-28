@@ -1,11 +1,11 @@
-package fields
+package caart.fields
 
 import math.min
 
 /**
 * Please see the CMYK.scala file for a short discussion of RGB and CMYK.
 */
-case class RGB(r: Int, g: Int, b: Int) {
+final case class RGB(r: Int, g: Int, b: Int) {
   def +(c: RGB) : RGB = RGB(min(r + c.r, 255),min(b + c.b, 255), min(b + c.b, 255))
 
   def toCMYK: CMYK = this match {
@@ -22,19 +22,19 @@ case class RGB(r: Int, g: Int, b: Int) {
 }
 
 object RGB {
-  val White = RGB(255, 255, 255)
-  val Black = RGB(0, 0, 0)
+  val White: RGB = RGB(255, 255, 255)
+  val Black: RGB = RGB(0, 0, 0)
 
-  val Red = RGB(255, 0, 0)
-  val Orange = RGB(255, 165, 0)
-  val Yellow = RGB(255, 255, 0)
-  val Green = RGB(0, 255, 0)
-  val Blue = RGB(0, 0, 255)
-  val Indigo = RGB(0, 28, 200)
-  val Violet = RGB(128, 0, 255)
+  val Red: RGB = RGB(255, 0, 0)
+  val Orange: RGB = RGB(255, 165, 0)
+  val Yellow: RGB = RGB(255, 255, 0)
+  val Green: RGB = RGB(0, 255, 0)
+  val Blue: RGB = RGB(0, 0, 255)
+  val Indigo: RGB = RGB(0, 28, 200)
+  val Violet: RGB = RGB(128, 0, 255)
 
-  val monotone = List(White, Black)
-  val rainbow = List(Red, Orange, Yellow, Green, Blue, Indigo, Violet)
+  val monotone: List[RGB] = List(White, Black)
+  val rainbow: List[RGB] = List(Red, Orange, Yellow, Green, Blue, Indigo, Violet)
 
-  val all = monotone ::: rainbow
+  val all: List[RGB] = monotone ::: rainbow
 }

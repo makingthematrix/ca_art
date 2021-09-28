@@ -1,17 +1,56 @@
 name := "ca_art"
 
-version := "0.1"
+version := "0.3"
+scalaVersion := "2.13.6"
 
-scalaVersion := "2.12.7"
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-feature",
+  "-unchecked",
+  "-encoding",
+  "utf8",
+  "-opt:unreachable-code",
+  "-opt:simplify-jumps",
+  "-opt:compact-locals",
+  "-opt:copy-propagation",
+  "-opt:redundant-casts",
+  "-opt:box-unbox",
+  "-opt:nullness-tracking",
+  "-opt:closure-invocations",
+  "-opt:allow-skip-core-module-init",
+  "-opt:assume-modules-non-null",
+  "-opt:allow-skip-class-loading",
+  "-opt:inline"
+)
 
-libraryDependencies += "de.h2b.scala.lib" % "simgraf_2.12" % "1.3.0"
-libraryDependencies += "com.storm-enroute" %% "scalameter" % "0.8.2"
-libraryDependencies += "com.storm-enroute" %% "scalameter-core" % "0.8.2"
-libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.5"
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
+libraryDependencies ++= Seq(
+  "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.3",
+  "com.wire" %% "wire-signals" % "1.0.0",
+
+  "com.github.almasb" % "fxgl"% "11.17",
+  //Test dependencies
+  "org.scalameta" %% "munit" % "0.7.26" % "test"
+)
+
+lazy val nativeImageProject =
+  project
+    .in(file("."))
+    .enablePlugins(NativeImagePlugin)
+    .settings(
+      Compile / mainClass := Some("caart.Main"),
+      nativeImageInstalled := true
+    )
+
+testFrameworks += new TestFramework("munit.Framework")
 
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/releases"
 
-testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")
+Test / parallelExecution := true
+fork := true
+Test / fork := true
 
-parallelExecution in Test := false
+developers := List(
+  Developer("makingthematrix", "Maciej Gorywoda", "maciej.gorywoda@wire.com", url("https://github.com/makingthematrix"))
+)
+
+licenses := Seq("GPL 3.0" -> url("https://www.gnu.org/licenses/gpl-3.0.en.html"))

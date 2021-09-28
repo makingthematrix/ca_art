@@ -1,15 +1,13 @@
-package langtonscolors
+package caart.langtonscolors
 
-import engine.{Automaton, AutomatonCell, Board}
-import engine.Neighborhood.neumann
-import fields.{CMYK, Dir2D, Pos2D}
+import caart.engine.{Automaton, AutomatonCell, AutomatonCreator, Board}
+import caart.engine.Neighborhood.neumann
+import caart.fields.{CMYK, Dir2D, Pos2D}
 
-case class LangtonsColors(colors: Set[CMYK],
-                          dirs: List[(Dir2D, CMYK)],
-                          override val pos: Pos2D,
-                          override val findCell: Pos2D => LangtonsColors)
-  extends AutomatonCell[LangtonsColors] {
-
+final case class LangtonsColors(colors: Set[CMYK],
+                                dirs: List[(Dir2D, CMYK)],
+                                override val pos: Pos2D,
+                                override val findCell: Pos2D => LangtonsColors) extends AutomatonCell[LangtonsColors] {
   override  def update: Option[LangtonsColors] = (newColors, newDirs) match {
     case (cs, ds) if cs == colors && ds == dirs => None
     case (cs, ds)                               => Some(copy(colors = cs, dirs = ds))
@@ -28,13 +26,11 @@ case class LangtonsColors(colors: Set[CMYK],
   }
 }
 
-object LangtonsColors {
+object LangtonsColors extends AutomatonCreator[LangtonsColors] {
   def apply(pos: Pos2D, findCell: Pos2D => LangtonsColors): LangtonsColors = LangtonsColors(Set.empty, List.empty, pos, findCell)
-
   def automaton(dim: Int): Automaton[LangtonsColors] = new Automaton[LangtonsColors](dim, apply, LColorsBoard.apply)
 
   import scala.collection.parallel.immutable.ParMap
-
 
   /** A board optimized for Langton's Ant
     *
@@ -54,7 +50,7 @@ object LangtonsColors {
         .flatMap(_.update)
         .map(c => c.pos -> c).toMap
 
-      val (toUpdate, toStay) = map.partition { case (id, c) => updated.keySet.contains(c.pos) }
+      val (toUpdate, toStay) = map.partition { case (_, c) => updated.keySet.contains(c.pos) }
 
       new LColorsBoard(dim, toStay ++ toUpdate.map { case (id, c) => id -> updated(c.pos) })
     }

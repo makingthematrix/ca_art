@@ -1,6 +1,6 @@
-package engine
+package caart.engine
 
-import fields.Pos2D
+import caart.fields.Pos2D
 
 /** The trait which must be implemented by every Cellular Automaton's cell class.
   * Every cell must know its position on the board (`pos`), it must have access
@@ -11,6 +11,6 @@ import fields.Pos2D
   */
 trait AutomatonCell[C <: AutomatonCell[C]] {
   val pos: Pos2D
-  val findCell: (Pos2D) => C
+  val findCell: Pos2D => C
   def update: Option[C]
 }

@@ -1,4 +1,4 @@
-package fields
+package caart.fields
 
 import math.round
 
@@ -18,7 +18,7 @@ import math.round
 * 
 * https://en.wikipedia.org/wiki/CMYK_color_model
 */
-case class CMYK(c: Double, m: Double, y: Double, k: Double) {
+final case class CMYK(c: Double, m: Double, y: Double, k: Double) {
   def +(other: CMYK): CMYK = CMYK.sum(Seq(this, other))
 
   // this makes sense only for dimming the color, ie. color in <0.0, 1.0>
@@ -39,7 +39,7 @@ case class CMYK(c: Double, m: Double, y: Double, k: Double) {
       )
   }
 
-  lazy val abs = math.sqrt(c *c + m * m + y * y + k * k)
+  lazy val abs: Double = math.sqrt(c *c + m * m + y * y + k * k)
 
   override def toString: String = s"CMYK(${c.round(3)}, ${m.round(3)}, ${y.round(3)}, ${k.round(3)})"
 }
@@ -49,16 +49,16 @@ object CMYK {
 
   def unapply(color: CMYK): Option[(Double, Double, Double, Double)] = Some((color.c, color.m, color.y, color.k))
 
-  val Cyan = CMYK(1.0, 0.0, 0.0)
-  val Magenta = CMYK(0.0, 1.0, 0.0)
-  val Yellow = CMYK(0.0, 0.0, 1.0)
+  val Cyan: CMYK = CMYK(1.0, 0.0, 0.0)
+  val Magenta: CMYK = CMYK(0.0, 1.0, 0.0)
+  val Yellow: CMYK = CMYK(0.0, 0.0, 1.0)
 
-  val colors = Array(Cyan, Magenta, Yellow)
+  val colors: Array[CMYK] = Array(Cyan, Magenta, Yellow)
 
-  val Black = CMYK(0.0, 0.0, 0.0, 1.0)
-  val White = CMYK(0.0, 0.0, 0.0)
+  val Black: CMYK = CMYK(0.0, 0.0, 0.0, 1.0)
+  val White: CMYK = CMYK(0.0, 0.0, 0.0)
 
-  def sum(colors: Traversable[CMYK]): CMYK =
+  def sum(colors: Iterable[CMYK]): CMYK =
     sum(Vector(colors.map(c => c.c + c.k).sum, colors.map(c => c.m + c.k).sum, colors.map(c => c.y + c.k).sum))
 
   private[CMYK] def sum(vec: Vector[Double]): CMYK = {

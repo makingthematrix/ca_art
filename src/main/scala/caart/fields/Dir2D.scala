@@ -1,4 +1,4 @@
-package fields
+package caart.fields
 
 /**
 Similarly to `Pos2D` this is a simple representation of a 2D vector.
