@@ -17,12 +17,6 @@ If you run the Game of Life example (with `run example 1`) you will see an empty
 
 ### If you want to write your own cellular automata ...
 
-... watch [the talk](https://www.youtube.com/watch?v=0ABjVP0st08), read the comments in the code, figure out how the Game of Life example works, and start from writing its copy. Apart from the cell's case class you will also need to tell the graphic library how to turn a cell into a colored square on the screen (the `toColor` method), and how to interpret clicks. You can also contact me on Twitter ([@makingthematrix](https://twitter.com/makingthematrix)) and Wire (@maciek - sorry, no permalinks yet).
+... watch [the talk](https://www.youtube.com/watch?v=0ABjVP0st08), read the comments in the code, figure out how the Game of Life example works, and start from writing its copy. Apart from the cell's case class you will also need to tell the graphic library how to turn a cell into a colored square on the screen (the `toColor` method), and how to interpret clicks. You can also contact me on Twitter ([@makingthematrix](https://twitter.com/makingthematrix)).
 
 A link to the "slides" - the animation in VideoScribe that was a big part of the talk: [here](https://drive.google.com/file/d/1wsKXR3r-_lGhPVG-KyxA7aJ_OOL5EVy2/view?usp=sharing)
-
-### My other work
-
-Apart from fame of being a conference speaker and sheer terror of standing in front of people expecting me to say something, I have one more reason to work on this project. My other idea, [The GAI Library](https://github.com/makingthematrix/gailibrary), is a very early stage of a small AI library. Right now it consists mainly of a lot of design notes and some bad Rust code, because I use it to learn Rust by combat. If I ever manage to get it to a usable shape, I will try to apply it in computer games and maybe (that's a big maybe) also for robots controlled by Raspberry Pi. You may view **CA Art** as a way to reason about **GAI** in a language which is right now much more natural to me than Rust (although Rust is quite similar to Scala). It's something like a sandbox where I can quickly test my ideas before the Rust compile will start yelling at me.
-
-You can also check my older project: [Artificial Neural Networks in Akka](https://github.com/makingthematrix/ann). It's an attempt to write a special kind of a neural network - asynchronous and time-aware - in Akka. It's a bit neglected right now, but for sure I'll get back to it at some point.
