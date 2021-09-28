@@ -34,6 +34,7 @@ libraryDependencies ++= Seq(
 
 lazy val nativeImageProject =
   project
+    .in(file("."))
     .enablePlugins(NativeImagePlugin)
     .settings(
       Compile / mainClass := Some("caart.Main"),
