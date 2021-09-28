@@ -28,7 +28,7 @@ object Arguments {
     case (acc, Seq("step", value))        => acc.copy(step  = Integer.parseInt(value))
     case (acc, Seq("scale", value))       => acc.copy(scale = Integer.parseInt(value))
     case (acc, Seq("delay", value))       => acc.copy(delay = Integer.parseInt(value).toLong)
-    case (acc, Seq("enforcegc", "true"))  => acc.copy(enforceGC = false)
+    case (acc, Seq("enforcegc", "true"))  => acc.copy(enforceGC = true)
     case (acc, Seq("enforcegc", "false")) => acc.copy(enforceGC = false)
     case (acc, Seq("example", value)) =>
       examples.find(_.str == value) match {
