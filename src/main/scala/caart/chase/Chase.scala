@@ -18,7 +18,7 @@ final case class Chase(color:   CMYK,
   override def update: Option[Chase] = (color, dirToCenter) match {
     case (CMYK.White, None) => None
     case (_, None)          => Some(copy(color = newColor))
-    case (_, Some(cDir))    => Some(copy(color = newColor, brushes = newBrushes(cDir)))
+    case (_, Some(_))       => Some(copy(color = newColor, brushes = newBrushes))
   }
 
   private def newColor =
@@ -26,7 +26,7 @@ final case class Chase(color:   CMYK,
     else if (color.abs < 0.02) CMYK.White
     else color * 0.98
 
-  private def newBrushes(cDir: Dir2D): List[CMYK] = moore(this).collect {
+  private def newBrushes: List[CMYK] = moore(this).collect {
     case (thisDir, cell) if cell.brushes.nonEmpty && cell.dirToCenter.contains(thisDir.turnAround) => cell.brushes
   }.flatten.toList
 
