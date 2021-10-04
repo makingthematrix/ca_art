@@ -15,8 +15,6 @@ package object visualisation {
   object UserEventType {
     case object LeftClick extends UserEventType
     case object RightClick extends UserEventType
-    case object MouseDrag extends UserEventType
-    case object MouseDragFinished extends UserEventType
   }
 
   final case class UserEvent(pos: Pos2D, eventType: UserEventType)

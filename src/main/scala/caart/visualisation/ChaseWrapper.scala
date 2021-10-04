@@ -12,13 +12,11 @@ final class ChaseWrapper(override val args: Arguments) extends AutoWrapper[Chase
   override val auto: Automaton[Chase] = Chase.automaton(args.dim)
 
   override protected def updateFromEvent(event: UserEvent): Board[Chase] = event.eventType match {
-    case UserEventType.LeftClick | UserEventType.MouseDrag =>
-      auto.update { _.copy(center = Some(event.pos)) }
-    case UserEventType.RightClick =>
+    case UserEventType.LeftClick =>
       val color = RGB.rainbow(Random.nextInt(RGB.rainbow.size)).toCMYK
       auto.updateOne(event.pos){ _.copy(color = color, brushes = List(color)) }
-    case _ =>
-      auto.current
+    case UserEventType.RightClick =>
+      auto.update { _.copy(center = Some(event.pos)) }
   }
 
   override protected def toColor(c: Chase): Color =

@@ -22,14 +22,7 @@ abstract class AutoWrapper[C <: AutomatonCell[C]] {
     }.toMap
 
   val onUserEvent: SourceStream[UserEvent] = EventStream[UserEvent]()
-  onUserEvent.foreach(event => event.eventType match {
-    case UserEventType.LeftClick | UserEventType.RightClick =>
-      updateBoard { updateFromEvent(event) }
-    case UserEventType.MouseDrag =>
-      updateFromEvent(event) // don't update the board until MouseDragFinished
-    case UserEventType.MouseDragFinished =>
-      updateBoard(auto.current)
-  })
+  onUserEvent.foreach(event => updateBoard { updateFromEvent(event) })
 
   private var currentBoard = Option.empty[Board[C]]
   private var currentTurn = 0L
