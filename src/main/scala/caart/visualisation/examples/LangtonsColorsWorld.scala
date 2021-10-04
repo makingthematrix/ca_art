@@ -1,14 +1,15 @@
-package caart.visualisation
+package caart.visualisation.examples
 
 import caart.Arguments
+import caart.engine.fields.{CMYK, Dir2D}
 import caart.engine.{Automaton, Board}
-import caart.fields.{CMYK, Dir2D}
-import caart.langtonscolors.LangtonsColors
+import caart.examples.LangtonsColors
+import caart.visualisation.{UserEvent, World}
 import javafx.scene.paint.Color
 
 import scala.util.Random
 
-final class LangtonsColorsWrapper(override val args: Arguments) extends AutoWrapper[LangtonsColors] {
+final class LangtonsColorsWorld(override val args: Arguments) extends World[LangtonsColors] {
   override val auto: Automaton[LangtonsColors] = LangtonsColors.automaton(args.dim)
 
   override protected def toColor(c: LangtonsColors): Color =

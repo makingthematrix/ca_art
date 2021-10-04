@@ -2,14 +2,15 @@ package caart.visualisation
 
 import caart.Arguments
 import caart.engine.{Automaton, AutomatonCell, Board}
-import caart.fields.Pos2D
+import caart.engine.fields.Pos2D
+import caart.visualisation.examples.{ChaseWorld, GameOfLifeWorld, LangtonsAntWorld, LangtonsColorsWorld}
 import com.wire.signals.ui.UiDispatchQueue.Ui
 import com.wire.signals.{EventStream, SourceStream}
 import javafx.scene.paint.Color
 
 import scala.concurrent.Future
 
-abstract class AutoWrapper[C <: AutomatonCell[C]] {
+abstract class World[C <: AutomatonCell[C]] {
   def args: Arguments
   def auto: Automaton[C]
   protected def toColor(c: C): Color
@@ -58,11 +59,11 @@ abstract class AutoWrapper[C <: AutomatonCell[C]] {
     tiles.values.foreach { _.initialize() }
 }
 
-object AutoWrapper {
-  def apply(args: Arguments): AutoWrapper[_] = args.example match {
-    case Arguments.GameOfLifeExample     => new GameOfLifeWrapper(args)
-    case Arguments.LangtonsAntExample    => new LangtonsAntWrapper(args)
-    case Arguments.LangtonsColorsExample => new LangtonsColorsWrapper(args)
-    case Arguments.ChaseExample          => new ChaseWrapper(args)
+object World {
+  def apply(args: Arguments): World[_] = args.example match {
+    case Arguments.GameOfLifeExample     => new GameOfLifeWorld(args)
+    case Arguments.LangtonsAntExample    => new LangtonsAntWorld(args)
+    case Arguments.LangtonsColorsExample => new LangtonsColorsWorld(args)
+    case Arguments.ChaseExample          => new ChaseWorld(args)
   }
 }

@@ -8,10 +8,10 @@ import com.wire.signals.ui.UiDispatchQueue
 import javafx.application.Platform
 import javafx.scene.input.KeyCode
 
-final class FXGLApp(args: Arguments) extends GameApplication {
+final class Game(args: Arguments) extends GameApplication {
   import com.wire.signals.Threading.defaultContext
 
-  private lazy val auto = AutoWrapper(args)
+  private lazy val world = World(args)
 
   private val gameState = Signal[GameState](GameState.Pause)
   gameState.foreach {
@@ -22,7 +22,7 @@ final class FXGLApp(args: Arguments) extends GameApplication {
   private def run(): Unit =
     while(gameState.currentValue.contains(GameState.Play)) {
       val t = System.currentTimeMillis()
-      auto.next()
+      world.next()
       println(s"the turn took ${System.currentTimeMillis() - t}ms")
       if (args.delay > 0L) Thread.sleep(args.delay)
     }
@@ -40,7 +40,7 @@ final class FXGLApp(args: Arguments) extends GameApplication {
   override protected def initUI(): Unit = {
     println(s"args: $args")
     UiDispatchQueue.setUi(Platform.runLater)
-    auto.init()
+    world.init()
   }
 
   override def initInput(): Unit = {

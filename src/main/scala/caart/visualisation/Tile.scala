@@ -1,7 +1,7 @@
 package caart.visualisation
 
 import caart.engine.AutomatonCell
-import caart.fields.Pos2D
+import caart.engine.fields.Pos2D
 import com.almasb.fxgl.dsl.FXGL
 import com.wire.signals.{Signal, SourceStream}
 import javafx.geometry.Point2D

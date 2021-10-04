@@ -1,14 +1,15 @@
-package caart.visualisation
+package caart.visualisation.examples
 
 import caart.Arguments
-import caart.chase.Chase
+import caart.engine.fields.RGB
 import caart.engine.{Automaton, Board}
-import caart.fields.RGB
+import caart.examples.Chase
+import caart.visualisation.{UserEvent, UserEventType, World}
 import javafx.scene.paint.Color
 
 import scala.util.Random
 
-final class ChaseWrapper(override val args: Arguments) extends AutoWrapper[Chase] {
+final class ChaseWorld(override val args: Arguments) extends World[Chase] {
   override val auto: Automaton[Chase] = Chase.automaton(args.dim)
 
   override protected def updateFromEvent(event: UserEvent): Board[Chase] = event.eventType match {

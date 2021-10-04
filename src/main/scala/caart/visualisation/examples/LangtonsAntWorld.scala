@@ -1,12 +1,13 @@
-package caart.visualisation
+package caart.visualisation.examples
 
 import caart.Arguments
+import caart.engine.fields.Up
 import caart.engine.{Automaton, Board}
-import caart.fields.Up
-import caart.langtonsant.LangtonsAnt
+import caart.examples.LangtonsAnt
+import caart.visualisation.{UserEvent, World}
 import javafx.scene.paint.Color
 
-final class LangtonsAntWrapper (override val args: Arguments) extends AutoWrapper[LangtonsAnt] {
+final class LangtonsAntWorld(override val args: Arguments) extends World[LangtonsAnt] {
   override val auto: Automaton[LangtonsAnt] = LangtonsAnt.automaton(args.dim)
 
   override protected def toColor(c: LangtonsAnt): Color = (c.color, c.dir) match {

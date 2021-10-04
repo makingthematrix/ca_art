@@ -1,6 +1,6 @@
 package caart
 
-import caart.fields.Pos2D
+import caart.engine.fields.Pos2D
 
 package object visualisation {
   sealed trait GameState

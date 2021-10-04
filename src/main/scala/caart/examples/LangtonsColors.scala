@@ -1,8 +1,8 @@
-package caart.langtonscolors
+package caart.examples
 
-import caart.engine.{Automaton, AutomatonCell, AutomatonCreator, Board}
 import caart.engine.Neighborhood.neumann
-import caart.fields.{CMYK, Dir2D, Pos2D}
+import caart.engine.fields.{CMYK, Dir2D, Pos2D}
+import caart.engine.{Automaton, AutomatonCell, AutomatonCreator, Board}
 
 final case class LangtonsColors(colors: Set[CMYK],
                                 dirs: List[(Dir2D, CMYK)],
