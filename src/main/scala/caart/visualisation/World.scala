@@ -29,34 +29,29 @@ abstract class World[C <: AutomatonCell[C]] {
   private var currentTurn = 0L
 
   def updateBoard(newBoard: Board[C]): Future[Unit] = {
-    val t = System.currentTimeMillis()
-    val toUpdate: List[C] = currentBoard.fold(newBoard.cells)(newBoard - _)
-    println(s"--- gathering what to update: ${System.currentTimeMillis() - t}ms (${toUpdate.length})")
+    val t = System.currentTimeMillis
+    val toUpdate = currentBoard.fold(newBoard.cells)(newBoard - _)
+    println(s"--- gathering what to update: ${System.currentTimeMillis - t}ms (${toUpdate.length})")
     currentBoard = Some(newBoard)
-    Future {
-      val t = System.currentTimeMillis()
-      toUpdate.foreach(c => tiles(c.pos).refresh())
-      println(s"--- tile refresh: ${System.currentTimeMillis() - t}ms")
-    }(Ui)
+    Future { toUpdate.foreach(c => tiles(c.pos).refresh()) }(Ui)
   }
 
   def next(): Unit = {
-    var t = System.currentTimeMillis()
-    val newBoard: Board[C] = auto.next()
-    println(s"--- auto next: ${System.currentTimeMillis() - t}ms")
+    var t = System.currentTimeMillis
+    val newBoard = auto.next()
+    println(s"--- auto next: ${System.currentTimeMillis - t}ms")
     if (currentTurn % args.step == 0) {
       updateBoard(newBoard)
       if (args.enforceGC) {
-        t = System.currentTimeMillis()
+        t = System.currentTimeMillis
         System.gc()
-        println(s"--- garbage collection: ${System.currentTimeMillis() - t}ms")
+        println(s"--- garbage collection: ${System.currentTimeMillis - t}ms")
       }
     }
     currentTurn += 1L
   }
 
-  def init(): Unit =
-    tiles.values.foreach { _.initialize() }
+  def init(): Unit = tiles.values.foreach { _.initialize() }
 }
 
 object World {

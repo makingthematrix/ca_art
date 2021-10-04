@@ -18,7 +18,7 @@ import caart.engine.fields.Pos2D
   */
 class Automaton[C <: AutomatonCell[C]](dim: Int,
                                        private val createCell:  (Pos2D, Pos2D => C) => C,
-                                       private val createBoard: (Int, Pos2D => C)   => Board[C] = Board.apply _
+                                       private val createBoard: (Int, Pos2D => C)   => Board[C]
                                       ) extends Iterator[Board[C]] {
   private var board: Board[C] = createBoard(dim, createCell(_, board.findCell(_)))
 
@@ -51,12 +51,12 @@ class Automaton[C <: AutomatonCell[C]](dim: Int,
     board
   }
 
-  def cells: List[C] = board.cells
+  def cells: Vector[C] = board.cells
   val positions: Set[Pos2D] = Pos2D(dim).toSet
   def findCell(pos: Pos2D): C = board.findCell(pos)
 }
 
 trait AutomatonCreator[C <: AutomatonCell[C]] {
   def cell(pos: Pos2D, findCell: Pos2D => C): C
-  def automaton(dim: Int): Automaton[C] = new Automaton[C](dim, cell)
+  def automaton(dim: Int): Automaton[C] = new Automaton[C](dim, cell, Board.apply)
 }

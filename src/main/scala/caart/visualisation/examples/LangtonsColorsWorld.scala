@@ -23,7 +23,7 @@ final class LangtonsColorsWorld(override val args: Arguments) extends World[Lang
     auto.updateOne(event.pos) { cell =>
       val d = Dir2D.dirs4(Random.nextInt(Dir2D.dirs4.length))
       val c = CMYK.colors(Random.nextInt(CMYK.colors.length))
-      cell.copy(colors = Set(c), dirs = List((d, c)))
+      cell.copy(colors = Set(c), dirs = Vector((d, c)))
     }
 }
 

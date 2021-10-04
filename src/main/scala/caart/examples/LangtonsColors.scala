@@ -6,7 +6,7 @@ import caart.engine.{AutomatonCell, AutomatonCreator, Neighborhood}
 final case class LangtonsColors(override val pos: Pos2D,
                                 override val findCell: Pos2D => LangtonsColors,
                                 colors: Set[CMYK] = Set.empty,
-                                dirs: List[(Dir2D, CMYK)] = Nil) extends AutomatonCell[LangtonsColors] {
+                                dirs: Vector[(Dir2D, CMYK)] = Vector.empty) extends AutomatonCell[LangtonsColors] {
   override def needsUpdate: Boolean =
     dirs.nonEmpty || Neighborhood.neumann(this).exists(p => p._2.dirs.nonEmpty)
 
@@ -20,7 +20,7 @@ final case class LangtonsColors(override val pos: Pos2D,
     (colors | newColors) &~ (colors & newColors) // no generic xor?
   }
 
-  private def newDirs = Neighborhood.neumann(this).toList.flatMap {
+  private def newDirs = Neighborhood.neumann(this).toVector.flatMap {
     case (thisDir, cell) => cell.dirs.filter(_._1 == thisDir.turnAround)
   }.map {
     case (thatDir, color) if colors.contains(color) => (thatDir.turnRight, color)

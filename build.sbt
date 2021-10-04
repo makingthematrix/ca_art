@@ -32,7 +32,7 @@ libraryDependencies ++= Seq(
   "org.scalameta" %% "munit" % "0.7.26" % "test"
 )
 
-lazy val nativeImageProject =
+lazy val nativeImage =
   project
     .in(file("."))
     .enablePlugins(NativeImagePlugin)
