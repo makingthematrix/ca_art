@@ -1,7 +1,7 @@
 package caart.visualisation
 
 import caart.Arguments
-import caart.engine.Automaton
+import caart.engine.{Automaton, Board}
 import caart.gameoflife.GameOfLife
 import javafx.scene.paint.Color
 
@@ -10,9 +10,6 @@ final class GameOfLifeWrapper(override val args: Arguments) extends AutoWrapper[
 
   override protected def toColor(c: GameOfLife): Color = if (c.life) Color.BLACK else Color.WHITE
 
-  onLeftClick.foreach { pos =>
-    updateBoard {
-      auto.updateOne(pos) { cell => cell.copy(life = !cell.life) }
-    }
-  }
+  override protected def updateFromEvent(event: UserEvent): Board[GameOfLife] =
+    auto.updateOne(event.pos) { cell => cell.copy(life = !cell.life) }
 }

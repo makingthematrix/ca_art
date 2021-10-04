@@ -29,6 +29,8 @@ class Automaton[C <: AutomatonCell[C]](dim: Int,
 
   override def hasNext: Boolean = true
 
+  def current: Board[C] = board
+
   /** Updates the current state of the iterator.
     *
     * Used to provide the initial state of the automaton or to perform a change in the middle of the main loop.

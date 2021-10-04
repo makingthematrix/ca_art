@@ -13,15 +13,23 @@ abstract class AutoWrapper[C <: AutomatonCell[C]] {
   def args: Arguments
   def auto: Automaton[C]
   protected def toColor(c: C): Color
-
-  val onLeftClick: SourceStream[Pos2D] = EventStream[Pos2D]()
-  val onRightClick: SourceStream[Pos2D] = EventStream[Pos2D]()
+  protected def updateFromEvent(event: UserEvent): Board[C]
 
   private lazy val tiles: Map[Pos2D, Tile[C]] =
     auto.positions.map { pos =>
-      val tile = Tile(() => auto.findCell(pos), args.scale, toColor, onLeftClick, onRightClick)
+      val tile = Tile(() => auto.findCell(pos), args.scale, toColor, onUserEvent)
       pos -> tile
     }.toMap
+
+  val onUserEvent: SourceStream[UserEvent] = EventStream[UserEvent]()
+  onUserEvent.foreach(event => event.eventType match {
+    case UserEventType.LeftClick | UserEventType.RightClick =>
+      updateBoard { updateFromEvent(event) }
+    case UserEventType.MouseDrag =>
+      updateFromEvent(event) // don't update the board until MouseDragFinished
+    case UserEventType.MouseDragFinished =>
+      updateBoard(auto.current)
+  })
 
   private var currentBoard = Option.empty[Board[C]]
   private var currentTurn = 0L

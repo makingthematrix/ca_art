@@ -1,8 +1,8 @@
 package caart.visualisation
 
 import caart.Arguments
-import caart.engine.Automaton
-import caart.fields.{Pos2D, Up}
+import caart.engine.{Automaton, Board}
+import caart.fields.Up
 import caart.langtonsant.LangtonsAnt
 import javafx.scene.paint.Color
 
@@ -15,9 +15,6 @@ final class LangtonsAntWrapper (override val args: Arguments) extends AutoWrappe
     case (true, _)    => Color.BLACK
   }
 
-  onLeftClick.foreach { pos =>
-    updateBoard {
-      auto.updateOne(pos) { cell => cell.copy(color = !cell.color, dir = Some(Up)) }
-    }
-  }
+  override protected def updateFromEvent(event: UserEvent): Board[LangtonsAnt] =
+    auto.updateOne(event.pos) { cell => cell.copy(color = !cell.color, dir = Some(Up)) }
 }
