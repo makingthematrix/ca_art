@@ -17,10 +17,10 @@ import caart.engine.fields.Pos2D
   * @constructor Takes the board edge size, a function for creating cells, and a function to create the board.
   */
 class Automaton[C <: AutomatonCell[C]](dim: Int,
-                                       applyCell:  (Pos2D, Pos2D => C) => C,
-                                       applyBoard: (Int, Pos2D => C)   => Board[C] = Board.apply _
+                                       private val createCell:  (Pos2D, Pos2D => C) => C,
+                                       private val createBoard: (Int, Pos2D => C)   => Board[C] = Board.apply _
                                       ) extends Iterator[Board[C]] {
-  private var board: Board[C] = applyBoard(dim, applyCell(_, board.findCell(_)))
+  private var board: Board[C] = createBoard(dim, createCell(_, board.findCell(_)))
 
   override def next(): Board[C] = {
     board = board.next
@@ -58,5 +58,5 @@ class Automaton[C <: AutomatonCell[C]](dim: Int,
 
 trait AutomatonCreator[C <: AutomatonCell[C]] {
   def cell(pos: Pos2D, findCell: Pos2D => C): C
-  def automaton(dim: Int): Automaton[C] = new Automaton[C](dim, cell, Board.apply)
+  def automaton(dim: Int): Automaton[C] = new Automaton[C](dim, cell)
 }
