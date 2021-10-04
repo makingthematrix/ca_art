@@ -1,7 +1,7 @@
-package caart.langtonsant
+package caart.examples
 
-import caart.engine.{Automaton, AutomatonCell, AutomatonCreator, Board, Neighborhood}
-import caart.fields._
+import caart.engine.fields._
+import caart.engine._
 
 final case class LangtonsAnt(color: Boolean,
                              dir: Option[Dir2D],

@@ -1,6 +1,6 @@
 package caart.engine
 
-import caart.fields.Pos2D
+import caart.engine.fields.Pos2D
 
 /** The trait which must be implemented by every Cellular Automaton's cell class.
   * Every cell must know its position on the board (`pos`), it must have access

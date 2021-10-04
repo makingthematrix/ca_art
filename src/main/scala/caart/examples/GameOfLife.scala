@@ -1,8 +1,8 @@
-package caart.gameoflife
+package caart.examples
 
-import caart.engine.{Automaton, AutomatonCell, AutomatonCreator, Board, Neighborhood}
-import caart.fields.Pos2D
-import Neighborhood.moore
+import caart.engine.Neighborhood.moore
+import caart.engine.fields.Pos2D
+import caart.engine._
 
 final case class GameOfLife(life: Boolean,
                            override val pos: Pos2D,

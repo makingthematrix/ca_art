@@ -1,6 +1,6 @@
 package caart.engine
 
-import caart.fields.Pos2D
+import caart.engine.fields.Pos2D
 import scala.collection.parallel.immutable.ParMap
 
 /** A 2D board; both the container for cells and the graph of their spatial relations.

@@ -1,4 +1,4 @@
-package caart.fields
+package caart.engine.fields
 
 class CMYKSpec extends munit.FunSuite {
   test("CMYK color should multiply by a coefficient") {

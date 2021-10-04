@@ -1,6 +1,6 @@
 package caart.engine
 
-import caart.fields.Dir2D
+import caart.engine.fields.Dir2D
 
 /**
   * Utility methods for collecting the neighborhood of a given cell.

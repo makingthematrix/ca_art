@@ -1,6 +1,6 @@
 package caart.engine
 
-import caart.fields.Pos2D
+import caart.engine.fields.Pos2D
 
 /** The main class of a cellular automaton.
   *
@@ -28,6 +28,8 @@ class Automaton[C <: AutomatonCell[C]](dim: Int,
   }
 
   override def hasNext: Boolean = true
+
+  def current: Board[C] = board
 
   /** Updates the current state of the iterator.
     *
