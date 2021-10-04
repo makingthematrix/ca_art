@@ -12,7 +12,7 @@ import scala.collection.parallel.immutable.ParMap
 class Board[C <: AutomatonCell[C]](dim: Int, protected val map: ParMap[Int, C]) {
   def findCell(pos: Pos2D): C = map(Board.id(pos, dim))
 
-  def next: Board[C] = new Board(dim, map.map { case (k, c) => k -> c.update.getOrElse(c) })
+  def next: Board[C] = new Board(dim, map.map { case (k, c) => k -> c.next })
 
   def copy(pos: Pos2D)(updater: C => C): Board[C] = {
     val id = Board.id(pos, dim)
@@ -51,19 +51,19 @@ object Board {
   /** Builds a map of identifiers to the automaton's cells.
     *
     * @param dim length of the board's edge
-    * @param applyCell a function building the cell
+    * @param findCell a function building the cell
     * @tparam C type of the cell
     * @return a parallel map of identifiers (based on the given cell's position) to the cells
     */
-  def buildMap[C <: AutomatonCell[C]](dim: Int, applyCell: Pos2D => C): ParMap[Int, C] =
-    Pos2D(dim).foldLeft(ParMap.empty[Int, C])((map, pos) => map + (id(pos, dim) -> applyCell(pos)))
+  def buildMap[C <: AutomatonCell[C]](dim: Int, findCell: Pos2D => C): ParMap[Int, C] =
+    Pos2D(dim).foldLeft(ParMap.empty[Int, C])((map, pos) => map + (id(pos, dim) -> findCell(pos)))
 
   /** Builds the board of the given automaton's cells.
     *
     * @param dim length of the board's edge
-    * @param applyCell a function building the cell
+    * @param findCell a function building the cell
     * @tparam C type of the cell
     * @return the board
     */
-  def apply[C <: AutomatonCell[C]](dim: Int, applyCell: Pos2D => C): Board[C] = new Board(dim, buildMap(dim, applyCell))
+  def apply[C <: AutomatonCell[C]](dim: Int, findCell: Pos2D => C): Board[C] = new Board(dim, buildMap(dim, findCell))
 }

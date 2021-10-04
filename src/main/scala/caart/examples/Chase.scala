@@ -1,14 +1,13 @@
 package caart.examples
 
-import caart.engine.Neighborhood.moore
-import caart.engine.fields._
-import caart.engine._
+import caart.engine.{AutomatonCell, AutomatonCreator, Neighborhood}
+import caart.engine.fields.{CMYK, Pos2D}
 
-final case class Chase(color:   CMYK,
-                       center:  Option[Pos2D],
-                       brushes: List[CMYK],
-                       override val pos: Pos2D,
-                       override val findCell: Pos2D => Chase) extends AutomatonCell[Chase] {
+final case class Chase(override val pos: Pos2D,
+                       override val findCell: Pos2D => Chase,
+                       color:   CMYK = CMYK.White,
+                       center:  Option[Pos2D] = None,
+                       brushes: List[CMYK] = Nil) extends AutomatonCell[Chase] {
   private[Chase] lazy val dirToCenter = center match {
     case None                      => None
     case Some(cPos) if cPos == pos => None
@@ -26,7 +25,7 @@ final case class Chase(color:   CMYK,
     else if (color.abs < 0.02) CMYK.White
     else color * 0.98
 
-  private def newBrushes: List[CMYK] = moore(this).collect {
+  private def newBrushes: List[CMYK] = Neighborhood.moore(this).collect {
     case (thisDir, cell) if cell.brushes.nonEmpty && cell.dirToCenter.contains(thisDir.turnAround) => cell.brushes
   }.flatten.toList
 
@@ -34,7 +33,6 @@ final case class Chase(color:   CMYK,
 }
 
 object Chase extends AutomatonCreator[Chase] {
-  def apply(pos: Pos2D, findCell: Pos2D => Chase): Chase = Chase(CMYK.White, None, List.empty, pos, findCell)
-  def automaton(dim: Int): Automaton[Chase] = new Automaton[Chase](dim, apply, Board.apply)
+  def cell(pos: Pos2D, findCell: Pos2D => Chase): Chase = Chase(pos, findCell)
 }
 

@@ -57,6 +57,6 @@ class Automaton[C <: AutomatonCell[C]](dim: Int,
 }
 
 trait AutomatonCreator[C <: AutomatonCell[C]] {
-  def apply(pos: Pos2D, findCell: Pos2D => C): C
-  def automaton(dim: Int): Automaton[C]
+  def cell(pos: Pos2D, findCell: Pos2D => C): C
+  def automaton(dim: Int): Automaton[C] = new Automaton[C](dim, cell, Board.apply)
 }

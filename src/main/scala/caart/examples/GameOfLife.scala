@@ -1,13 +1,12 @@
 package caart.examples
 
-import caart.engine.Neighborhood.moore
+import caart.engine.{AutomatonCell, AutomatonCreator, Neighborhood}
 import caart.engine.fields.Pos2D
-import caart.engine._
 
-final case class GameOfLife(life: Boolean,
-                           override val pos: Pos2D,
-                           override val findCell: Pos2D => GameOfLife) extends AutomatonCell[GameOfLife] {
-  override def update: Option[GameOfLife] = moore(this).count { case (_, c) => c.life } match {
+final case class GameOfLife(override val pos: Pos2D,
+                            override val findCell: Pos2D => GameOfLife,
+                            life: Boolean = false) extends AutomatonCell[GameOfLife] {
+  override def update: Option[GameOfLife] = Neighborhood.moore(this).count { case (_, c) => c.life } match {
     case 3 if !life => Some(copy(life = true))
     case n if life && (n < 2 || n > 3) => Some(copy(life = false))
     case _ => None
@@ -15,6 +14,5 @@ final case class GameOfLife(life: Boolean,
 }
 
 object GameOfLife extends AutomatonCreator[GameOfLife] {
-  def apply(pos: Pos2D, findCell: Pos2D => GameOfLife): GameOfLife = GameOfLife(life = false, pos, findCell)
-  def automaton(dim: Int): Automaton[GameOfLife] = new Automaton[GameOfLife](dim, apply, Board.apply)
+  def cell(pos: Pos2D, findCell: Pos2D => GameOfLife): GameOfLife = GameOfLife(pos, findCell)
 }

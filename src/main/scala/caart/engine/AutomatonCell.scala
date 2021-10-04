@@ -9,8 +9,11 @@ import caart.engine.fields.Pos2D
   *
   * @tparam C the lower bound for the cell is this trait itself
   */
-trait AutomatonCell[C <: AutomatonCell[C]] {
+trait AutomatonCell[C <: AutomatonCell[C]] { self: C =>
   val pos: Pos2D
   val findCell: Pos2D => C
   def update: Option[C]
+
+  def needsUpdate: Boolean = true
+  def next: C = if (needsUpdate) update.getOrElse(self) else self
 }
