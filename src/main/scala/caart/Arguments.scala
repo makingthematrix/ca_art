@@ -7,7 +7,7 @@ final case class Arguments(dim:     Int = 100,        // the number of cells in 
                            step:    Int = 1,          // how often the visualisation should be refresh
                            scale:   Int = 8,          // how many pixels per cell in the visualisation
                            delay:   Long = 0L,        // interval between two updates in milliseconds
-                           enforceGC: Boolean = true, // enforce garbage collection every turn
+                           enforceGC: Boolean = false, // enforce garbage collection every turn
                            example: Example = GameOfLifeExample
                           ) {
   lazy val windowSize: Int = dim * scale

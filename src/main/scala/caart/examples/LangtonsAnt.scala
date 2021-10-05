@@ -21,12 +21,15 @@ final case class LangtonsAnt(override val pos: Pos2D,
 
   private def newColor = if (dir.isEmpty) color else !color
 
-  private def newDir = Neighborhood.neumann(this).find {
-    case (thisDir, cell) => cell.dir.contains(thisDir.turnAround)
-  }.map {
-    case (thisDir, _) if color => thisDir.turnLeft
-    case (thisDir, _)          => thisDir.turnRight
-  }
+  private def newDir =
+    Neighborhood
+      .neumann(this)
+      .find {
+        case (thisDir, cell) => cell.dir.contains(thisDir.turnAround)
+      }.map {
+        case (thisDir, _) if color => thisDir.turnLeft
+        case (thisDir, _)          => thisDir.turnRight
+      }
 }
 
 object LangtonsAnt extends AutomatonCreator[LangtonsAnt] {

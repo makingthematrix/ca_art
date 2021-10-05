@@ -8,14 +8,13 @@ its new state, or it can denote a spatial relation between two cells.
 In the second case we deal usually only with constants: Up, Right, Down, etc.
 */
 class Dir2D(val x: Double, val y: Double) {
-  def turnRight: Dir2D = new Dir2D(-y, x)
-  def turnLeft:  Dir2D = new Dir2D(y, -x)
-  def turnAround:Dir2D = new Dir2D(-x, -y)
+  def turnRight:  Dir2D = new Dir2D(-y, x)
+  def turnLeft:   Dir2D = new Dir2D(y, -x)
+  def turnAround: Dir2D = new Dir2D(-x, -y)
 
   // returns the cross product of this vector and another
   def crossZ(other: Dir2D): Double = x * (other.y - y) - y * (other.x - x)
-  
-    
+
   // calculating the cross product is an easy way to tell if the other vector
   // is clockwise or counterclockwise from this one
   // `crossZ` is 0.0 if the vectors are parallel
@@ -120,7 +119,7 @@ object Dir2D {
     }
   }
 
-  def approx4(x: Double, y: Double) =
+  def approx4(x: Double, y: Double): Dir2D =
     if (x > 0.0) {
       if (y > x) Down
       else if (y < -x) Up
@@ -131,7 +130,7 @@ object Dir2D {
       else Left
     }
 
-  def approx8(x: Double, y: Double) = {
+  def approx8(x: Double, y: Double): Dir2D = {
     val absX = math.abs(x)
     if (y < 0.0) {
       if (2.0 * absX < -y) Up

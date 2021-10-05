@@ -12,7 +12,7 @@ import scala.collection.parallel.immutable.ParMap
 class Board[C <: AutomatonCell[C]](dim: Int, protected val map: ParMap[Int, C]) {
   def findCell(pos: Pos2D): C = map(Board.id(pos, dim))
 
-  def next: Board[C] = copy { _.next }
+  final def next: Board[C] = copy { _.next }
 
   def copy(pos: Pos2D)(updater: C => C): Board[C] = {
     val id = Board.id(pos, dim)
@@ -21,12 +21,10 @@ class Board[C <: AutomatonCell[C]](dim: Int, protected val map: ParMap[Int, C]) 
 
   def copy(updater: C => C): Board[C] = new Board(dim, map.map { case (id, cell) => id -> updater(cell) })
 
-  def cells: Vector[C] = map.values.toVector
+  final def cells: Vector[C] = map.values.toVector
 
-  // optimized under an assumption that `.values` in `ParMap` always return cells in the same order
-  // i.e. we will compare cells with the same positions
   final def -(board: Board[C]): Vector[C] =
-    map.values.zip(board.map.values).collect { case (c1, c2) if c1 != c2 => c1 }.toVector
+    map.collect { case (id, cell) if board.map(id) != cell => cell }.toVector
 }
 
 object Board {

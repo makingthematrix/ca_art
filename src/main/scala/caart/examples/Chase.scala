@@ -20,14 +20,22 @@ final case class Chase(override val pos: Pos2D,
     case (_, Some(_))       => Some(copy(color = newColor, brushes = newBrushes))
   }
 
+  override def needsUpdate: Boolean =
+    (color != CMYK.White) || Neighborhood.moore(this).values.exists(_.brushes.nonEmpty)
+
   private def newColor =
     if (brushes.nonEmpty) CMYK.sum(color :: brushes)
     else if (color.abs < 0.02) CMYK.White
     else color * 0.98
 
-  private def newBrushes: List[CMYK] = Neighborhood.moore(this).collect {
-    case (thisDir, cell) if cell.brushes.nonEmpty && cell.dirToCenter.contains(thisDir.turnAround) => cell.brushes
-  }.flatten.toList
+  private def newBrushes =
+    Neighborhood
+      .moore(this)
+      .collect {
+        case (thisDir, cell) if cell.brushes.nonEmpty && cell.dirToCenter.contains(thisDir.turnAround) => cell.brushes
+      }
+      .flatten
+      .toList
 
   override def toString: String = s"Chase($pos, color = $color, center = $center, dir to center = $dirToCenter, brushes = $brushes)"
 }
