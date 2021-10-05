@@ -16,14 +16,13 @@ abstract class World[C <: AutomatonCell[C]] {
   protected def toColor(c: C): Color
   protected def updateFromEvent(event: UserEvent): Board[C]
 
+  private val onUserEvent: SourceStream[UserEvent] = EventStream[UserEvent]()
+  onUserEvent.foreach(event => updateBoard { updateFromEvent(event) })
+
   private lazy val tiles: Map[Pos2D, Tile[C]] =
     auto.positions.map { pos =>
-      val tile = Tile(() => auto.findCell(pos), args.scale, toColor, onUserEvent)
-      pos -> tile
+      pos -> Tile(() => auto.findCell(pos), args.scale, toColor, onUserEvent)
     }.toMap
-
-  val onUserEvent: SourceStream[UserEvent] = EventStream[UserEvent]()
-  onUserEvent.foreach(event => updateBoard { updateFromEvent(event) })
 
   private var currentBoard = Option.empty[Board[C]]
   private var currentTurn = 0L
