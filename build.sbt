@@ -26,7 +26,8 @@ scalacOptions ++= Seq(
 libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.3",
   "com.wire" %% "wire-signals" % "1.0.0",
-
+  "ch.qos.logback" % "logback-classic" % "1.2.6",
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4",
   "com.github.almasb" % "fxgl"% "11.17",
   //Test dependencies
   "org.scalameta" %% "munit" % "0.7.26" % "test"

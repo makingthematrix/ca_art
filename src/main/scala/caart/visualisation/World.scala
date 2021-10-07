@@ -4,13 +4,14 @@ import caart.Arguments
 import caart.engine.{Automaton, AutomatonCell, Board}
 import caart.engine.fields.Pos2D
 import caart.visualisation.examples.{ChaseWorld, GameOfLifeWorld, LangtonsAntWorld, LangtonsColorsWorld}
+import com.typesafe.scalalogging.LazyLogging
 import com.wire.signals.ui.UiDispatchQueue.Ui
 import com.wire.signals.{EventStream, SourceStream}
 import javafx.scene.paint.Color
 
 import scala.concurrent.Future
 
-abstract class World[C <: AutomatonCell[C]] {
+abstract class World[C <: AutomatonCell[C]] extends LazyLogging {
   def args: Arguments
   def auto: Automaton[C]
   protected def toColor(c: C): Color
@@ -30,7 +31,7 @@ abstract class World[C <: AutomatonCell[C]] {
   def updateBoard(newBoard: Board[C]): Future[Unit] = {
     val t = System.currentTimeMillis
     val toUpdate = currentBoard.fold(newBoard.cells)(newBoard - _)
-    println(s"--- gathering what to update: ${System.currentTimeMillis - t}ms (${toUpdate.length})")
+    logger.debug(s"--- gathering what to update: ${System.currentTimeMillis - t}ms (${toUpdate.length})")
     currentBoard = Some(newBoard)
     Future { toUpdate.foreach(c => tiles(c.pos).refresh()) }(Ui)
   }
@@ -38,13 +39,13 @@ abstract class World[C <: AutomatonCell[C]] {
   def next(): Unit = {
     var t = System.currentTimeMillis
     val newBoard = auto.next()
-    println(s"--- auto next: ${System.currentTimeMillis - t}ms")
+    logger.debug(s"--- auto next: ${System.currentTimeMillis - t}ms")
     if (currentTurn % args.step == 0) {
       updateBoard(newBoard)
       if (args.enforceGC) {
         t = System.currentTimeMillis
         System.gc()
-        println(s"--- garbage collection: ${System.currentTimeMillis - t}ms")
+        logger.debug(s"--- garbage collection: ${System.currentTimeMillis - t}ms")
       }
     }
     currentTurn += 1L

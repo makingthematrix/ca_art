@@ -3,12 +3,13 @@ package caart.visualisation
 import caart.Arguments
 import com.almasb.fxgl.app.{ApplicationMode, GameApplication, GameSettings}
 import com.almasb.fxgl.dsl.FXGL
+import com.typesafe.scalalogging.LazyLogging
 import com.wire.signals.Signal
 import com.wire.signals.ui.UiDispatchQueue
 import javafx.application.Platform
 import javafx.scene.input.KeyCode
 
-final class Game(args: Arguments) extends GameApplication {
+final class Game(args: Arguments) extends GameApplication with LazyLogging {
   import com.wire.signals.Threading.defaultContext
 
   private lazy val world = World(args)
@@ -23,7 +24,7 @@ final class Game(args: Arguments) extends GameApplication {
     while(gameState.currentValue.contains(GameState.Play)) {
       val t = System.currentTimeMillis()
       world.next()
-      println(s"the turn took ${System.currentTimeMillis() - t}ms")
+      logger.debug(s"the turn took ${System.currentTimeMillis() - t}ms")
       if (args.delay > 0L) Thread.sleep(args.delay)
     }
 
@@ -38,7 +39,7 @@ final class Game(args: Arguments) extends GameApplication {
   }
 
   override protected def initUI(): Unit = {
-    println(s"args: $args")
+    logger.debug(s"args: $args")
     UiDispatchQueue.setUi(Platform.runLater)
     world.init()
   }
