@@ -1,13 +1,17 @@
 package caart.examples
 
-import caart.engine.{Automaton, AutomatonCell, AutomatonCreator}
+import caart.engine.GlobalCell.EmptyGlobalCell
+import caart.engine.{Automaton, AutomatonCell, AutomatonCreator, GlobalCell}
 import caart.engine.fields.{CMYK, Pos2D}
 
 final case class Chase(override val pos: Pos2D,
                        override val auto: Automaton[Chase],
                        color:   CMYK = CMYK.White,
                        center:  Option[Pos2D] = None,
-                       brushes: List[CMYK] = Nil) extends AutomatonCell[Chase] {
+                       brushes: List[CMYK] = Nil)
+  extends AutomatonCell[Chase] {
+  override type GC = EmptyGlobalCell
+
   private[Chase] lazy val dirToCenter = center match {
     case None                      => None
     case Some(cPos) if cPos == pos => None
@@ -38,5 +42,6 @@ final case class Chase(override val pos: Pos2D,
 
 object Chase extends AutomatonCreator[Chase] {
   def cell(pos: Pos2D, auto: Automaton[Chase]): Chase = Chase(pos, auto)
+  override def globalCell: EmptyGlobalCell = GlobalCell.Empty
 }
 

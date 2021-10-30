@@ -1,12 +1,16 @@
 package caart.examples
 
-import caart.engine.{Automaton, AutomatonCell, AutomatonCreator}
+import caart.engine.GlobalCell.EmptyGlobalCell
+import caart.engine.{Automaton, AutomatonCell, AutomatonCreator, GlobalCell}
 import caart.engine.fields.{Dir2D, Pos2D}
 
 final case class LangtonsAnt(override val pos: Pos2D,
                              override val auto: Automaton[LangtonsAnt],
                              color: Boolean = false,
-                             dir: Option[Dir2D] = None) extends AutomatonCell[LangtonsAnt] {
+                             dir: Option[Dir2D] = None)
+  extends AutomatonCell[LangtonsAnt] {
+  override type GC = EmptyGlobalCell
+
   /* In case of Langton's Ant in every iteration only a small part of the board is updated
    * ( `2*n / (dim*dim)` where `n` is the number of ants on the board). We can speed it up
    * by overriding `needsUpdate` with a quick check if the update is needed at all.
@@ -32,4 +36,5 @@ final case class LangtonsAnt(override val pos: Pos2D,
 
 object LangtonsAnt extends AutomatonCreator[LangtonsAnt] {
   override def cell(pos: Pos2D, auto: Automaton[LangtonsAnt]): LangtonsAnt = LangtonsAnt(pos, auto)
+  override def globalCell: EmptyGlobalCell = GlobalCell.Empty
 }

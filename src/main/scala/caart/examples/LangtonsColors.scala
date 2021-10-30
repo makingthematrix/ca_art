@@ -1,12 +1,16 @@
 package caart.examples
 
+import caart.engine.GlobalCell.EmptyGlobalCell
 import caart.engine.fields.{CMYK, Dir2D, Pos2D}
-import caart.engine.{Automaton, AutomatonCell, AutomatonCreator}
+import caart.engine.{Automaton, AutomatonCell, AutomatonCreator, GlobalCell}
 
 final case class LangtonsColors(override val pos: Pos2D,
                                 override val auto: Automaton[LangtonsColors],
                                 colors: Set[CMYK] = Set.empty,
-                                dirs: Map[Dir2D, CMYK] = Map.empty) extends AutomatonCell[LangtonsColors] {
+                                dirs: Map[Dir2D, CMYK] = Map.empty)
+  extends AutomatonCell[LangtonsColors] {
+  override type GC = EmptyGlobalCell
+
   override def needsUpdate: Boolean =
     dirs.nonEmpty || auto.neumann(pos).exists(_._2.dirs.nonEmpty)
 
@@ -31,4 +35,5 @@ final case class LangtonsColors(override val pos: Pos2D,
 
 object LangtonsColors extends AutomatonCreator[LangtonsColors] {
   override def cell(pos: Pos2D, auto: Automaton[LangtonsColors]): LangtonsColors = LangtonsColors(pos, auto)
+  override def globalCell: EmptyGlobalCell = GlobalCell.Empty
 }

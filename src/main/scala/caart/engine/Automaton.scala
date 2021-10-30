@@ -18,12 +18,20 @@ import caart.engine.fields.{Dir2D, Pos2D}
   */
 class Automaton[C <: AutomatonCell[C]](dim: Int,
                                        private val createCell:  (Pos2D, Automaton[C]) => C,
-                                       private val createBoard: (Int, Pos2D => C) => Board[C])
+                                       private val createBoard: (Int, Pos2D => C) => Board[C],
+                                       private var globalCell: C#GC)
   extends Iterator[Board[C]] {
   private var board: Board[C] = createBoard(dim, createCell(_, this))
 
+  def global: C#GC = globalCell
+
+  def updateGlobal(updater: C#GC => C#GC): Unit = {
+    globalCell = updater(globalCell)
+  }
+
   override def next(): Board[C] = {
     board = board.next
+    globalCell = globalCell.next
     board
   }
 
@@ -76,5 +84,7 @@ class Automaton[C <: AutomatonCell[C]](dim: Int,
 
 trait AutomatonCreator[C <: AutomatonCell[C]] {
   def cell(pos: Pos2D, auto: Automaton[C]): C
-  def automaton(dim: Int): Automaton[C] = new Automaton[C](dim, cell, Board.apply)
+  def globalCell: C#GC
+
+  def automaton(dim: Int): Automaton[C] = new Automaton[C](dim, cell, Board.apply, globalCell)
 }

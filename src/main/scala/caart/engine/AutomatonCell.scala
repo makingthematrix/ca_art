@@ -10,10 +10,24 @@ import caart.engine.fields.Pos2D
   * @tparam C the lower bound for the cell is this trait itself
   */
 trait AutomatonCell[C <: AutomatonCell[C]] { self: C =>
+  type GC <: GlobalCell[GC]
+
   val pos: Pos2D
   val auto: Automaton[C]
   def update: Option[C]
 
   def needsUpdate: Boolean = true
   def next: C = if (needsUpdate) update.getOrElse(self) else self
+}
+
+trait GlobalCell[GC <: GlobalCell[GC]] {
+  def next: GC
+}
+
+object GlobalCell {
+  final case class EmptyGlobalCell private() extends GlobalCell[EmptyGlobalCell] {
+    override def next: EmptyGlobalCell = this
+  }
+
+  val Empty: EmptyGlobalCell = EmptyGlobalCell()
 }
