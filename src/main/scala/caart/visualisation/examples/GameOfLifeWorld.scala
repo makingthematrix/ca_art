@@ -3,7 +3,7 @@ package caart.visualisation.examples
 import caart.Arguments
 import caart.engine.{Automaton, Board}
 import caart.examples.GameOfLife
-import caart.visualisation.{UserEvent, World}
+import caart.visualisation.{World, UserEvent}
 import javafx.scene.paint.Color
 
 final class GameOfLifeWorld(override val args: Arguments) extends World[GameOfLife] {

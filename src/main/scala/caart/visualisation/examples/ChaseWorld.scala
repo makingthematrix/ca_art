@@ -4,7 +4,7 @@ import caart.Arguments
 import caart.engine.fields.RGB
 import caart.engine.{Automaton, Board}
 import caart.examples.Chase
-import caart.visualisation.{UserEvent, UserEventType, World}
+import caart.visualisation.{World, UserEvent, UserEventType}
 import javafx.scene.paint.Color
 
 import scala.util.Random

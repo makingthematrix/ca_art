@@ -4,7 +4,7 @@ import caart.Arguments
 import caart.engine.fields.Up
 import caart.engine.{Automaton, Board}
 import caart.examples.LangtonsAnt
-import caart.visualisation.{UserEvent, World}
+import caart.visualisation.{World, UserEvent}
 import javafx.scene.paint.Color
 
 final class LangtonsAntWorld(override val args: Arguments) extends World[LangtonsAnt] {

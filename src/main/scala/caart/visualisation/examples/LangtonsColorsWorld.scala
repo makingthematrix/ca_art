@@ -4,7 +4,7 @@ import caart.Arguments
 import caart.engine.fields.{CMYK, Dir2D}
 import caart.engine.{Automaton, Board}
 import caart.examples.LangtonsColors
-import caart.visualisation.{UserEvent, World}
+import caart.visualisation.{World, UserEvent}
 import javafx.scene.paint.Color
 
 import scala.util.Random
@@ -26,4 +26,3 @@ final class LangtonsColorsWorld(override val args: Arguments) extends World[Lang
       cell.copy(colors = Set(c), dirs = Map(d -> c))
     }
 }
-

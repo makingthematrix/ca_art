@@ -12,7 +12,7 @@ final case class LangtonsAnt(override val pos: Pos2D,
    * by overriding `needsUpdate` with a quick check if the update is needed at all.
    */
   override def needsUpdate: Boolean =
-    dir.isDefined || Neighborhood.neumann(this).exists(p => p._2.dir.isDefined)
+    dir.isDefined || Neighborhood.neumann(this).exists(_._2.dir.isDefined)
 
   override  def update: Option[LangtonsAnt] = (newColor, newDir) match {
     case (c, d) if c == color && d == dir => None

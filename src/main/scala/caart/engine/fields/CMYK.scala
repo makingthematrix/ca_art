@@ -21,7 +21,7 @@ import math.round
 final case class CMYK(c: Double, m: Double, y: Double, k: Double) {
   def +(other: CMYK): CMYK = CMYK.sum(Seq(this, other))
 
-  // this makes sense only for dimming the color, ie. color in <0.0, 1.0>
+  // this makes sense only for dimming the color, ie. coeff in <0.0, 1.0>
   def *(coeff: Double): CMYK = {
     require(coeff >= 0.0 && coeff <= 1.0)
     val nc = CMYK(c * coeff, m * coeff, y * coeff, k * coeff)

@@ -1,15 +1,19 @@
 package caart.visualisation
 
 import caart.Arguments
-import caart.engine.{Automaton, AutomatonCell, Board}
 import caart.engine.fields.Pos2D
+import caart.engine.{Automaton, AutomatonCell, Board}
 import caart.visualisation.examples.{ChaseWorld, GameOfLifeWorld, LangtonsAntWorld, LangtonsColorsWorld}
+import com.almasb.fxgl.dsl.FXGL
 import com.typesafe.scalalogging.LazyLogging
 import com.wire.signals.ui.UiDispatchQueue.Ui
-import com.wire.signals.{EventStream, SourceStream}
+import com.wire.signals.{EventStream, Signal, SourceStream}
+import javafx.scene.canvas.Canvas
+import javafx.scene.input.{MouseButton, MouseEvent}
 import javafx.scene.paint.Color
 
 import scala.concurrent.Future
+import scala.util.chaining.scalaUtilChainingOps
 
 abstract class World[C <: AutomatonCell[C]] extends LazyLogging {
   def args: Arguments
@@ -20,20 +24,29 @@ abstract class World[C <: AutomatonCell[C]] extends LazyLogging {
   private val onUserEvent: SourceStream[UserEvent] = EventStream[UserEvent]()
   onUserEvent.foreach(event => updateBoard { updateFromEvent(event) })
 
-  private lazy val tiles: Map[Pos2D, Tile[C]] =
-    auto.positions.map { pos =>
-      pos -> Tile(() => auto.findCell(pos), args.scale, toColor, onUserEvent)
-    }.toMap
+  private val drag = Signal(Option.empty[Pos2D])
+  drag.onUpdated.collect { case (Some(Some(prev)), _) => UserEvent(prev, UserEventType.LeftClick) }.pipeTo(onUserEvent)
+
+  private val canvas = new Canvas().tap { canvas =>
+    canvas.setWidth(args.windowSize.toDouble)
+    canvas.setHeight(args.windowSize.toDouble)
+  }
 
   private var currentBoard = Option.empty[Board[C]]
   private var currentTurn = 0L
 
   def updateBoard(newBoard: Board[C]): Future[Unit] = {
-    val t = System.currentTimeMillis
-    val toUpdate = currentBoard.fold(newBoard.cells)(newBoard - _)
-    logger.debug(s"--- gathering what to update: ${System.currentTimeMillis - t}ms (${toUpdate.length})")
+    val toUpdate = currentBoard.fold(newBoard.cells)(newBoard - _).groupBy(toColor)
     currentBoard = Some(newBoard)
-    Future { toUpdate.foreach(c => tiles(c.pos).refresh()) }(Ui)
+    Future {
+      val graphics = canvas.getGraphicsContext2D
+      toUpdate.foreach { case (color, cells) =>
+        graphics.setFill(color)
+        cells.foreach { c =>
+          graphics.fillRect(c.pos.x * args.scale, c.pos.y * args.scale, args.scale, args.scale)
+        }
+      }
+    }(Ui)
   }
 
   def next(): Unit = {
@@ -51,7 +64,28 @@ abstract class World[C <: AutomatonCell[C]] extends LazyLogging {
     currentTurn += 1L
   }
 
-  def init(): Unit = tiles.values.foreach { _.initialize() }
+  def init(): Unit = {
+    FXGL.addUINode(canvas)
+
+    canvas.setOnMouseDragged { (ev: MouseEvent) =>
+      val p = Pos2D(ev.getSceneX.toInt / args.scale, ev.getSceneY.toInt / args.scale)
+      drag ! Some(p)
+    }
+
+    canvas.setOnMousePressed { (ev: MouseEvent) =>
+      ev.setDragDetect(true)
+      val p = Pos2D(ev.getSceneX.toInt / args.scale, ev.getSceneY.toInt / args.scale)
+      if (ev.getButton == MouseButton.PRIMARY) onUserEvent ! UserEvent(p, UserEventType.LeftClick)
+      else if (ev.getButton == MouseButton.SECONDARY) onUserEvent ! UserEvent(p, UserEventType.RightClick)
+    }
+
+    canvas.setOnMouseReleased { (_: MouseEvent) => drag ! None }
+
+    Future {
+      canvas.getGraphicsContext2D.setFill(Color.WHITE)
+      canvas.getGraphicsContext2D.fillRect(0.0, 0.0, args.windowSize.toDouble, args.windowSize.toDouble)
+    }(Ui)
+  }
 }
 
 object World {

@@ -8,7 +8,7 @@ final case class LangtonsColors(override val pos: Pos2D,
                                 colors: Set[CMYK] = Set.empty,
                                 dirs: Map[Dir2D, CMYK] = Map.empty) extends AutomatonCell[LangtonsColors] {
   override def needsUpdate: Boolean =
-    dirs.nonEmpty || Neighborhood.neumann(this).exists(p => p._2.dirs.nonEmpty)
+    dirs.nonEmpty || Neighborhood.neumann(this).exists(_._2.dirs.nonEmpty)
 
   override  def update: Option[LangtonsColors] = (newColors, newDirs) match {
     case (cs, ds) if cs == colors && ds == dirs => None
