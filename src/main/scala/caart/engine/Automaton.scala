@@ -69,8 +69,12 @@ class Automaton[C <: AutomatonCell[C]](dim: Int,
     * up, right, down, and left from the given one. The method returns them
     * as a map where keys are the corresponding Dir2D constants.
     */
-  def neumann(pos: Pos2D): Map[Dir2D, C] =
-    Dir2D.dirs4.map(dir => dir -> board.findCell(pos.move(dir))).toMap
+  final def neumann(pos: Pos2D): Map[Dir2D, C] =
+    neumannFind(pos).map { case (dir, neighbor) => dir -> board.findCell(neighbor) }
+
+  private final val neumannMap = new scala.collection.mutable.HashMap[Pos2D, Map[Dir2D, Pos2D]]()
+  private final def neumannFind(pos: Pos2D): Map[Dir2D, Pos2D] =
+    neumannMap.getOrElseUpdate(pos, Dir2D.dirs4.map(dir => dir -> pos.move(dir)).toMap)
 
   /**
     * The Moore's neighborhood is a collection of eight cells which are
@@ -78,8 +82,12 @@ class Automaton[C <: AutomatonCell[C]](dim: Int,
     * the given one. The method returns them as a map where keys are
     * the corresponding Dir2D constants.
     */
-  def moore(pos: Pos2D): Map[Dir2D, C] =
-    Dir2D.dirs8.map(dir => dir -> board.findCell(pos.move(dir))).toMap
+  final def moore(pos: Pos2D): Map[Dir2D, C] =
+    mooreFind(pos).map { case (dir, neighbor) => dir -> board.findCell(neighbor) }
+
+  private final val mooreMap = new scala.collection.mutable.HashMap[Pos2D, Map[Dir2D, Pos2D]]()
+  private final def mooreFind(pos: Pos2D): Map[Dir2D, Pos2D] =
+    mooreMap.getOrElseUpdate(pos, Dir2D.dirs8.map(dir => dir -> pos.move(dir)).toMap)
 }
 
 trait AutomatonCreator[C <: AutomatonCell[C]] {
