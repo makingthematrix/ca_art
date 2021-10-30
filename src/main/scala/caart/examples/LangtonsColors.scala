@@ -1,14 +1,14 @@
 package caart.examples
 
 import caart.engine.fields.{CMYK, Dir2D, Pos2D}
-import caart.engine.{AutomatonCell, AutomatonCreator, Neighborhood}
+import caart.engine.{Automaton, AutomatonCell, AutomatonCreator}
 
 final case class LangtonsColors(override val pos: Pos2D,
-                                override val findCell: Pos2D => LangtonsColors,
+                                override val auto: Automaton[LangtonsColors],
                                 colors: Set[CMYK] = Set.empty,
                                 dirs: Map[Dir2D, CMYK] = Map.empty) extends AutomatonCell[LangtonsColors] {
   override def needsUpdate: Boolean =
-    dirs.nonEmpty || Neighborhood.neumann(this).exists(_._2.dirs.nonEmpty)
+    dirs.nonEmpty || auto.neumann(pos).exists(_._2.dirs.nonEmpty)
 
   override  def update: Option[LangtonsColors] = (newColors, newDirs) match {
     case (cs, ds) if cs == colors && ds == dirs => None
@@ -21,16 +21,14 @@ final case class LangtonsColors(override val pos: Pos2D,
   }
 
   private def newDirs =
-    Neighborhood
-      .neumann(this)
-      .flatMap {
-        case (thisDir, cell) => cell.dirs.filter(_._1 == thisDir.turnAround)
-      }.map {
-        case (thatDir, color) if colors.contains(color) => (thatDir.turnRight, color)
-        case (thatDir, color) =>                           (thatDir.turnLeft, color)
-      }
+    auto.neumann(pos).flatMap {
+      case (thisDir, cell) => cell.dirs.filter(_._1 == thisDir.turnAround)
+    }.map {
+      case (thatDir, color) if colors.contains(color) => (thatDir.turnRight, color)
+      case (thatDir, color) =>                           (thatDir.turnLeft, color)
+    }
 }
 
 object LangtonsColors extends AutomatonCreator[LangtonsColors] {
-  def cell(pos: Pos2D, findCell: Pos2D => LangtonsColors): LangtonsColors = LangtonsColors(pos, findCell)
+  override def cell(pos: Pos2D, auto: Automaton[LangtonsColors]): LangtonsColors = LangtonsColors(pos, auto)
 }

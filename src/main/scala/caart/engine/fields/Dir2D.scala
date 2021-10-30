@@ -99,8 +99,8 @@ case object DownLeft extends Dir2D(-1.0, 1.0) {
 }
 
 object Dir2D {
-  val dirs4 = Array(Up, Right, Down, Left)
-  val dirs8 = Array(Up, UpRight, Right, DownRight, Down, DownLeft, Left, UpLeft)
+  val dirs4: Array[Dir2D] = Array(Up, Right, Down, Left)
+  val dirs8: Array[Dir2D] = Array(Up, UpRight, Right, DownRight, Down, DownLeft, Left, UpLeft)
 
   def apply(x: Double, y: Double): Dir2D = {
     require(x != 0.0 || y != 0.0, "Unable to create a Dir2D from (x = 0.0, y = 0.0)")

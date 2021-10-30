@@ -1,10 +1,10 @@
 package caart.examples
 
-import caart.engine.{AutomatonCell, AutomatonCreator, Neighborhood}
+import caart.engine.{Automaton, AutomatonCell, AutomatonCreator}
 import caart.engine.fields.{CMYK, Pos2D}
 
 final case class Chase(override val pos: Pos2D,
-                       override val findCell: Pos2D => Chase,
+                       override val auto: Automaton[Chase],
                        color:   CMYK = CMYK.White,
                        center:  Option[Pos2D] = None,
                        brushes: List[CMYK] = Nil) extends AutomatonCell[Chase] {
@@ -21,7 +21,7 @@ final case class Chase(override val pos: Pos2D,
   }
 
   override def needsUpdate: Boolean =
-    (color != CMYK.White) || Neighborhood.moore(this).values.exists(_.brushes.nonEmpty)
+    (color != CMYK.White) || auto.moore(pos).values.exists(_.brushes.nonEmpty)
 
   private def newColor =
     if (brushes.nonEmpty) CMYK.sum(color :: brushes)
@@ -29,18 +29,14 @@ final case class Chase(override val pos: Pos2D,
     else color * 0.98
 
   private def newBrushes =
-    Neighborhood
-      .moore(this)
-      .collect {
-        case (thisDir, cell) if cell.brushes.nonEmpty && cell.dirToCenter.contains(thisDir.turnAround) => cell.brushes
-      }
-      .flatten
-      .toList
+    auto.moore(pos).collect {
+      case (thisDir, cell) if cell.brushes.nonEmpty && cell.dirToCenter.contains(thisDir.turnAround) => cell.brushes
+    }.flatten.toList
 
   override def toString: String = s"Chase($pos, color = $color, center = $center, dir to center = $dirToCenter, brushes = $brushes)"
 }
 
 object Chase extends AutomatonCreator[Chase] {
-  def cell(pos: Pos2D, findCell: Pos2D => Chase): Chase = Chase(pos, findCell)
+  def cell(pos: Pos2D, auto: Automaton[Chase]): Chase = Chase(pos, auto)
 }
 

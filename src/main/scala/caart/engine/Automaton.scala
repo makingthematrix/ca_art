@@ -1,6 +1,6 @@
 package caart.engine
 
-import caart.engine.fields.Pos2D
+import caart.engine.fields.{Dir2D, Pos2D}
 
 /** The main class of a cellular automaton.
   *
@@ -17,10 +17,10 @@ import caart.engine.fields.Pos2D
   * @constructor Takes the board edge size, a function for creating cells, and a function to create the board.
   */
 class Automaton[C <: AutomatonCell[C]](dim: Int,
-                                       private val createCell:  (Pos2D, Pos2D => C) => C,
-                                       private val createBoard: (Int, Pos2D => C)   => Board[C]
-                                      ) extends Iterator[Board[C]] {
-  private var board: Board[C] = createBoard(dim, createCell(_, board.findCell(_)))
+                                       private val createCell:  (Pos2D, Automaton[C]) => C,
+                                       private val createBoard: (Int, Pos2D => C) => Board[C])
+  extends Iterator[Board[C]] {
+  private var board: Board[C] = createBoard(dim, createCell(_, this))
 
   override def next(): Board[C] = {
     board = board.next
@@ -54,9 +54,27 @@ class Automaton[C <: AutomatonCell[C]](dim: Int,
   def cells: Vector[C] = board.cells
   val positions: Set[Pos2D] = Pos2D(dim).toSet
   def findCell(pos: Pos2D): C = board.findCell(pos)
+
+
+  /**
+    * The von Neumann's neighborhood is a collection of four cells which are
+    * up, right, down, and left from the given one. The method returns them
+    * as a map where keys are the corresponding Dir2D constants.
+    */
+  def neumann(pos: Pos2D): Map[Dir2D, C] =
+    Dir2D.dirs4.map(dir => dir -> board.findCell(pos.move(dir))).toMap
+
+  /**
+    * The Moore's neighborhood is a collection of eight cells which are
+    * up, up-right, right, right-down, down, down-left, left, and left-up from
+    * the given one. The method returns them as a map where keys are
+    * the corresponding Dir2D constants.
+    */
+  def moore(pos: Pos2D): Map[Dir2D, C] =
+    Dir2D.dirs8.map(dir => dir -> board.findCell(pos.move(dir))).toMap
 }
 
 trait AutomatonCreator[C <: AutomatonCell[C]] {
-  def cell(pos: Pos2D, findCell: Pos2D => C): C
+  def cell(pos: Pos2D, auto: Automaton[C]): C
   def automaton(dim: Int): Automaton[C] = new Automaton[C](dim, cell, Board.apply)
 }

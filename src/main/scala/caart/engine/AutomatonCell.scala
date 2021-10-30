@@ -11,7 +11,7 @@ import caart.engine.fields.Pos2D
   */
 trait AutomatonCell[C <: AutomatonCell[C]] { self: C =>
   val pos: Pos2D
-  val findCell: Pos2D => C
+  val auto: Automaton[C]
   def update: Option[C]
 
   def needsUpdate: Boolean = true
