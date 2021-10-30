@@ -1,6 +1,8 @@
 package caart.engine
 
 import caart.engine.fields.Pos2D
+
+import scala.collection.parallel.CollectionConverters.ImmutableMapIsParallelizable
 import scala.collection.parallel.immutable.ParMap
 
 /** A 2D board; both the container for cells and the graph of their spatial relations.
@@ -9,17 +11,17 @@ import scala.collection.parallel.immutable.ParMap
   * @param map a map of identifiers to cells
   * @tparam C the exact case class implementing the cell
   */
-class Board[C <: AutomatonCell[C]](dim: Int, protected val map: ParMap[Int, C]) {
-  def findCell(pos: Pos2D): C = map(Board.id(pos, dim))
+class Board[C <: AutomatonCell[C]](dim: Int, protected val map: ParMap[Pos2D, C]) {
+  def findCell(pos: Pos2D): C = map(Board.wrap(pos, dim))
 
   final def next: Board[C] = copy { _.next }
 
   def copy(pos: Pos2D)(updater: C => C): Board[C] = {
-    val id = Board.id(pos, dim)
-    new Board(dim, map.updated(id, updater(map(id))))
+    val wrappedPos = Board.wrap(pos, dim)
+    new Board(dim, map.updated(wrappedPos, updater(map(wrappedPos))))
   }
 
-  def copy(updater: C => C): Board[C] = new Board(dim, map.map { case (id, cell) => id -> updater(cell) })
+  def copy(updater: C => C): Board[C] = new Board(dim, map.map { case (pos, cell) => pos -> updater(cell) })
 
   final def cells: Vector[C] = map.values.toVector
 
@@ -28,23 +30,15 @@ class Board[C <: AutomatonCell[C]](dim: Int, protected val map: ParMap[Int, C]) 
 }
 
 object Board {
-  /** A method converting the given position to the identifier of a cell at that position.
-    *
-    * If the given position is outside the board, the method uses modulo(dim) to wrap it around.
-    * Essentially that means that the board is the surface of a 3D torus, with no edges in either direction.
-    *
-    * @param pos position on a 2D plane; if it's bigger than `dim` it will be wrapped around
-    * @param dim length of the edge
-    * @return the identifier
-    */
-  def id(pos: Pos2D, dim: Int): Int = {
-    def wrap(i: Int) = i % dim match {
-      case x if x >= 0 => x
-      case x           => x + dim
-    }
 
-    wrap(pos.x) * dim + wrap(pos.y)
-  }
+  def wrap(pos: Pos2D, dim: Int): Pos2D =
+    if (pos.x >= 0 && pos.x < dim) {
+      if (pos.y >= 0 && pos.y < dim) pos
+      else pos.copy(y = (pos.y + dim) % dim)
+    } else {
+      if (pos.y >= 0 && pos.y < dim) pos.copy(x = (pos.x + dim) % dim)
+      else pos.copy(x = (pos.x + dim) % dim, y = (pos.y + dim) % dim)
+    }
 
   /** Builds a map of identifiers to the automaton's cells.
     *
@@ -53,8 +47,8 @@ object Board {
     * @tparam C type of the cell
     * @return a parallel map of identifiers (based on the given cell's position) to the cells
     */
-  def buildMap[C <: AutomatonCell[C]](dim: Int, findCell: Pos2D => C): ParMap[Int, C] =
-    Pos2D(dim).foldLeft(ParMap.empty[Int, C])((map, pos) => map + (id(pos, dim) -> findCell(pos)))
+  def buildMap[C <: AutomatonCell[C]](dim: Int, findCell: Pos2D => C): ParMap[Pos2D, C] =
+    Pos2D(dim).map(pos => pos -> findCell(pos)).toMap.par
 
   /** Builds the board of the given automaton's cells.
     *
