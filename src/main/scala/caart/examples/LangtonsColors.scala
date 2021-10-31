@@ -15,8 +15,8 @@ final case class LangtonsColors(override val pos: Pos2D,
     dirs.nonEmpty || auto.neumann(pos).exists(_._2.dirs.nonEmpty)
 
   override  def update: Option[LangtonsColors] = (newColors, newDirs) match {
-    case (cs, ds) if cs == colors && ds == dirs => None
-    case (cs, ds)                               => Some(copy(colors = cs, dirs = ds))
+    case (`colors`, `dirs`) => None
+    case (cs, ds)           => Some(copy(colors = cs, dirs = ds))
   }
 
   private def newColors = {
