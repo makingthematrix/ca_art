@@ -1,24 +1,22 @@
 package caart.examples
 
-import caart.engine.GlobalCell.EmptyGlobalCell
 import caart.engine.{Automaton, AutomatonCell, AutomatonCreator, GlobalCell}
 import caart.engine.fields.{CMYK, Pos2D}
 
 final case class Chase(override val pos: Pos2D,
                        override val auto: Automaton[Chase],
                        color:   CMYK = CMYK.White,
-                       center:  Option[Pos2D] = None,
                        brushes: List[CMYK] = Nil)
   extends AutomatonCell[Chase] {
-  override type GC = EmptyGlobalCell
+  override type GC = Chase.Global
 
-  private[Chase] lazy val dirToCenter = center match {
+  private[Chase] lazy val dirToPlayerPosition = auto.global.playerPosition match {
     case None                      => None
     case Some(cPos) if cPos == pos => None
     case Some(cPos)                => Some((cPos - pos).approx8)
   }
 
-  override def update: Option[Chase] = (color, dirToCenter) match {
+  override def update: Option[Chase] = (color, dirToPlayerPosition) match {
     case (CMYK.White, None) => None
     case (_, None)          => Some(copy(color = newColor))
     case (_, Some(_))       => Some(copy(color = newColor, brushes = newBrushes))
@@ -34,14 +32,16 @@ final case class Chase(override val pos: Pos2D,
 
   private def newBrushes =
     auto.moore(pos).collect {
-      case (thisDir, cell) if cell.brushes.nonEmpty && cell.dirToCenter.contains(thisDir.turnAround) => cell.brushes
+      case (thisDir, cell) if cell.brushes.nonEmpty && cell.dirToPlayerPosition.contains(thisDir.turnAround) => cell.brushes
     }.flatten.toList
 
-  override def toString: String = s"Chase($pos, color = $color, center = $center, dir to center = $dirToCenter, brushes = $brushes)"
+  override def toString: String = s"Chase($pos, color = $color, direction to the player's position = $dirToPlayerPosition, brushes = $brushes)"
 }
 
 object Chase extends AutomatonCreator[Chase] {
+  final case class Global(playerPosition: Option[Pos2D] = None) extends GlobalCell[Chase.Global]
+
   def cell(pos: Pos2D, auto: Automaton[Chase]): Chase = Chase(pos, auto)
-  override def globalCell(auto: Automaton[Chase]): EmptyGlobalCell = GlobalCell.Empty
+  override def globalCell(auto: Automaton[Chase]): Chase.Global = Chase.Global()
 }
 

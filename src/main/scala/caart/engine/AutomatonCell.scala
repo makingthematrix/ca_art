@@ -20,14 +20,12 @@ trait AutomatonCell[C <: AutomatonCell[C]] { self: C =>
   def next: C = if (needsUpdate) update.getOrElse(self) else self
 }
 
-trait GlobalCell[GC <: GlobalCell[GC]] {
-  def next: GC
+trait GlobalCell[GC <: GlobalCell[GC]] { self: GC =>
+  def next: GC = self
 }
 
 object GlobalCell {
-  final case class EmptyGlobalCell private() extends GlobalCell[EmptyGlobalCell] {
-    override def next: EmptyGlobalCell = this
-  }
+  final case class EmptyGlobalCell private() extends GlobalCell[EmptyGlobalCell]
 
   val Empty: EmptyGlobalCell = EmptyGlobalCell()
 }

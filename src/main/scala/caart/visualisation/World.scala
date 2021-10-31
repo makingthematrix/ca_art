@@ -35,18 +35,20 @@ abstract class World[C <: AutomatonCell[C]] extends LazyLogging {
   private var currentBoard = Option.empty[Board[C]]
   private var currentTurn = 0L
 
-  def updateBoard(newBoard: Board[C]): Future[Unit] = {
+  def updateBoard(newBoard: Board[C]): Unit = {
     val toUpdate = currentBoard.fold(newBoard.cells)(newBoard - _).groupBy(toColor)
-    currentBoard = Some(newBoard)
-    Future {
-      val graphics = canvas.getGraphicsContext2D
-      toUpdate.foreach { case (color, cells) =>
-        graphics.setFill(color)
-        cells.foreach { c =>
-          graphics.fillRect(c.pos.x * args.scale, c.pos.y * args.scale, args.scale, args.scale)
+    if (toUpdate.nonEmpty) {
+      currentBoard = Some(newBoard)
+      Future {
+        val graphics = canvas.getGraphicsContext2D
+        toUpdate.foreach { case (color, cells) =>
+          graphics.setFill(color)
+          cells.foreach { c =>
+            graphics.fillRect(c.pos.x * args.scale, c.pos.y * args.scale, args.scale, args.scale)
+          }
         }
-      }
-    }(Ui)
+      }(Ui)
+    }
   }
 
   def next(): Unit = {
