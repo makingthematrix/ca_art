@@ -20,5 +20,5 @@ final case class GameOfLife(override val pos: Pos2D,
 
 object GameOfLife extends AutomatonCreator[GameOfLife] {
   override def cell(pos: Pos2D, auto: Automaton[GameOfLife]): GameOfLife = GameOfLife(pos, auto)
-  override def globalCell: EmptyGlobalCell = GlobalCell.Empty
+  override def globalCell(auto: Automaton[GameOfLife]): EmptyGlobalCell = GlobalCell.Empty
 }

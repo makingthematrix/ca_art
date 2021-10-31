@@ -35,5 +35,5 @@ final case class LangtonsColors(override val pos: Pos2D,
 
 object LangtonsColors extends AutomatonCreator[LangtonsColors] {
   override def cell(pos: Pos2D, auto: Automaton[LangtonsColors]): LangtonsColors = LangtonsColors(pos, auto)
-  override def globalCell: EmptyGlobalCell = GlobalCell.Empty
+  override def globalCell( auto: Automaton[LangtonsColors]): EmptyGlobalCell = GlobalCell.Empty
 }

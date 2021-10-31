@@ -2,6 +2,8 @@ package caart.engine
 
 import caart.engine.fields.{Dir2D, Pos2D}
 
+import scala.collection.mutable
+
 /** The main class of a cellular automaton.
   *
   * To create a cellular automaton, the user has to specify the size of the board, `dim`, (for simpilicity reasons 
@@ -19,9 +21,10 @@ import caart.engine.fields.{Dir2D, Pos2D}
 class Automaton[C <: AutomatonCell[C]](dim: Int,
                                        private val createCell:  (Pos2D, Automaton[C]) => C,
                                        private val createBoard: (Int, Pos2D => C) => Board[C],
-                                       private var globalCell: C#GC)
+                                       private var createGlobalCell: Automaton[C] => C#GC)
   extends Iterator[Board[C]] {
   private var board: Board[C] = createBoard(dim, createCell(_, this))
+  private var globalCell: C#GC = createGlobalCell(this)
 
   def global: C#GC = globalCell
 
@@ -63,7 +66,6 @@ class Automaton[C <: AutomatonCell[C]](dim: Int,
   val positions: Set[Pos2D] = Pos2D(dim).toSet
   def findCell(pos: Pos2D): C = board.findCell(pos)
 
-
   /**
     * The von Neumann's neighborhood is a collection of four cells which are
     * up, right, down, and left from the given one. The method returns them
@@ -72,7 +74,7 @@ class Automaton[C <: AutomatonCell[C]](dim: Int,
   final def neumann(pos: Pos2D): Map[Dir2D, C] =
     neumannFind(pos).map { case (dir, neighbor) => dir -> board.findCell(neighbor) }
 
-  private final val neumannMap = new scala.collection.mutable.HashMap[Pos2D, Map[Dir2D, Pos2D]]()
+  private final val neumannMap = new mutable.HashMap[Pos2D, Map[Dir2D, Pos2D]]()
   private final def neumannFind(pos: Pos2D): Map[Dir2D, Pos2D] =
     neumannMap.getOrElseUpdate(pos, Dir2D.dirs4.map(dir => dir -> pos.move(dir)).toMap)
 
@@ -85,14 +87,14 @@ class Automaton[C <: AutomatonCell[C]](dim: Int,
   final def moore(pos: Pos2D): Map[Dir2D, C] =
     mooreFind(pos).map { case (dir, neighbor) => dir -> board.findCell(neighbor) }
 
-  private final val mooreMap = new scala.collection.mutable.HashMap[Pos2D, Map[Dir2D, Pos2D]]()
+  private final val mooreMap = new mutable.HashMap[Pos2D, Map[Dir2D, Pos2D]]()
   private final def mooreFind(pos: Pos2D): Map[Dir2D, Pos2D] =
     mooreMap.getOrElseUpdate(pos, Dir2D.dirs8.map(dir => dir -> pos.move(dir)).toMap)
 }
 
 trait AutomatonCreator[C <: AutomatonCell[C]] {
   def cell(pos: Pos2D, auto: Automaton[C]): C
-  def globalCell: C#GC
+  def globalCell(auto: Automaton[C]): C#GC
 
   def automaton(dim: Int): Automaton[C] = new Automaton[C](dim, cell, Board.apply, globalCell)
 }

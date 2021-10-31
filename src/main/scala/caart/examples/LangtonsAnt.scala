@@ -36,5 +36,5 @@ final case class LangtonsAnt(override val pos: Pos2D,
 
 object LangtonsAnt extends AutomatonCreator[LangtonsAnt] {
   override def cell(pos: Pos2D, auto: Automaton[LangtonsAnt]): LangtonsAnt = LangtonsAnt(pos, auto)
-  override def globalCell: EmptyGlobalCell = GlobalCell.Empty
+  override def globalCell(auto: Automaton[LangtonsAnt]): EmptyGlobalCell = GlobalCell.Empty
 }

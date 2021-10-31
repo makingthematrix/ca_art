@@ -42,6 +42,6 @@ final case class Chase(override val pos: Pos2D,
 
 object Chase extends AutomatonCreator[Chase] {
   def cell(pos: Pos2D, auto: Automaton[Chase]): Chase = Chase(pos, auto)
-  override def globalCell: EmptyGlobalCell = GlobalCell.Empty
+  override def globalCell(auto: Automaton[Chase]): EmptyGlobalCell = GlobalCell.Empty
 }
 
