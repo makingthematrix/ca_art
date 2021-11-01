@@ -1,7 +1,7 @@
 name := "ca_art"
 
 version := "0.3"
-scalaVersion := "2.13.6"
+scalaVersion := "2.13.7"
 
 scalacOptions ++= Seq(
   "-deprecation",

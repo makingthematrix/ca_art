@@ -17,15 +17,5 @@ trait AutomatonCell[C <: AutomatonCell[C]] { self: C =>
   def update: Option[C]
 
   def needsUpdate: Boolean = true
-  def next: C = if (needsUpdate) update.getOrElse(self) else self
-}
-
-trait GlobalCell[GC <: GlobalCell[GC]] { self: GC =>
-  def next: GC = self
-}
-
-object GlobalCell {
-  final case class EmptyGlobalCell private() extends GlobalCell[EmptyGlobalCell]
-
-  val Empty: EmptyGlobalCell = EmptyGlobalCell()
+  final def next: C = if (needsUpdate) update.getOrElse(self) else self
 }

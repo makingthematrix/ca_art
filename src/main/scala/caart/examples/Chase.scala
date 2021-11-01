@@ -39,7 +39,10 @@ final case class Chase(override val pos: Pos2D,
 }
 
 object Chase extends AutomatonCreator[Chase] {
-  final case class Global(playerPosition: Option[Pos2D] = None) extends GlobalCell[Chase.Global]
+  final case class Global(playerPosition: Option[Pos2D] = None) extends GlobalCell[Chase.Global] {
+    override def update: Option[Global] = None
+    override def needsUpdate: Boolean = false
+  }
 
   def cell(pos: Pos2D, auto: Automaton[Chase]): Chase = Chase(pos, auto)
   override def globalCell(auto: Automaton[Chase]): Chase.Global = Chase.Global()

@@ -21,7 +21,7 @@ import scala.collection.mutable
 class Automaton[C <: AutomatonCell[C]](dim: Int,
                                        private val createCell:  (Pos2D, Automaton[C]) => C,
                                        private val createBoard: (Int, Pos2D => C) => Board[C],
-                                       private var createGlobalCell: Automaton[C] => C#GC)
+                                       private val createGlobalCell: Automaton[C] => C#GC)
   extends Iterator[Board[C]] {
   private var board: Board[C] = createBoard(dim, createCell(_, this))
   private var globalCell: C#GC = createGlobalCell(this)
