@@ -1,0 +1,43 @@
+package caart.engine
+
+import caart.engine.fields.{Dir2D, Pos2D}
+
+/** The trait which must be implemented by every Cellular Automaton's cell class.
+  * Every cell must know its position on the board (`pos`), it must have access
+  * to other cells of its type (`findCell`), and it must implement the rules which
+  * control the creation of its successor (`selfUpdate`).
+  *
+  * @tparam C the lower bound for the cell is this trait itself
+  */
+trait Cell[C <: Cell[C]] { self: C =>
+  type GC <: GlobalCell[C, GC]
+  type CE <: Cell.Event
+
+  val pos: Pos2D
+  val auto: Cell.AutoContract[C]
+  def selfUpdate: Option[C]
+  def updateFromEvents(events: Iterable[C#CE]): Option[C]
+
+  def needsSelfUpdate: Boolean = true
+
+  final def next(events: Iterable[C#CE]): C =
+    (events.nonEmpty, needsSelfUpdate) match {
+      case (false, false) => self
+      case (false, true)  => selfUpdate.getOrElse(self)
+      case (true,  false) => updateFromEvents(events).getOrElse(self)
+      case (true,  true)  => updateFromEvents(events).orElse(selfUpdate).getOrElse(self)
+    }
+}
+
+object Cell {
+  trait Event
+
+  trait AutoContract[C <: Cell[C]] {
+    def globalCell: C#GC
+    def addEvent(pos: Pos2D, event: C#CE): Unit
+    def addEvent(event: C#GC#GCE): Unit
+
+    def neumann(pos: Pos2D): Map[Dir2D, C]
+    def moore(pos: Pos2D): Map[Dir2D, C]
+  }
+}
