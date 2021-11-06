@@ -4,6 +4,7 @@ import caart.engine.fields.{Dir2D, Pos2D}
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.collection.mutable
+import scala.util.chaining.scalaUtilChainingOps
 
 /** The main class of a cellular automaton.
   *
@@ -36,12 +37,14 @@ class Automaton[C <: Cell[C]](dim: Int,
     _globalEvents ::= event
 
   override final def globalCell: C#GC = _globalCell
+
   final def cellEvents: Map[Pos2D, Iterable[C#CE]] =
     _cellEvents.groupBy(_._1).map { case (pos, events) => (pos, events.map(_._2)) }
+
   final def globalEvents: List[C#GC#GCE] = _globalEvents
-  final def oneCellEvents(pos: Pos2D): List[C#CE] = _cellEvents.collect {
-    case (p, event) if pos == p => event
-  }
+
+  final def oneCellEvents(pos: Pos2D): List[C#CE] =
+    _cellEvents.collect { case (p, event) if pos == p => event }
 
   final def updatedByEvents(cell: C): Option[C] = {
     val events: List[C#CE] = oneCellEvents(cell.pos)
@@ -51,12 +54,10 @@ class Automaton[C <: Cell[C]](dim: Int,
   final def globalUpdatedByEvents: Option[C#GC] = globalCell.updateFromEvents(globalEvents)
 
   override def next(): Board[C] = {
-    val ges = globalEvents
-    val ces = cellEvents
-    _globalEvents = Nil
-    _cellEvents = Nil
-    _globalCell = _globalCell.next(ges)
-    _board = _board.next(ces)
+    _globalCell = _globalCell.next(_globalEvents.tap(_ => _globalEvents = Nil))
+    _board = _board.next {
+      if (_cellEvents.nonEmpty) cellEvents.tap(_ => _cellEvents = Nil) else Map.empty
+    }
     _board
   }
 
