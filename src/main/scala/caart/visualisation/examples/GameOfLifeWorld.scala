@@ -2,12 +2,13 @@ package caart.visualisation.examples
 
 import caart.Arguments
 import caart.engine.Automaton
+import caart.engine.GlobalCell.Empty
 import caart.examples.GameOfLife
 import caart.visualisation.{UserEvent, World}
 import javafx.scene.paint.Color
 
-final class GameOfLifeWorld(override val args: Arguments) extends World[GameOfLife] {
-  override val auto: Automaton[GameOfLife] = GameOfLife.automaton(args.dim)
+final class GameOfLifeWorld(override val args: Arguments) extends World[GameOfLife, Empty[GameOfLife]] {
+  override val auto: Automaton[GameOfLife, Empty[GameOfLife]] = GameOfLife.automaton(args.dim)
 
   override protected def toColor(cell: GameOfLife): Color =
     auto.updatedByEvents(cell) match {

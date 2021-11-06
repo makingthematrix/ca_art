@@ -14,7 +14,7 @@ trait Cell[C <: Cell[C]] { self: C =>
   type CE <: Cell.Event
 
   val pos: Pos2D
-  val auto: Cell.AutoContract[C]
+  val auto: Cell.AutoContract[C, GC]
 
   def selfUpdate: Option[C]
   def updateFromEvents(events: Iterable[C#CE]): Option[C]
@@ -27,12 +27,12 @@ trait Cell[C <: Cell[C]] { self: C =>
 object Cell {
   trait Event
 
-  trait AutoContract[C <: Cell[C]] {
+  trait AutoContract[C <: Cell[C], GC <: GlobalCell[C, GC]] {
     val updateStrategy: UpdateStrategy.Type[C]
 
-    def globalCell: C#GC
+    def globalCell: GC
     def addEvent(pos: Pos2D, event: C#CE): Unit
-    def addEvent(event: C#GC#GCE): Unit
+    def addEvent(event: GC#GCE): Unit
 
     def neumann(pos: Pos2D): Map[Dir2D, C]
     def moore(pos: Pos2D): Map[Dir2D, C]

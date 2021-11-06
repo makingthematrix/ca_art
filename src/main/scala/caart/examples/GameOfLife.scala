@@ -5,7 +5,7 @@ import caart.engine.{Automaton, Cell, GlobalCell}
 import caart.engine.fields.Pos2D
 
 final case class GameOfLife(override val pos: Pos2D,
-                            override val auto: Cell.AutoContract[GameOfLife],
+                            override val auto: Cell.AutoContract[GameOfLife, Empty[GameOfLife]],
                             life: Boolean = false)
   extends Cell[GameOfLife] {
   import caart.examples.GameOfLife._
@@ -23,9 +23,9 @@ final case class GameOfLife(override val pos: Pos2D,
     }
 }
 
-object GameOfLife extends Automaton.Creator[GameOfLife] {
-  override def cell(pos: Pos2D, auto: Cell.AutoContract[GameOfLife]): GameOfLife = GameOfLife(pos, auto)
-  override def globalCell(auto: GlobalCell.AutoContract[GameOfLife]): Empty[GameOfLife] = GlobalCell.empty
+object GameOfLife extends Automaton.Creator[GameOfLife, Empty[GameOfLife]] {
+  override def cell(pos: Pos2D, auto: Cell.AutoContract[GameOfLife, Empty[GameOfLife]]): GameOfLife = GameOfLife(pos, auto)
+  override def globalCell(auto: GlobalCell.AutoContract[GameOfLife, Empty[GameOfLife]]): Empty[GameOfLife] = GlobalCell.empty
 
   case object FlipCell extends Cell.Event
 }

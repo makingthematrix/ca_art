@@ -2,7 +2,7 @@ package caart.visualisation
 
 import caart.Arguments
 import caart.engine.fields.Pos2D
-import caart.engine.{Automaton, Cell, Board}
+import caart.engine.{Automaton, Board, Cell, GlobalCell}
 import caart.visualisation.examples.{ChaseWorld, GameOfLifeWorld, LangtonsAntWorld, LangtonsColorsWorld}
 import com.almasb.fxgl.dsl.FXGL
 import com.typesafe.scalalogging.LazyLogging
@@ -15,9 +15,9 @@ import javafx.scene.paint.Color
 import scala.concurrent.Future
 import scala.util.chaining.scalaUtilChainingOps
 
-abstract class World[C <: Cell[C]] extends LazyLogging {
+abstract class World[C <: Cell[C], GC <: GlobalCell[C, GC]] extends LazyLogging {
   def args: Arguments
-  def auto: Automaton[C]
+  def auto: Automaton[C, GC]
   protected def toColor(c: C): Color
   protected def processUserEvent(event: UserEvent): Unit
 
@@ -100,7 +100,7 @@ abstract class World[C <: Cell[C]] extends LazyLogging {
 }
 
 object World {
-  def apply(args: Arguments): World[_] = args.example match {
+  def apply(args: Arguments): World[_, _] = args.example match {
     case Arguments.GameOfLifeExample     => new GameOfLifeWorld(args)
     case Arguments.LangtonsAntExample    => new LangtonsAntWorld(args)
     case Arguments.LangtonsColorsExample => new LangtonsColorsWorld(args)

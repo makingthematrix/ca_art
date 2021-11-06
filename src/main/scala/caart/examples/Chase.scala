@@ -5,12 +5,12 @@ import caart.engine.fields.{CMYK, Pos2D}
 import com.typesafe.scalalogging.LazyLogging
 
 final case class Chase(override val pos: Pos2D,
-                       override val auto: Cell.AutoContract[Chase],
+                       override val auto: Cell.AutoContract[Chase, ChaseGlobal],
                        color:   CMYK = CMYK.White,
                        brushes: List[CMYK] = Nil)
   extends Cell[Chase] {
   import Chase._
-  override type GC = Global
+  override type GC = ChaseGlobal
   override type CE = ChaseEvent
 
   override def selfUpdate: Option[Chase] = (color, dirToPlayerPosition) match {
@@ -51,15 +51,16 @@ final case class Chase(override val pos: Pos2D,
   override def toString: String = s"Chase($pos, color = $color, direction to the player's position = $dirToPlayerPosition, brushes = $brushes)"
 }
 
-object Chase extends Automaton.Creator[Chase] with LazyLogging {
-  final case class Global(playerPosition: Option[Pos2D] = None) extends GlobalCell.NoSelfUpdate[Chase, Chase.Global] {
-    override type GCE = SetPlayer
-    override def updateFromEvents(events: Iterable[SetPlayer]): Option[Chase.Global] =
-      events.headOption.map { case SetPlayer(pos) => copy(playerPosition = Some(pos)) }
-  }
+final case class ChaseGlobal(playerPosition: Option[Pos2D] = None) extends GlobalCell.NoSelfUpdate[Chase, ChaseGlobal] {
+  import Chase.SetPlayer
+  override type GCE = SetPlayer
+  override def updateFromEvents(events: Iterable[SetPlayer]): Option[ChaseGlobal] =
+    events.headOption.map { case SetPlayer(pos) => copy(playerPosition = Some(pos)) }
+}
 
-  override def cell(pos: Pos2D, auto: Cell.AutoContract[Chase]): Chase = Chase(pos, auto)
-  override def globalCell(auto: GlobalCell.AutoContract[Chase]): Chase.Global = Chase.Global()
+object Chase extends Automaton.Creator[Chase, ChaseGlobal] with LazyLogging {
+  override def cell(pos: Pos2D, auto: Cell.AutoContract[Chase, ChaseGlobal]): Chase = Chase(pos, auto)
+  override def globalCell(auto: GlobalCell.AutoContract[Chase, ChaseGlobal]): ChaseGlobal = ChaseGlobal()
 
   trait ChaseEvent extends Cell.Event
   final case class CreateChaser(color: CMYK) extends ChaseEvent

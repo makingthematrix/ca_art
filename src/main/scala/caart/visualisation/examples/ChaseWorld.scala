@@ -3,15 +3,15 @@ package caart.visualisation.examples
 import caart.Arguments
 import caart.engine.Automaton
 import caart.engine.fields.RGB
-import caart.examples.Chase
+import caart.examples.{Chase, ChaseGlobal}
 import caart.visualisation.{UserEvent, UserEventType, World}
 import com.typesafe.scalalogging.LazyLogging
 import javafx.scene.paint.Color
 
 import scala.util.Random
 
-final class ChaseWorld(override val args: Arguments) extends World[Chase] with LazyLogging {
-  override val auto: Automaton[Chase] = Chase.automaton(args.dim)
+final class ChaseWorld(override val args: Arguments) extends World[Chase, ChaseGlobal] with LazyLogging {
+  override val auto: Automaton[Chase, ChaseGlobal] = Chase.automaton(args.dim)
 
   override protected def processUserEvent(event: UserEvent): Unit = event.eventType match {
     case UserEventType.LeftClick =>

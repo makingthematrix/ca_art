@@ -1,51 +1,49 @@
 package caart.engine
 
+import caart.engine.GlobalUpdateStrategy.Type
 import caart.engine.fields.Pos2D
 
 trait GlobalCell[C <: Cell[C], GC <: GlobalCell[C, GC]] { self: GC =>
   type GCE <: GlobalCell.Event
-  protected val auto: GlobalCell.AutoContract[C]
+  protected val auto: GlobalCell.AutoContract[C, GC]
   def selfUpdate: Option[GC]
-  def updateFromEvents(events: Iterable[C#GC#GCE]): Option[GC]
+  def updateFromEvents(events: Iterable[GC#GCE]): Option[GC]
 
   def needsSelfUpdate: Boolean = true
 
-  final def next(events: Iterable[C#GC#GCE]): GC =
-    (events.nonEmpty, needsSelfUpdate) match {
-      case (false, false) => self
-      case (false, true)  => selfUpdate.getOrElse(self)
-      case (true,  false) => updateFromEvents(events).getOrElse(self)
-      case (true,  true)  => updateFromEvents(events).orElse(selfUpdate).getOrElse(self)
-    }
+  @inline final def next(events: Iterable[GC#GCE]): GC = auto.globalUpdateStrategy(self, events)
 }
 
 object GlobalCell {
   trait Event
 
-  trait AutoContract[C <: Cell[C]] {
+  trait AutoContract[C <: Cell[C], GC <: GlobalCell[C, GC]] {
+    val globalUpdateStrategy: GlobalUpdateStrategy.Type[C, GC]
+
     def board: Board[C]
     def addEvent(pos: Pos2D, event: C#CE): Unit
   }
 
-  private def noAutoContract[C <: Cell[C]] = new AutoContract[C] {
+  private def noAutoContract[C <: Cell[C], GC <: GlobalCell[C, GC]] = new AutoContract[C, GC] {
     override def board: Board[C] = Board.empty[C]
     override def addEvent(pos: Pos2D, event: C#CE): Unit = ()
+
+    override val globalUpdateStrategy: Type[C, GC] = GlobalUpdateStrategy.onlyEvents[C, GC]
   }
 
   final case class Empty[C <: Cell[C]] private() extends GlobalCell[C, Empty[C]] {
     override type GCE = GlobalCell.Event
     override def selfUpdate: Option[Empty[C]] = None
     override def needsSelfUpdate: Boolean = false
-    override val auto: AutoContract[C] = noAutoContract[C]
-    override def updateFromEvents(events: Iterable[C#GC#GCE]): Option[Empty[C]] = None
+    override val auto: AutoContract[C, Empty[C]] = noAutoContract[C, Empty[C]]
+    override def updateFromEvents(events: Iterable[Empty[C]#GCE]): Option[Empty[C]] = None
   }
 
-  private val _empty: Empty[_] = Empty()
-  def empty[C <: Cell[C]]: Empty[C] = _empty.asInstanceOf[Empty[C]]
+  def empty[C <: Cell[C]]: Empty[C] = Empty[C]()
 
   trait NoSelfUpdate[C <: Cell[C], GC <: GlobalCell[C, GC]] extends GlobalCell[C, GC] { self: GC =>
     override def needsSelfUpdate: Boolean = false
     def selfUpdate: Option[GC] = None
-    override val auto: AutoContract[C] = noAutoContract[C]
+    override val auto: AutoContract[C, GC] = noAutoContract[C, GC]
   }
 }

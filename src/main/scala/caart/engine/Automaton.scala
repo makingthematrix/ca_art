@@ -20,30 +20,35 @@ import scala.util.chaining.scalaUtilChainingOps
   *
   * @constructor Takes the board edge size, a function for creating cells, and a function to create the board.
   */
-class Automaton[C <: Cell[C]](dim: Int,
-                              private val createCell:  (Pos2D, Cell.AutoContract[C]) => C,
-                              private val createBoard: (Int, Pos2D => C) => Board[C],
-                              private val createGlobalCell: GlobalCell.AutoContract[C] => C#GC,
-                              override val updateStrategy: UpdateStrategy.Type[C]
-                             )
-  extends Iterator[Board[C]] with Cell.AutoContract[C] with GlobalCell.AutoContract[C] with LazyLogging { self: Automaton[C] =>
+class Automaton[C <: Cell[C], GC <: GlobalCell[C, GC]](
+  dim: Int,
+  private val createCell:  (Pos2D, Cell.AutoContract[C, GC]) => C,
+  private val createBoard: (Int, Pos2D => C) => Board[C],
+  private val createGlobalCell: GlobalCell.AutoContract[C, GC] => GC,
+  override val updateStrategy: UpdateStrategy.Type[C],
+  override val globalUpdateStrategy: GlobalUpdateStrategy.Type[C, GC]
+) extends Iterator[Board[C]]
+  with Cell.AutoContract[C, GC]
+  with GlobalCell.AutoContract[C, GC]
+  with LazyLogging { self: Automaton[C, GC] =>
+
   private var _cellEvents = List.empty[(Pos2D, C#CE)]
-  private var _globalEvents = List.empty[C#GC#GCE]
+  private var _globalEvents = List.empty[GC#GCE]
   private var _board: Board[C] = createBoard(dim, createCell(_, this))
-  private var _globalCell: C#GC = createGlobalCell(this)
+  private var _globalCell: GC = createGlobalCell(this)
 
   override def addEvent(pos: Pos2D, event: C#CE): Unit =
     _cellEvents ::= (pos -> event)
 
-  override def addEvent(event: C#GC#GCE): Unit =
+  override def addEvent(event: GC#GCE): Unit =
     _globalEvents ::= event
 
-  override final def globalCell: C#GC = _globalCell
+  override final def globalCell: GC = _globalCell
 
   final def cellEvents: Map[Pos2D, Iterable[C#CE]] =
     _cellEvents.groupBy(_._1).map { case (pos, events) => (pos, events.map(_._2)) }
 
-  final def globalEvents: List[C#GC#GCE] = _globalEvents
+  final def globalEvents: List[GC#GCE] = _globalEvents
 
   final def oneCellEvents(pos: Pos2D): List[C#CE] =
     _cellEvents.collect { case (p, event) if pos == p => event }
@@ -53,7 +58,7 @@ class Automaton[C <: Cell[C]](dim: Int,
     if (events.nonEmpty) cell.updateFromEvents(events) else None
   }
 
-  final def globalUpdatedByEvents: Option[C#GC] = globalCell.updateFromEvents(globalEvents)
+  final def globalUpdatedByEvents: Option[GC] = globalCell.updateFromEvents(globalEvents)
 
   override def next(): Board[C] = {
     _globalCell = _globalCell.next(_globalEvents.tap(_ => _globalEvents = Nil))
@@ -87,7 +92,7 @@ class Automaton[C <: Cell[C]](dim: Int,
     _board
   }
 
-  def updateGlobal(updater: C#GC => C#GC): C#GC = {
+  def updateGlobal(updater: GC => GC): GC = {
     _globalCell = updater(_globalCell)
     _globalCell
   }
@@ -123,11 +128,13 @@ class Automaton[C <: Cell[C]](dim: Int,
 }
 
 object Automaton {
-  trait Creator[C <: Cell[C]] {
-    def cell(pos: Pos2D, auto: Cell.AutoContract[C]): C
-    def globalCell(auto: GlobalCell.AutoContract[C]): C#GC
+  trait Creator[C <: Cell[C], GC <: GlobalCell[C, GC]] {
+    def cell(pos: Pos2D, auto: Cell.AutoContract[C, GC]): C
+    def globalCell(auto: GlobalCell.AutoContract[C, GC]): GC
 
-    def automaton(dim: Int, updateStrategy: UpdateStrategy.Type[C] = UpdateStrategy.eventsOverrideSelf): Automaton[C] =
-      new Automaton[C](dim, cell, Board.apply, globalCell, updateStrategy)
+    def automaton(dim: Int,
+                  updateStrategy: UpdateStrategy.Type[C] = UpdateStrategy.eventsOverrideSelf[C],
+                  globalUpdateStrategy: GlobalUpdateStrategy.Type[C, GC] = GlobalUpdateStrategy.eventsOverrideSelf[C, GC]): Automaton[C, GC] =
+      new Automaton[C, GC](dim, cell, Board.apply, globalCell, updateStrategy, globalUpdateStrategy)
   }
 }
