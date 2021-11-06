@@ -23,7 +23,9 @@ import scala.util.chaining.scalaUtilChainingOps
 class Automaton[C <: Cell[C]](dim: Int,
                               private val createCell:  (Pos2D, Cell.AutoContract[C]) => C,
                               private val createBoard: (Int, Pos2D => C) => Board[C],
-                              private val createGlobalCell: GlobalCell.AutoContract[C] => C#GC)
+                              private val createGlobalCell: GlobalCell.AutoContract[C] => C#GC,
+                              override val updateStrategy: UpdateStrategy.Type[C]
+                             )
   extends Iterator[Board[C]] with Cell.AutoContract[C] with GlobalCell.AutoContract[C] with LazyLogging { self: Automaton[C] =>
   private var _cellEvents = List.empty[(Pos2D, C#CE)]
   private var _globalEvents = List.empty[C#GC#GCE]
@@ -125,6 +127,7 @@ object Automaton {
     def cell(pos: Pos2D, auto: Cell.AutoContract[C]): C
     def globalCell(auto: GlobalCell.AutoContract[C]): C#GC
 
-    def automaton(dim: Int): Automaton[C] = new Automaton[C](dim, cell, Board.apply, globalCell)
+    def automaton(dim: Int, updateStrategy: UpdateStrategy.Type[C] = UpdateStrategy.eventsOverrideSelf): Automaton[C] =
+      new Automaton[C](dim, cell, Board.apply, globalCell, updateStrategy)
   }
 }

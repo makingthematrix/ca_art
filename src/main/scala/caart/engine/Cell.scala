@@ -15,24 +15,21 @@ trait Cell[C <: Cell[C]] { self: C =>
 
   val pos: Pos2D
   val auto: Cell.AutoContract[C]
+
   def selfUpdate: Option[C]
   def updateFromEvents(events: Iterable[C#CE]): Option[C]
 
   def needsSelfUpdate: Boolean = true
 
-  final def next(events: Iterable[C#CE]): C =
-    (events.nonEmpty, needsSelfUpdate) match {
-      case (false, false) => self
-      case (false, true)  => selfUpdate.getOrElse(self)
-      case (true,  false) => updateFromEvents(events).getOrElse(self)
-      case (true,  true)  => updateFromEvents(events).orElse(selfUpdate).getOrElse(self)
-    }
+  @inline final def next(events: Iterable[C#CE]): C = auto.updateStrategy(self, events)
 }
 
 object Cell {
   trait Event
 
   trait AutoContract[C <: Cell[C]] {
+    val updateStrategy: UpdateStrategy.Type[C]
+
     def globalCell: C#GC
     def addEvent(pos: Pos2D, event: C#CE): Unit
     def addEvent(event: C#GC#GCE): Unit
