@@ -4,11 +4,11 @@ import caart.engine.{Automaton, Cell, GlobalCell}
 import caart.engine.fields.{Dir2D, Pos2D, Right}
 
 final case class Snake(override val pos: Pos2D,
-                       override val auto: Cell.AutoContract[Snake],
+                       override val auto: Cell.AutoContract[Snake, SnakeGlobal],
                        cellType: Snake.CellType = Snake.Empty)
   extends Cell[Snake] {
   import Snake._
-  override type GC = Snake.Global
+  override type GC = SnakeGlobal
   override type CE = Cell.Event
 
   override def selfUpdate: Option[Snake] = cellType match {
@@ -22,15 +22,15 @@ final case class Snake(override val pos: Pos2D,
   override def updateFromEvents(events: Iterable[Cell.Event]): Option[Snake] = None
 }
 
-object Snake extends Automaton.Creator[Snake] {
-  final case class Global(headDir: Dir2D = Right, snakeSize: Int = 3, treatEaten: Boolean = false)
-    extends GlobalCell.NoSelfUpdate[Snake, Snake.Global] {
-    override type GCE = GlobalCell.Event
-    override def updateFromEvents(events: Iterable[GlobalCell.Event]): Option[Snake.Global] = None
-  }
+final case class SnakeGlobal(headDir: Dir2D = Right, snakeSize: Int = 3, treatEaten: Boolean = false)
+  extends GlobalCell.NoSelfUpdate[Snake, SnakeGlobal] {
+  override type GCE = GlobalCell.Event
+  override def updateFromEvents(events: Iterable[GlobalCell.Event]): Option[SnakeGlobal] = None
+}
 
-  override def cell(pos: Pos2D, auto: Cell.AutoContract[Snake]): Snake = Snake(pos, auto)
-  override def globalCell(auto: GlobalCell.AutoContract[Snake]): Snake.Global = Snake.Global()
+object Snake extends Automaton.Creator[Snake, SnakeGlobal] {
+  override def cell(pos: Pos2D, auto: Cell.AutoContract[Snake, SnakeGlobal]): Snake = Snake(pos, auto)
+  override def globalCell(auto: GlobalCell.AutoContract[Snake, SnakeGlobal]): SnakeGlobal = SnakeGlobal()
 
   sealed trait CellType
 
