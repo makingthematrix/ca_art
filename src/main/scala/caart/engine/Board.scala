@@ -1,6 +1,7 @@
 package caart.engine
 
 import caart.engine.fields.Pos2D
+import com.typesafe.scalalogging.LazyLogging
 
 import scala.collection.parallel.CollectionConverters.ImmutableMapIsParallelizable
 import scala.collection.parallel.immutable.ParMap
@@ -11,10 +12,11 @@ import scala.collection.parallel.immutable.ParMap
   * @param map a map of identifiers to cells
   * @tparam C the exact case class implementing the cell
   */
-class Board[C <: AutomatonCell[C]](dim: Int, protected val map: ParMap[Pos2D, C]) {
+class Board[C <: Cell[C]](dim: Int, protected val map: ParMap[Pos2D, C]) extends LazyLogging {
   def findCell(pos: Pos2D): C = map(Board.wrap(pos, dim))
 
-  final def next: Board[C] = copy { _.next }
+  final def next(events: Map[Pos2D, Iterable[C#CE]]): Board[C] =
+    copy { c => c.next(events.getOrElse(c.pos, Nil)) }
 
   def copy(pos: Pos2D)(updater: C => C): Board[C] = {
     val wrappedPos = Board.wrap(pos, dim)
@@ -30,6 +32,8 @@ class Board[C <: AutomatonCell[C]](dim: Int, protected val map: ParMap[Pos2D, C]
 }
 
 object Board {
+  private val Empty: Board[_] = new Board(0, ParMap.empty[Pos2D, Nothing])
+  def empty[C <: Cell[C]]: Board[C] = Empty.asInstanceOf[Board[C]]
 
   def wrap(pos: Pos2D, dim: Int): Pos2D =
     if (pos.x >= 0 && pos.x < dim) {
@@ -47,7 +51,7 @@ object Board {
     * @tparam C type of the cell
     * @return a parallel map of identifiers (based on the given cell's position) to the cells
     */
-  def buildMap[C <: AutomatonCell[C]](dim: Int, findCell: Pos2D => C): ParMap[Pos2D, C] =
+  def buildMap[C <: Cell[C]](dim: Int, findCell: Pos2D => C): ParMap[Pos2D, C] =
     Pos2D(dim).map(pos => pos -> findCell(pos)).toMap.par
 
   /** Builds the board of the given automaton's cells.
@@ -57,5 +61,5 @@ object Board {
     * @tparam C type of the cell
     * @return the board
     */
-  def apply[C <: AutomatonCell[C]](dim: Int, findCell: Pos2D => C): Board[C] = new Board(dim, buildMap(dim, findCell))
+  def apply[C <: Cell[C]](dim: Int, findCell: Pos2D => C): Board[C] = new Board(dim, buildMap(dim, findCell))
 }

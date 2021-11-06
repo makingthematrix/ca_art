@@ -2,7 +2,7 @@ package caart.visualisation
 
 import caart.Arguments
 import caart.engine.fields.Pos2D
-import caart.engine.{Automaton, AutomatonCell, Board}
+import caart.engine.{Automaton, Cell, Board}
 import caart.visualisation.examples.{ChaseWorld, GameOfLifeWorld, LangtonsAntWorld, LangtonsColorsWorld}
 import com.almasb.fxgl.dsl.FXGL
 import com.typesafe.scalalogging.LazyLogging
@@ -15,14 +15,23 @@ import javafx.scene.paint.Color
 import scala.concurrent.Future
 import scala.util.chaining.scalaUtilChainingOps
 
-abstract class World[C <: AutomatonCell[C]] extends LazyLogging {
+abstract class World[C <: Cell[C]] extends LazyLogging {
   def args: Arguments
   def auto: Automaton[C]
   protected def toColor(c: C): Color
-  protected def updateFromEvent(event: UserEvent): Board[C]
+  protected def processUserEvent(event: UserEvent): Unit
 
   private val onUserEvent: SourceStream[UserEvent] = EventStream[UserEvent]()
-  onUserEvent.foreach(event => updateBoard { updateFromEvent(event) })
+  onUserEvent.foreach { event =>
+    processUserEvent(event)
+    val cell = auto.findCell(event.pos)
+    val color = toColor(cell)
+    Future {
+      val graphics = canvas.getGraphicsContext2D
+      graphics.setFill(color)
+      graphics.fillRect(cell.pos.x * args.scale, cell.pos.y * args.scale, args.scale, args.scale)
+    }(Ui)
+  }
 
   private val drag = Signal(Option.empty[Pos2D])
   drag.onUpdated.collect { case (Some(Some(prev)), _) => UserEvent(prev, UserEventType.LeftClick) }.pipeTo(onUserEvent)
@@ -35,7 +44,7 @@ abstract class World[C <: AutomatonCell[C]] extends LazyLogging {
   private var currentBoard = Option.empty[Board[C]]
   private var currentTurn = 0L
 
-  def updateBoard(newBoard: Board[C]): Unit = {
+  private def updateBoard(newBoard: Board[C]): Unit = {
     val toUpdate = currentBoard.fold(newBoard.cells)(newBoard - _).groupBy(toColor)
     if (toUpdate.nonEmpty) {
       currentBoard = Some(newBoard)

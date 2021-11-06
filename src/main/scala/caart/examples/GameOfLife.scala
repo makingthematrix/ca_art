@@ -1,24 +1,31 @@
 package caart.examples
 
-import caart.engine.GlobalCell.EmptyGlobalCell
-import caart.engine.{Automaton, AutomatonCell, AutomatonCreator, GlobalCell}
+import caart.engine.GlobalCell.Empty
+import caart.engine.{Automaton, Cell, GlobalCell}
 import caart.engine.fields.Pos2D
 
 final case class GameOfLife(override val pos: Pos2D,
-                            override val auto: Automaton[GameOfLife],
+                            override val auto: Cell.AutoContract[GameOfLife],
                             life: Boolean = false)
-  extends AutomatonCell[GameOfLife] {
-  override type GC = EmptyGlobalCell
+  extends Cell[GameOfLife] {
+  import caart.examples.GameOfLife._
+  override type GC = Empty[GameOfLife]
+  override type CE = FlipCell.type
 
-  override def update: Option[GameOfLife] =
+  override def updateFromEvents(events: Iterable[FlipCell.type]): Option[GameOfLife] =
+    if (events.size % 2 == 1) Some(copy(life = !life)) else None
+
+  override def selfUpdate: Option[GameOfLife] =
     auto.moore(pos).values.count(_.life) match {
-      case 3 if !life                    => Some(copy(life = true))
+      case 3 if !life => Some(copy(life = true))
       case n if life && (n < 2 || n > 3) => Some(copy(life = false))
-      case _                             => None
+      case _ => None
     }
 }
 
-object GameOfLife extends AutomatonCreator[GameOfLife] {
-  override def cell(pos: Pos2D, auto: Automaton[GameOfLife]): GameOfLife = GameOfLife(pos, auto)
-  override def globalCell(auto: Automaton[GameOfLife]): EmptyGlobalCell = GlobalCell.Empty
+object GameOfLife extends Automaton.Creator[GameOfLife] {
+  override def cell(pos: Pos2D, auto: Cell.AutoContract[GameOfLife]): GameOfLife = GameOfLife(pos, auto)
+  override def globalCell(auto: GlobalCell.AutoContract[GameOfLife]): Empty[GameOfLife] = GlobalCell.empty
+
+  case object FlipCell extends Cell.Event
 }

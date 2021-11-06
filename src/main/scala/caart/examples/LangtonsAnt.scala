@@ -1,27 +1,32 @@
 package caart.examples
 
-import caart.engine.GlobalCell.EmptyGlobalCell
-import caart.engine.{Automaton, AutomatonCell, AutomatonCreator, GlobalCell}
-import caart.engine.fields.{Dir2D, Pos2D}
+import caart.engine.GlobalCell.Empty
+import caart.engine.{Automaton, Cell, GlobalCell}
+import caart.engine.fields.{Dir2D, Pos2D, Up}
 
 final case class LangtonsAnt(override val pos: Pos2D,
-                             override val auto: Automaton[LangtonsAnt],
+                             override val auto: Cell.AutoContract[LangtonsAnt],
                              color: Boolean = false,
                              dir: Option[Dir2D] = None)
-  extends AutomatonCell[LangtonsAnt] {
-  override type GC = EmptyGlobalCell
+  extends Cell[LangtonsAnt] {
+  import LangtonsAnt._
+  override type GC = Empty[LangtonsAnt]
+  override type CE = CreateAnt.type
 
   /* In case of Langton's Ant in every iteration only a small part of the board is updated
    * ( `2*n / (dim*dim)` where `n` is the number of ants on the board). We can speed it up
-   * by overriding `needsUpdate` with a quick check if the update is needed at all.
+   * by overriding `needsSelfUpdate` with a quick check if the selfUpdate is needed at all.
    */
-  override def needsUpdate: Boolean =
+  override def needsSelfUpdate: Boolean =
     dir.isDefined || auto.neumann(pos).exists(_._2.dir.isDefined)
 
-  override  def update: Option[LangtonsAnt] = (newColor, newDir) match {
+  override  def selfUpdate: Option[LangtonsAnt] = (newColor, newDir) match {
     case (`color`, `dir`) => None
     case (c, d)           => Some(copy(color = c, dir = d))
   }
+
+  override def updateFromEvents(events: Iterable[CreateAnt.type]): Option[LangtonsAnt] =
+    if (events.nonEmpty) Some(copy(dir = Some(Up))) else None
 
   private def newColor = if (dir.isEmpty) color else !color
 
@@ -34,7 +39,9 @@ final case class LangtonsAnt(override val pos: Pos2D,
     }
 }
 
-object LangtonsAnt extends AutomatonCreator[LangtonsAnt] {
-  override def cell(pos: Pos2D, auto: Automaton[LangtonsAnt]): LangtonsAnt = LangtonsAnt(pos, auto)
-  override def globalCell(auto: Automaton[LangtonsAnt]): EmptyGlobalCell = GlobalCell.Empty
+object LangtonsAnt extends Automaton.Creator[LangtonsAnt] {
+  override def cell(pos: Pos2D, auto: Cell.AutoContract[LangtonsAnt]): LangtonsAnt = LangtonsAnt(pos, auto)
+  override def globalCell(auto: GlobalCell.AutoContract[LangtonsAnt]): Empty[LangtonsAnt] = GlobalCell.empty
+
+  case object CreateAnt extends Cell.Event
 }
