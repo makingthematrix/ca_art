@@ -40,6 +40,7 @@ object Cell {
     def addEvent(pos: Pos2D, event: C#CE): Unit
     def addEvent(event: GC#GCE): Unit
 
+    def findCell(pos: Pos2D): C
     def neumann(pos: Pos2D): Map[Dir2D, C]
     def moore(pos: Pos2D): Map[Dir2D, C]
   }

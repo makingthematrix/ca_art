@@ -100,7 +100,7 @@ class Automaton[C <: Cell[C], GC <: GlobalCell[C, GC]](
 
   def cells: Vector[C] = _board.cells
   val positions: Set[Pos2D] = Pos2D(dim).toSet
-  def findCell(pos: Pos2D): C = _board.findCell(pos)
+  override def findCell(pos: Pos2D): C = _board.findCell(pos)
 
   /**
     * The von Neumann's neighborhood is a collection of four cells which are

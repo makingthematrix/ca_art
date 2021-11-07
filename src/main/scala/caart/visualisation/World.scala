@@ -4,7 +4,6 @@ import caart.Arguments
 import caart.engine.GlobalCell.Empty
 import caart.engine.fields.Pos2D
 import caart.engine.{Automaton, AutomatonNoGlobal, Board, Cell, GlobalCell}
-import caart.visualisation.examples.{ChaseWorld, GameOfLifeWorld, LangtonsAntWorld, LangtonsColorsWorld}
 import com.almasb.fxgl.dsl.FXGL
 import com.typesafe.scalalogging.LazyLogging
 import com.wire.signals.ui.UiDispatchQueue.Ui
@@ -16,7 +15,7 @@ import javafx.scene.paint.Color
 import scala.concurrent.Future
 import scala.util.chaining.scalaUtilChainingOps
 
-abstract class World[C <: Cell[C], GC <: GlobalCell[C, GC]] extends LazyLogging {
+abstract class World[C <: Cell[C], GC <: GlobalCell[C, GC]] extends GameContract with LazyLogging {
   def args: Arguments
   def auto: Automaton[C, GC]
   protected def toColor(c: C): Color
@@ -61,7 +60,7 @@ abstract class World[C <: Cell[C], GC <: GlobalCell[C, GC]] extends LazyLogging 
     }
   }
 
-  def next(): Unit = {
+  override def next(): Unit = {
     var t = System.currentTimeMillis
     val newBoard = auto.next()
     logger.debug(s"--- auto next: ${System.currentTimeMillis - t}ms")
@@ -76,7 +75,7 @@ abstract class World[C <: Cell[C], GC <: GlobalCell[C, GC]] extends LazyLogging 
     currentTurn += 1L
   }
 
-  def init(): Unit = {
+  override def init(): Unit = {
     FXGL.addUINode(canvas)
 
     canvas.setOnMouseDragged { (ev: MouseEvent) =>
@@ -104,11 +103,7 @@ abstract class WorldNoGlobal[C <: Cell[C]] extends World[C, Empty[C]] {
   override def auto: AutomatonNoGlobal[C]
 }
 
-object World {
-  def apply(args: Arguments): World[_, _] = args.example match {
-    case Arguments.GameOfLifeExample     => new GameOfLifeWorld(args)
-    case Arguments.LangtonsAntExample    => new LangtonsAntWorld(args)
-    case Arguments.LangtonsColorsExample => new LangtonsColorsWorld(args)
-    case Arguments.ChaseExample          => new ChaseWorld(args)
-  }
+trait GameContract {
+  def next(): Unit
+  def init(): Unit
 }
