@@ -27,6 +27,7 @@ trait Cell[C <: Cell[C]] { self: C =>
 
 trait CellNoGlobal[C <: Cell[C]] extends Cell[C] { self: C =>
   override type GC = Empty[C]
+  override val auto: Cell.AutoContractNoGlobal[C] // no change really, but maybe it will be better readable in IDE hints?...
 }
 
 object Cell {

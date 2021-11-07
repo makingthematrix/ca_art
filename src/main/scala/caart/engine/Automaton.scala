@@ -1,8 +1,6 @@
 package caart.engine
 
 import caart.engine.GlobalCell.Empty
-import caart.engine.GlobalUpdateStrategy.Type
-import caart.engine.UpdateStrategy.Type
 import caart.engine.fields.{Dir2D, Pos2D}
 import com.typesafe.scalalogging.LazyLogging
 
@@ -24,7 +22,7 @@ import scala.util.chaining.scalaUtilChainingOps
   * @constructor Takes the board edge size, a function for creating cells, and a function to create the board.
   */
 class Automaton[C <: Cell[C], GC <: GlobalCell[C, GC]](
-  dim: Int,
+  val dim: Int,
   private val createCell:  (Pos2D, Cell.AutoContract[C, GC]) => C,
   private val createBoard: (Int, Pos2D => C) => Board[C],
   private val createGlobalCell: GlobalCell.AutoContract[C, GC] => GC,
@@ -130,7 +128,7 @@ class Automaton[C <: Cell[C], GC <: GlobalCell[C, GC]](
     mooreMap.getOrElseUpdate(pos, Dir2D.dirs8.map(dir => dir -> pos.move(dir)).toMap)
 }
 
-class AutomatonNoGlobal[C <: Cell[C]](dim: Int,
+class AutomatonNoGlobal[C <: Cell[C]](override val dim: Int,
                                       private val createCell:  (Pos2D, Cell.AutoContractNoGlobal[C]) => C,
                                       private val createBoard: (Int, Pos2D => C) => Board[C],
                                       override val updateStrategy: UpdateStrategy.Type[C])
@@ -140,7 +138,7 @@ class AutomatonNoGlobal[C <: Cell[C]](dim: Int,
     createBoard,
     (_: GlobalCell.AutoContract[C, Empty[C]]) => GlobalCell.empty[C],
     updateStrategy,
-    GlobalUpdateStrategy.noNothing[C, Empty[C]]
+    GlobalUpdateStrategy.noUpdate[C, Empty[C]]
   )
 
 object Automaton {
