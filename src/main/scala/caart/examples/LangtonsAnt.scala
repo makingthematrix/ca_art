@@ -1,13 +1,13 @@
 package caart.examples
 
 import caart.engine.fields.{Dir2D, Pos2D, Up}
-import caart.engine.{Automaton, Cell, CellNoGlobal}
+import caart.engine.{Automaton, Cell}
 
 final case class LangtonsAnt(override val pos: Pos2D,
                              override val auto: Cell.AutoContractNoGlobal[LangtonsAnt],
                              color: Boolean = false,
                              dir: Option[Dir2D] = None)
-  extends CellNoGlobal[LangtonsAnt] {
+  extends Cell.NoGlobal[LangtonsAnt] {
   import LangtonsAnt._
   override type CE = CreateAnt.type
 

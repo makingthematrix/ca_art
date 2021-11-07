@@ -2,15 +2,15 @@ package caart.examples
 
 import caart.engine.{Automaton, Cell, GlobalCell}
 import caart.engine.fields.{Dir2D, Pos2D, Right}
+
 import scala.util.Random
 
 final case class Snake(override val pos: Pos2D,
                        override val auto: Cell.AutoContract[Snake, SnakeGlobal],
                        cellType: Snake.CellType = Snake.Empty)
-  extends Cell[Snake] {
+  extends Cell.NoEvents[Snake] {
   import Snake._
   override type GC = SnakeGlobal
-  override type CE = Cell.Event
 
   override def selfUpdate: Option[Snake] = cellType match {
     case Empty                  => ifEmpty
@@ -62,8 +62,6 @@ final case class Snake(override val pos: Pos2D,
       None
     } else
       Some(copy(cellType = Empty))
-
-  override def updateFromEvents(events: Iterable[Cell.Event]): Option[Snake] = None
 }
 
 final case class SnakeGlobal(headDir: Dir2D = Right,

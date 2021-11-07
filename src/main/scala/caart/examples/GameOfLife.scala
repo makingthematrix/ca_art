@@ -1,12 +1,12 @@
 package caart.examples
 
 import caart.engine.fields.Pos2D
-import caart.engine.{Automaton, Cell, CellNoGlobal}
+import caart.engine.{Automaton, Cell}
 
 final case class GameOfLife(override val pos: Pos2D,
                             override val auto: Cell.AutoContractNoGlobal[GameOfLife],
                             life: Boolean = false)
-  extends CellNoGlobal[GameOfLife] {
+  extends Cell.NoGlobal[GameOfLife] {
   import caart.examples.GameOfLife._
   override type CE = FlipCell.type
 

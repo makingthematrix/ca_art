@@ -1,13 +1,13 @@
 package caart.examples
 
 import caart.engine.fields.{CMYK, Dir2D, Pos2D}
-import caart.engine.{Automaton, Cell, CellNoGlobal}
+import caart.engine.{Automaton, Cell}
 
 final case class LangtonsColors(override val pos: Pos2D,
                                 override val auto: Cell.AutoContractNoGlobal[LangtonsColors],
                                 colors: Set[CMYK] = Set.empty,
                                 dirs: Map[Dir2D, CMYK] = Map.empty)
-  extends CellNoGlobal[LangtonsColors] {
+  extends Cell.NoGlobal[LangtonsColors] {
   import LangtonsColors._
   override type CE = CreateAnt
 
