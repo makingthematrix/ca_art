@@ -24,7 +24,7 @@ object GlobalCell {
     def addEvent(pos: Pos2D, event: C#CE): Unit
   }
 
-  private def noAutoContract[C <: Cell[C], GC <: GlobalCell[C, GC]] = new AutoContract[C, GC] {
+  def noAutoContract[C <: Cell[C], GC <: GlobalCell[C, GC]]: AutoContract[C, GC] = new AutoContract[C, GC] {
     override def board: Board[C] = Board.empty[C]
     override def addEvent(pos: Pos2D, event: C#CE): Unit = ()
 

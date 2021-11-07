@@ -1,17 +1,16 @@
 package caart.visualisation.examples
 
 import caart.Arguments
-import caart.engine.Automaton
-import caart.engine.GlobalCell.Empty
+import caart.engine.AutomatonNoGlobal
 import caart.engine.fields.{CMYK, Dir2D}
 import caart.examples.LangtonsColors
-import caart.visualisation.{UserEvent, World}
+import caart.visualisation.{UserEvent, WorldNoGlobal}
 import javafx.scene.paint.Color
 
 import scala.util.Random
 
-final class LangtonsColorsWorld(override val args: Arguments) extends World[LangtonsColors, Empty[LangtonsColors]] {
-  override val auto: Automaton[LangtonsColors, Empty[LangtonsColors]] = LangtonsColors.automaton(args.dim)
+final class LangtonsColorsWorld(override val args: Arguments) extends WorldNoGlobal[LangtonsColors] {
+  override val auto: AutomatonNoGlobal[LangtonsColors] = LangtonsColors.automatonNoGlobal(args.dim)
 
   override protected def toColor(cell: LangtonsColors): Color = {
     val c = auto.updatedByEvents(cell).getOrElse(cell)

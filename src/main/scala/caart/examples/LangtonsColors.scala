@@ -1,16 +1,14 @@
 package caart.examples
 
-import caart.engine.GlobalCell.Empty
 import caart.engine.fields.{CMYK, Dir2D, Pos2D}
-import caart.engine.{Automaton, Cell, GlobalCell}
+import caart.engine.{Automaton, Cell, CellNoGlobal}
 
 final case class LangtonsColors(override val pos: Pos2D,
-                                override val auto: Cell.AutoContract[LangtonsColors, Empty[LangtonsColors]],
+                                override val auto: Cell.AutoContractNoGlobal[LangtonsColors],
                                 colors: Set[CMYK] = Set.empty,
                                 dirs: Map[Dir2D, CMYK] = Map.empty)
-  extends Cell[LangtonsColors] {
+  extends CellNoGlobal[LangtonsColors] {
   import LangtonsColors._
-  override type GC = Empty[LangtonsColors]
   override type CE = CreateAnt
 
   override def needsSelfUpdate: Boolean =
@@ -40,9 +38,8 @@ final case class LangtonsColors(override val pos: Pos2D,
     }
 }
 
-object LangtonsColors extends Automaton.Creator[LangtonsColors, Empty[LangtonsColors]] {
-  override def cell(pos: Pos2D, auto: Cell.AutoContract[LangtonsColors, Empty[LangtonsColors]]): LangtonsColors = LangtonsColors(pos, auto)
-  override def globalCell(auto: GlobalCell.AutoContract[LangtonsColors, Empty[LangtonsColors]]): Empty[LangtonsColors] = GlobalCell.empty
+object LangtonsColors extends Automaton.CreatorNoGlobal[LangtonsColors] {
+  override def cell(pos: Pos2D, auto: Cell.AutoContractNoGlobal[LangtonsColors]): LangtonsColors = LangtonsColors(pos, auto)
 
   final case class CreateAnt(color: CMYK, dir: Dir2D) extends Cell.Event
 }

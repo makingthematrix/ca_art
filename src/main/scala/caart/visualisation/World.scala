@@ -1,8 +1,9 @@
 package caart.visualisation
 
 import caart.Arguments
+import caart.engine.GlobalCell.Empty
 import caart.engine.fields.Pos2D
-import caart.engine.{Automaton, Board, Cell, GlobalCell}
+import caart.engine.{Automaton, AutomatonNoGlobal, Board, Cell, GlobalCell}
 import caart.visualisation.examples.{ChaseWorld, GameOfLifeWorld, LangtonsAntWorld, LangtonsColorsWorld}
 import com.almasb.fxgl.dsl.FXGL
 import com.typesafe.scalalogging.LazyLogging
@@ -97,6 +98,10 @@ abstract class World[C <: Cell[C], GC <: GlobalCell[C, GC]] extends LazyLogging 
       canvas.getGraphicsContext2D.fillRect(0.0, 0.0, args.windowSize.toDouble, args.windowSize.toDouble)
     }(Ui)
   }
+}
+
+abstract class WorldNoGlobal[C <: Cell[C]] extends World[C, Empty[C]] {
+  override def auto: AutomatonNoGlobal[C]
 }
 
 object World {

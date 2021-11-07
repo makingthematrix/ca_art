@@ -1,16 +1,14 @@
 package caart.examples
 
-import caart.engine.GlobalCell.Empty
-import caart.engine.{Automaton, Cell, GlobalCell}
 import caart.engine.fields.{Dir2D, Pos2D, Up}
+import caart.engine.{Automaton, Cell, CellNoGlobal}
 
 final case class LangtonsAnt(override val pos: Pos2D,
-                             override val auto: Cell.AutoContract[LangtonsAnt, Empty[LangtonsAnt]],
+                             override val auto: Cell.AutoContractNoGlobal[LangtonsAnt],
                              color: Boolean = false,
                              dir: Option[Dir2D] = None)
-  extends Cell[LangtonsAnt] {
+  extends CellNoGlobal[LangtonsAnt] {
   import LangtonsAnt._
-  override type GC = Empty[LangtonsAnt]
   override type CE = CreateAnt.type
 
   /* In case of Langton's Ant in every iteration only a small part of the board is updated
@@ -39,9 +37,8 @@ final case class LangtonsAnt(override val pos: Pos2D,
     }
 }
 
-object LangtonsAnt extends Automaton.Creator[LangtonsAnt, Empty[LangtonsAnt]] {
-  override def cell(pos: Pos2D, auto: Cell.AutoContract[LangtonsAnt, Empty[LangtonsAnt]]): LangtonsAnt = LangtonsAnt(pos, auto)
-  override def globalCell(auto: GlobalCell.AutoContract[LangtonsAnt, Empty[LangtonsAnt]]): Empty[LangtonsAnt] = GlobalCell.empty
+object LangtonsAnt extends Automaton.CreatorNoGlobal[LangtonsAnt] {
+  override def cell(pos: Pos2D, auto: Cell.AutoContractNoGlobal[LangtonsAnt]): LangtonsAnt = LangtonsAnt(pos, auto)
 
   case object CreateAnt extends Cell.Event
 }

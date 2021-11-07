@@ -1,5 +1,8 @@
 package caart.engine
 
+import caart.engine.GlobalCell.Empty
+import caart.engine.GlobalUpdateStrategy.Type
+import caart.engine.UpdateStrategy.Type
 import caart.engine.fields.{Dir2D, Pos2D}
 import com.typesafe.scalalogging.LazyLogging
 
@@ -127,6 +130,19 @@ class Automaton[C <: Cell[C], GC <: GlobalCell[C, GC]](
     mooreMap.getOrElseUpdate(pos, Dir2D.dirs8.map(dir => dir -> pos.move(dir)).toMap)
 }
 
+class AutomatonNoGlobal[C <: Cell[C]](dim: Int,
+                                      private val createCell:  (Pos2D, Cell.AutoContractNoGlobal[C]) => C,
+                                      private val createBoard: (Int, Pos2D => C) => Board[C],
+                                      override val updateStrategy: UpdateStrategy.Type[C])
+  extends Automaton[C, Empty[C]](
+    dim,
+    createCell,
+    createBoard,
+    (_: GlobalCell.AutoContract[C, Empty[C]]) => GlobalCell.empty[C],
+    updateStrategy,
+    GlobalUpdateStrategy.noNothing[C, Empty[C]]
+  )
+
 object Automaton {
   trait Creator[C <: Cell[C], GC <: GlobalCell[C, GC]] {
     def cell(pos: Pos2D, auto: Cell.AutoContract[C, GC]): C
@@ -136,5 +152,12 @@ object Automaton {
                   updateStrategy: UpdateStrategy.Type[C] = UpdateStrategy.eventsOverrideSelf[C],
                   globalUpdateStrategy: GlobalUpdateStrategy.Type[C, GC] = GlobalUpdateStrategy.eventsOverrideSelf[C, GC]): Automaton[C, GC] =
       new Automaton[C, GC](dim, cell, Board.apply, globalCell, updateStrategy, globalUpdateStrategy)
+  }
+
+  trait CreatorNoGlobal[C <: Cell[C]] extends Creator[C, Empty[C]] {
+    override def globalCell(auto: GlobalCell.AutoContract[C, Empty[C]]): Empty[C] = GlobalCell.empty[C]
+
+    def automatonNoGlobal(dim: Int, updateStrategy: UpdateStrategy.Type[C] = UpdateStrategy.eventsOverrideSelf[C]): AutomatonNoGlobal[C] =
+      new AutomatonNoGlobal[C](dim, cell, Board.apply, updateStrategy)
   }
 }

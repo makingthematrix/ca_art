@@ -1,5 +1,6 @@
 package caart.engine
 
+import caart.engine.GlobalCell.Empty
 import caart.engine.fields.{Dir2D, Pos2D}
 
 /** The trait which must be implemented by every Cellular Automaton's cell class.
@@ -24,6 +25,10 @@ trait Cell[C <: Cell[C]] { self: C =>
   @inline final def next(events: Iterable[C#CE]): C = auto.updateStrategy(self, events)
 }
 
+trait CellNoGlobal[C <: Cell[C]] extends Cell[C] { self: C =>
+  override type GC = Empty[C]
+}
+
 object Cell {
   trait Event
 
@@ -37,4 +42,6 @@ object Cell {
     def neumann(pos: Pos2D): Map[Dir2D, C]
     def moore(pos: Pos2D): Map[Dir2D, C]
   }
+
+  type AutoContractNoGlobal[C <: Cell[C]] = AutoContract[C, Empty[C]]
 }
