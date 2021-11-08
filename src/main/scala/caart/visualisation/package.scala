@@ -13,9 +13,13 @@ package object visualisation {
   sealed trait UserEventType
 
   object UserEventType {
-    case object LeftClick extends UserEventType
+    case object LeftClick  extends UserEventType
     case object RightClick extends UserEventType
+    case object MoveUp     extends UserEventType
+    case object MoveDown   extends UserEventType
+    case object MoveLeft   extends UserEventType
+    case object MoveRight  extends UserEventType
   }
 
-  final case class UserEvent(pos: Pos2D, eventType: UserEventType)
+  final case class UserEvent(pos: Option[Pos2D], eventType: UserEventType)
 }

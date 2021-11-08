@@ -10,16 +10,17 @@ import javafx.scene.paint.Color
 
 import scala.util.Random
 
-final class ChaseWorld(override val args: Arguments) extends World[Chase, ChaseGlobal] with LazyLogging {
-  override val auto: Automaton[Chase, ChaseGlobal] = Chase.automaton(args.dim)
+final class ChaseWorld(override protected val args: Arguments) extends World[Chase, ChaseGlobal] with LazyLogging {
+  override protected val auto: Automaton[Chase, ChaseGlobal] = Chase.automaton(args.dim)
 
-  override protected def processUserEvent(event: UserEvent): Unit = event.eventType match {
-    case UserEventType.LeftClick =>
+  override protected def processUserEvent(event: UserEvent): Unit = event match {
+    case UserEvent(Some(pos), UserEventType.LeftClick) =>
       val color = RGB.rainbow(Random.nextInt(RGB.rainbow.size)).toCMYK
-      auto.addEvent(event.pos, Chase.CreateChaser(color))
-    case UserEventType.RightClick =>
-      auto.addEvent(Chase.SetPlayer(event.pos))
-      auto.addEvent(event.pos, Chase.SetPlayerHere)
+      auto.addEvent(pos, Chase.CreateChaser(color))
+    case UserEvent(Some(pos), UserEventType.RightClick) =>
+      auto.addEvent(Chase.SetPlayer(pos))
+      auto.addEvent(pos, Chase.SetPlayerHere)
+    case _ =>
   }
 
   override protected def toColor(cell: Chase): Color = {

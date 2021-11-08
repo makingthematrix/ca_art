@@ -1,7 +1,7 @@
 package caart.examples
 
 import caart.engine.{Automaton, Cell, GlobalCell}
-import caart.engine.fields.{Dir2D, Pos2D, Right}
+import caart.engine.fields.{Dir2D, Pos2D}
 
 import scala.util.Random
 
@@ -64,7 +64,7 @@ final case class Snake(override val pos: Pos2D,
       Some(copy(cellType = Empty))
 }
 
-final case class SnakeGlobal(headDir: Dir2D = Right,
+final case class SnakeGlobal(headDir: Dir2D = Dir2D.Right,
                              snakeSize: Int = 3,
                              treatFound: Boolean = false,
                              gameOver: Boolean = false,

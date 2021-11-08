@@ -34,71 +34,72 @@ class Dir2D(val x: Double, val y: Double) {
   override def toString: String = s"Dir2D(${x.round(3)}, ${y.round(3)})"
 }
 
-case object Up    extends Dir2D(0.0, -1.0) {
-  override lazy val turnRight: Dir2D   = Right
-  override lazy val turnLeft : Dir2D   = Left
-  override lazy val turnAround : Dir2D = Down
-
-  override def toString: String = "Up"
-}
-
-case object Right extends Dir2D(1.0, 0.0) {
-  override lazy val turnRight: Dir2D   = Down
-  override lazy val turnLeft : Dir2D   = Up
-  override lazy val turnAround : Dir2D = Left
-
-  override def toString: String = "Right"
-}
-
-case object Down  extends Dir2D(0.0, 1.0) {
-  override lazy val turnRight: Dir2D   = Left
-  override lazy val turnLeft : Dir2D   = Right
-  override lazy val turnAround : Dir2D = Up
-
-  override def toString: String = "Down"
-}
-
-case object Left  extends Dir2D(-1.0, 0.0) {
-  override lazy val turnRight: Dir2D   = Up
-  override lazy val turnLeft : Dir2D   = Down
-  override lazy val turnAround : Dir2D = Right
-
-  override def toString: String = "Left"
-}
-
-case object UpLeft extends Dir2D(-1.0, -1.0) {
-  override lazy val turnRight: Dir2D   = UpRight
-  override lazy val turnLeft : Dir2D   = DownLeft
-  override lazy val turnAround : Dir2D = DownRight
-
-  override def toString: String = "UpLeft"
-}
-
-case object UpRight extends Dir2D(1.0, -1.0) {
-  override lazy val turnRight: Dir2D   = DownRight
-  override lazy val turnLeft : Dir2D   = UpLeft
-  override lazy val turnAround : Dir2D = DownLeft
-
-  override def toString: String = "UpRight"
-}
-
-case object DownRight extends Dir2D(1.0, 1.0) {
-  override lazy val turnRight: Dir2D = DownLeft
-  override lazy val turnLeft : Dir2D = UpRight
-  override lazy val turnAround : Dir2D = UpLeft
-
-  override def toString: String = "DownRight"
-}
-
-case object DownLeft extends Dir2D(-1.0, 1.0) {
-  override lazy val turnRight: Dir2D = UpLeft
-  override lazy val turnLeft : Dir2D = DownRight
-  override lazy val turnAround : Dir2D = UpRight
-
-  override def toString: String = "DownLeft"
-}
-
 object Dir2D {
+
+  case object Up    extends Dir2D(0.0, -1.0) {
+    override lazy val turnRight: Dir2D   = Right
+    override lazy val turnLeft : Dir2D   = Left
+    override lazy val turnAround : Dir2D = Down
+
+    override def toString: String = "Up"
+  }
+
+  case object Right extends Dir2D(1.0, 0.0) {
+    override lazy val turnRight: Dir2D   = Down
+    override lazy val turnLeft : Dir2D   = Up
+    override lazy val turnAround : Dir2D = Left
+
+    override def toString: String = "Right"
+  }
+
+  case object Down  extends Dir2D(0.0, 1.0) {
+    override lazy val turnRight: Dir2D   = Left
+    override lazy val turnLeft : Dir2D   = Right
+    override lazy val turnAround : Dir2D = Up
+
+    override def toString: String = "Down"
+  }
+
+  case object Left  extends Dir2D(-1.0, 0.0) {
+    override lazy val turnRight: Dir2D   = Up
+    override lazy val turnLeft : Dir2D   = Down
+    override lazy val turnAround : Dir2D = Right
+
+    override def toString: String = "Left"
+  }
+
+  case object UpLeft extends Dir2D(-1.0, -1.0) {
+    override lazy val turnRight: Dir2D   = UpRight
+    override lazy val turnLeft : Dir2D   = DownLeft
+    override lazy val turnAround : Dir2D = DownRight
+
+    override def toString: String = "UpLeft"
+  }
+
+  case object UpRight extends Dir2D(1.0, -1.0) {
+    override lazy val turnRight: Dir2D   = DownRight
+    override lazy val turnLeft : Dir2D   = UpLeft
+    override lazy val turnAround : Dir2D = DownLeft
+
+    override def toString: String = "UpRight"
+  }
+
+  case object DownRight extends Dir2D(1.0, 1.0) {
+    override lazy val turnRight: Dir2D = DownLeft
+    override lazy val turnLeft : Dir2D = UpRight
+    override lazy val turnAround : Dir2D = UpLeft
+
+    override def toString: String = "DownRight"
+  }
+
+  case object DownLeft extends Dir2D(-1.0, 1.0) {
+    override lazy val turnRight: Dir2D = UpLeft
+    override lazy val turnLeft : Dir2D = DownRight
+    override lazy val turnAround : Dir2D = UpRight
+
+    override def toString: String = "DownLeft"
+  }
+
   val dirs4: Array[Dir2D] = Array(Up, Right, Down, Left)
   val dirs8: Array[Dir2D] = Array(Up, UpRight, Right, DownRight, Down, DownLeft, Left, UpLeft)
 

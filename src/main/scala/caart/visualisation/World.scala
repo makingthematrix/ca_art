@@ -16,25 +16,26 @@ import scala.concurrent.Future
 import scala.util.chaining.scalaUtilChainingOps
 
 abstract class World[C <: Cell[C], GC <: GlobalCell[C, GC]] extends GameContract with LazyLogging {
-  def args: Arguments
-  def auto: Automaton[C, GC]
+  protected val args: Arguments
+  protected val auto: Automaton[C, GC]
   protected def toColor(c: C): Color
   protected def processUserEvent(event: UserEvent): Unit
 
   private val onUserEvent: SourceStream[UserEvent] = EventStream[UserEvent]()
   onUserEvent.foreach { event =>
     processUserEvent(event)
-    val cell = auto.findCell(event.pos)
-    val color = toColor(cell)
-    Future {
-      val graphics = canvas.getGraphicsContext2D
-      graphics.setFill(color)
-      graphics.fillRect(cell.pos.x * args.scale, cell.pos.y * args.scale, args.scale, args.scale)
-    }(Ui)
+    event.pos.map(auto.findCell).foreach { cell =>
+      val color = toColor(cell)
+      Future {
+        val graphics = canvas.getGraphicsContext2D
+        graphics.setFill(color)
+        graphics.fillRect(cell.pos.x * args.scale, cell.pos.y * args.scale, args.scale, args.scale)
+      }(Ui)
+    }
   }
 
   private val drag = Signal(Option.empty[Pos2D])
-  drag.onUpdated.collect { case (Some(Some(prev)), _) => UserEvent(prev, UserEventType.LeftClick) }.pipeTo(onUserEvent)
+  drag.onUpdated.collect { case (Some(prev), _) => UserEvent(prev, UserEventType.LeftClick) }.pipeTo(onUserEvent)
 
   private val canvas = new Canvas().tap { canvas =>
     canvas.setWidth(args.windowSize.toDouble)
@@ -86,8 +87,8 @@ abstract class World[C <: Cell[C], GC <: GlobalCell[C, GC]] extends GameContract
     canvas.setOnMousePressed { (ev: MouseEvent) =>
       ev.setDragDetect(true)
       val p = Pos2D(ev.getSceneX.toInt / args.scale, ev.getSceneY.toInt / args.scale)
-      if (ev.getButton == MouseButton.PRIMARY) onUserEvent ! UserEvent(p, UserEventType.LeftClick)
-      else if (ev.getButton == MouseButton.SECONDARY) onUserEvent ! UserEvent(p, UserEventType.RightClick)
+      if (ev.getButton == MouseButton.PRIMARY) onUserEvent ! UserEvent(Some(p), UserEventType.LeftClick)
+      else if (ev.getButton == MouseButton.SECONDARY) onUserEvent ! UserEvent(Some(p), UserEventType.RightClick)
     }
 
     canvas.setOnMouseReleased { (_: MouseEvent) => drag ! None }
@@ -100,7 +101,7 @@ abstract class World[C <: Cell[C], GC <: GlobalCell[C, GC]] extends GameContract
 }
 
 abstract class WorldNoGlobal[C <: Cell[C]] extends World[C, Empty[C]] {
-  override def auto: AutomatonNoGlobal[C]
+  override protected val auto: AutomatonNoGlobal[C]
 }
 
 trait GameContract {

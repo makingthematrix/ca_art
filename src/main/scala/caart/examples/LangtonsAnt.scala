@@ -1,6 +1,6 @@
 package caart.examples
 
-import caart.engine.fields.{Dir2D, Pos2D, Up}
+import caart.engine.fields.{Dir2D, Pos2D}
 import caart.engine.{Automaton, Cell}
 
 final case class LangtonsAnt(override val pos: Pos2D,
@@ -24,7 +24,7 @@ final case class LangtonsAnt(override val pos: Pos2D,
   }
 
   override def updateFromEvents(events: Iterable[CreateAnt.type]): Option[LangtonsAnt] =
-    if (events.nonEmpty) Some(copy(dir = Some(Up))) else None
+    if (events.nonEmpty) Some(copy(dir = Some(Dir2D.Up))) else None
 
   private def newColor = if (dir.isEmpty) color else !color
 
