@@ -7,8 +7,7 @@ import scala.util.Random
 
 final case class Snake(override val pos: Pos2D,
                        override val auto: Cell.AutoContract[Snake, SnakeGlobal],
-                       cellType: Snake.CellType = Snake.Empty)
-  extends Cell.NoEvents[Snake] {
+                       cellType: Snake.CellType = Snake.Empty) extends Cell.NoEvents[Snake] {
   import Snake._
   override type GC = SnakeGlobal
 
@@ -20,57 +19,54 @@ final case class Snake(override val pos: Pos2D,
     case Tail(_)                => ifTail
   }
 
+  @inline private def headDir = auto.globalCell.headDir
+  @inline private def treatFound = auto.globalCell.treatFound
+  @inline private def treatProbability = auto.globalCell.treatProbability
+
   private def ifEmpty =
-    auto.findCell(pos.move(auto.globalCell.headDir.turnAround)) match {
-      case Snake(_, _, Head(_)) =>
-        Some(copy(cellType = Head(auto.globalCell.headDir)))
-      case _ if Random.nextDouble() < auto.globalCell.treatProbability =>
-        Some(copy(cellType = Treat))
-      case _ =>
-        None
+    auto.findCell(pos.move(headDir.turnAround)) match {
+      case Snake(_, _, Head(_))                        => Some(copy(cellType = Head(headDir)))
+      case _ if Random.nextDouble() < treatProbability => Some(copy(cellType = Treat))
+      case _ => None
     }
 
   private def ifTreat =
-    auto.findCell(pos.move(auto.globalCell.headDir.turnAround)) match {
+    auto.findCell(pos.move(headDir.turnAround)) match {
       case Snake(_, _, Head(_)) =>
         auto.addEvent(TreatFound)
-        Some(copy(cellType = Head(auto.globalCell.headDir)))
+        Some(copy(cellType = Head(headDir)))
       case _ =>
         None
     }
 
-  private def ifHead(headDir: Dir2D) = {
-    auto.findCell(pos.move(auto.globalCell.headDir)) match {
-      case Snake(_, _, Body(_, _)) =>
-        auto.addEvent(GameOver)
-      case Snake(_, _, Tail(_)) if auto.globalCell.treatFound =>
-        auto.addEvent(GameOver)
+  private def ifHead(dir: Dir2D) = {
+    auto.findCell(pos.move(headDir)) match {
+      case Snake(_, _, Body(_, _))            => auto.addEvent(GameOver)
+      case Snake(_, _, Tail(_)) if treatFound => auto.addEvent(GameOver)
       case _ =>
     }
-    Some(copy(cellType = Body(auto.globalCell.headDir, headDir.turnAround)))
+    Some(copy(cellType = Body(headDir, dir.turnAround)))
   }
 
-  private def ifBody(headDir: Dir2D, tailDir: Dir2D) =
+  private def ifBody(dir: Dir2D, tailDir: Dir2D) =
     auto.findCell(pos.move(tailDir)) match {
-      case Snake(_, _, Tail(_)) if !auto.globalCell.treatFound => Some(copy(cellType = Tail(headDir)))
+      case Snake(_, _, Tail(_)) if !treatFound => Some(copy(cellType = Tail(dir)))
       case _ => None
     }
 
   private def ifTail =
-    if (auto.globalCell.treatFound) {
+    if (treatFound) {
       auto.addEvent(TreatEaten)
       None
     } else
       Some(copy(cellType = Empty))
 }
 
-final case class SnakeGlobal(headDir: Dir2D = Dir2D.Right,
-                             snakeSize: Int = 3,
-                             treatFound: Boolean = false,
-                             gameOver: Boolean = false,
-                             treatProbability: Double = 0.00001
-                            )
-  extends GlobalCell.NoSelfUpdate[Snake, SnakeGlobal] {
+final case class SnakeGlobal(headDir:          Dir2D   = Dir2D.Right,
+                             snakeSize:        Int     = 3,
+                             treatFound:       Boolean = false,
+                             gameOver:         Boolean = false,
+                             treatProbability: Double  = 0.00001) extends GlobalCell.NoSelfUpdate[Snake, SnakeGlobal] {
   import Snake._
   override type GCE = GlobalEvent
   override def updateFromEvents(events: Iterable[GlobalEvent]): Option[SnakeGlobal] = Some {
@@ -89,16 +85,16 @@ object Snake extends Automaton.Creator[Snake, SnakeGlobal] {
   override def globalCell(auto: GlobalCell.AutoContract[Snake, SnakeGlobal]): SnakeGlobal = SnakeGlobal()
 
   sealed trait CellType
-  case object Empty extends CellType
-  case object Treat extends CellType
-  final case class Head(dir2D: Dir2D) extends CellType
+  case object Empty                                     extends CellType
+  case object Treat                                     extends CellType
+  final case class Head(dir2D: Dir2D)                   extends CellType
   final case class Body(headDir: Dir2D, tailDir: Dir2D) extends CellType
-  final case class Tail(dir2D: Dir2D) extends CellType
+  final case class Tail(dir2D: Dir2D)                   extends CellType
 
   sealed trait GlobalEvent extends GlobalCell.Event
-  case object TurnLeft extends GlobalEvent
-  case object TurnRight extends GlobalEvent
-  case object TreatEaten extends GlobalEvent
-  case object TreatFound extends GlobalEvent
-  case object GameOver extends GlobalEvent
+  case object TurnLeft     extends GlobalEvent
+  case object TurnRight    extends GlobalEvent
+  case object TreatEaten   extends GlobalEvent
+  case object TreatFound   extends GlobalEvent
+  case object GameOver     extends GlobalEvent
 }
