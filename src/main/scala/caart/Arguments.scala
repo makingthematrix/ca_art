@@ -19,8 +19,9 @@ object Arguments {
   case object LangtonsAntExample    extends Example { override val str: String = "2" }
   case object LangtonsColorsExample extends Example { override val str: String = "3" }
   case object ChaseExample          extends Example { override val str: String = "4" }
+  case object SnakeExample          extends Example { override val str: String = "5" }
 
-  val examples = Seq(GameOfLifeExample, LangtonsAntExample, LangtonsColorsExample, ChaseExample)
+  val examples = Seq(GameOfLifeExample, LangtonsAntExample, LangtonsColorsExample, ChaseExample, SnakeExample)
 
   def parseArguments(args: Seq[String]): Arguments = args.flatMap(_.split('=')).sliding(2, 2).foldLeft(Arguments()){
     case (acc, Seq("dim", value))         => acc.copy(dim   = Integer.parseInt(value))

@@ -2,7 +2,7 @@ package caart.visualisation
 
 import caart.Arguments
 import caart.visualisation.Game.buildWorld
-import caart.visualisation.examples.{ChaseWorld, GameOfLifeWorld, LangtonsAntWorld, LangtonsColorsWorld}
+import caart.visualisation.examples.{ChaseWorld, GameOfLifeWorld, LangtonsAntWorld, LangtonsColorsWorld, SnakeWorld}
 import com.almasb.fxgl.app.{ApplicationMode, GameApplication, GameSettings}
 import com.almasb.fxgl.dsl.FXGL
 import com.typesafe.scalalogging.LazyLogging
@@ -60,5 +60,6 @@ object Game {
     case Arguments.LangtonsAntExample    => new LangtonsAntWorld(args)
     case Arguments.LangtonsColorsExample => new LangtonsColorsWorld(args)
     case Arguments.ChaseExample          => new ChaseWorld(args)
+    case Arguments.SnakeExample          => new SnakeWorld(args)
   }
 }

@@ -1,13 +1,20 @@
 package caart.visualisation.examples
 
-import caart.engine.{Automaton, GlobalUpdateStrategy, UpdateStrategy}
 import caart.Arguments
-import caart.engine.fields.Dir2D
+import caart.engine.fields.{Dir2D, Pos2D}
+import caart.engine.{Automaton, GlobalUpdateStrategy, UpdateStrategy}
+import caart.examples.Snake.{Body, Head, Tail}
 import caart.examples.{Snake, SnakeGlobal}
-import caart.visualisation.{UserEvent, World, UserEventType}
+import caart.visualisation.{UserEvent, World}
+import com.almasb.fxgl.dsl.FXGL
+import com.typesafe.scalalogging.LazyLogging
+import javafx.scene.input.KeyCode
 import javafx.scene.paint.Color
 
-final class SnakeWorld(override protected val args: Arguments) extends World[Snake, SnakeGlobal] {
+final class SnakeWorld(override protected val args: Arguments) extends World[Snake, SnakeGlobal] with LazyLogging {
+  import Snake.{TurnLeft, TurnRight}
+  import UserEvent.{MoveUp, MoveDown, MoveLeft, MoveRight}
+
   override protected val auto: Automaton[Snake, SnakeGlobal] =
     Snake.automaton(
       dim = args.dim,
@@ -24,20 +31,31 @@ final class SnakeWorld(override protected val args: Arguments) extends World[Sna
   }
 
   override protected def processUserEvent(event: UserEvent): Unit = {
-    import Snake.{TurnLeft, TurnRight}
-    import UserEventType.{MoveDown, MoveUp, MoveLeft, MoveRight}
     val headDir = auto.globalCell.headDir
     val turn: Option[Snake.GlobalEvent] = event match {
-      case UserEvent(_, MoveUp)    if headDir == Dir2D.Right => Some(TurnLeft)
-      case UserEvent(_, MoveUp)    if headDir == Dir2D.Left  => Some(TurnRight)
-      case UserEvent(_, MoveDown)  if headDir == Dir2D.Right => Some(TurnRight)
-      case UserEvent(_, MoveDown)  if headDir == Dir2D.Left  => Some(TurnLeft)
-      case UserEvent(_, MoveLeft)  if headDir == Dir2D.Up    => Some(TurnLeft)
-      case UserEvent(_, MoveLeft)  if headDir == Dir2D.Down  => Some(TurnRight)
-      case UserEvent(_, MoveRight) if headDir == Dir2D.Up    => Some(TurnRight)
-      case UserEvent(_, MoveRight) if headDir == Dir2D.Down  => Some(TurnLeft)
+      case MoveUp    if headDir == Dir2D.Right => Some(TurnLeft)
+      case MoveUp    if headDir == Dir2D.Left  => Some(TurnRight)
+      case MoveDown  if headDir == Dir2D.Right => Some(TurnRight)
+      case MoveDown  if headDir == Dir2D.Left  => Some(TurnLeft)
+      case MoveLeft  if headDir == Dir2D.Up    => Some(TurnLeft)
+      case MoveLeft  if headDir == Dir2D.Down  => Some(TurnRight)
+      case MoveRight if headDir == Dir2D.Up    => Some(TurnRight)
+      case MoveRight if headDir == Dir2D.Down  => Some(TurnLeft)
       case _ => None
     }
     turn.foreach(auto.addEvent)
+  }
+
+  override def init(): Unit = {
+    super.init()
+    val center = Pos2D(args.dim / 2, args.dim / 2)
+    auto.updateCell(center) { _.copy(cellType = Body(Dir2D.Right, Dir2D.Left)) }
+    auto.updateCell(center.move(Dir2D.Left)) { _.copy(cellType = Tail(Dir2D.Right)) }
+    auto.updateCell(center.move(Dir2D.Right)) { _.copy(cellType = Head(Dir2D.Right)) }
+
+    FXGL.onKeyUp(KeyCode.UP,    () => onUserEvent ! MoveUp)
+    FXGL.onKeyUp(KeyCode.DOWN,  () => onUserEvent ! MoveDown)
+    FXGL.onKeyUp(KeyCode.LEFT,  () => onUserEvent ! MoveLeft)
+    FXGL.onKeyUp(KeyCode.RIGHT, () => onUserEvent ! MoveRight)
   }
 }

@@ -21,7 +21,7 @@ abstract class World[C <: Cell[C], GC <: GlobalCell[C, GC]] extends GameContract
   protected def toColor(c: C): Color
   protected def processUserEvent(event: UserEvent): Unit
 
-  private val onUserEvent: SourceStream[UserEvent] = EventStream[UserEvent]()
+  protected val onUserEvent: SourceStream[UserEvent] = EventStream[UserEvent]()
   onUserEvent.foreach { event =>
     processUserEvent(event)
     event.pos.map(auto.findCell).foreach { cell =>
@@ -37,7 +37,7 @@ abstract class World[C <: Cell[C], GC <: GlobalCell[C, GC]] extends GameContract
   private val drag = Signal(Option.empty[Pos2D])
   drag.onUpdated.collect { case (Some(prev), _) => UserEvent(prev, UserEventType.LeftClick) }.pipeTo(onUserEvent)
 
-  private val canvas = new Canvas().tap { canvas =>
+  protected val canvas: Canvas = new Canvas().tap { canvas =>
     canvas.setWidth(args.windowSize.toDouble)
     canvas.setHeight(args.windowSize.toDouble)
   }

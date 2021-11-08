@@ -22,4 +22,10 @@ package object visualisation {
   }
 
   final case class UserEvent(pos: Option[Pos2D], eventType: UserEventType)
+  object UserEvent {
+    val MoveUp    = UserEvent(None, UserEventType.MoveUp)
+    val MoveDown  = UserEvent(None, UserEventType.MoveDown)
+    val MoveLeft  = UserEvent(None, UserEventType.MoveLeft)
+    val MoveRight = UserEvent(None, UserEventType.MoveRight)
+  }
 }
