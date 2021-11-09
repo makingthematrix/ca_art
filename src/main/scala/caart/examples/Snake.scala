@@ -63,17 +63,17 @@ final case class Snake(override val pos: Pos2D,
 }
 
 final case class SnakeGlobal(headDir:          Dir2D   = Dir2D.Right,
-                             snakeSize:        Int     = 3,
+                             score:            Int     = 0,
                              treatFound:       Boolean = false,
                              gameOver:         Boolean = false,
-                             treatProbability: Double  = 0.00001) extends GlobalCell.NoSelfUpdate[Snake, SnakeGlobal] {
+                             treatProbability: Double  = 0.00005) extends GlobalCell.NoSelfUpdate[Snake, SnakeGlobal] {
   import Snake._
   override type GCE = GlobalEvent
   override def updateFromEvents(events: Iterable[GlobalEvent]): Option[SnakeGlobal] = Some {
     events.foldLeft(this) {
       case (cell, GameOver)   => cell.copy(gameOver = true)
       case (cell, TreatFound) => cell.copy(treatFound = true)
-      case (cell, TreatEaten) => cell.copy(snakeSize = snakeSize + 1, treatFound = false)
+      case (cell, TreatEaten) => cell.copy(score = score + 1, treatFound = false)
       case (cell, TurnLeft)   => cell.copy(headDir = headDir.turnLeft)
       case (cell, TurnRight)  => cell.copy(headDir = headDir.turnRight)
     }

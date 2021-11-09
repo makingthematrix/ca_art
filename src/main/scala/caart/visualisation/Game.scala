@@ -19,22 +19,27 @@ final class Game(args: Arguments) extends GameApplication with LazyLogging {
   private val gameState = Signal[GameState](GameState.Pause)
   gameState.foreach {
     case GameState.Play => run()
+    case GameState.End => endGame()
     case _ =>
   }
 
   private def run(): Unit =
     while(gameState.currentValue.contains(GameState.Play)) {
       val t = System.currentTimeMillis
-      world.next()
-      logger.debug(s"the turn took ${System.currentTimeMillis - t}ms")
+      if (!world.next()) gameState ! GameState.End
+      //logger.debug(s"the turn took ${System.currentTimeMillis - t}ms")
       if (args.delay > 0L) Thread.sleep(args.delay)
     }
+
+  private def endGame(): Unit = {
+    Platform.runLater(() => Platform.exit())
+  }
 
   override def initSettings(gameSettings: GameSettings): Unit = {
     gameSettings.setWidth(args.windowSize)
     gameSettings.setHeight(args.windowSize)
     gameSettings.set3D(false)
-    gameSettings.setApplicationMode(ApplicationMode.DEVELOPER)
+    gameSettings.setApplicationMode(ApplicationMode.RELEASE)
     gameSettings.setGameMenuEnabled(true)
     gameSettings.setPixelsPerMeter(args.scale)
     gameSettings.setScaleAffectedOnResize(true)
@@ -50,6 +55,7 @@ final class Game(args: Arguments) extends GameApplication with LazyLogging {
     FXGL.onKeyUp(KeyCode.SPACE, () => gameState.mutate {
       case GameState.Pause => GameState.Play
       case GameState.Play  => GameState.Pause
+      case other => other
     })
   }
 }

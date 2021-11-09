@@ -3,7 +3,7 @@ package caart.visualisation.examples
 import caart.Arguments
 import caart.engine.fields.{Dir2D, Pos2D}
 import caart.engine.{Automaton, GlobalUpdateStrategy, UpdateStrategy}
-import caart.examples.Snake.{Body, Head, Tail}
+import caart.examples.Snake.{Body, Head, Tail, globalCell}
 import caart.examples.{Snake, SnakeGlobal}
 import caart.visualisation.{UserEvent, World}
 import com.almasb.fxgl.dsl.FXGL
@@ -58,4 +58,11 @@ final class SnakeWorld(override protected val args: Arguments) extends World[Sna
     FXGL.onKeyUp(KeyCode.LEFT,  () => onUserEvent ! MoveLeft)
     FXGL.onKeyUp(KeyCode.RIGHT, () => onUserEvent ! MoveRight)
   }
+
+  override def next(): Boolean =
+    if (auto.globalCell.gameOver) {
+      logger.info(s"Game over! Your score: ${auto.globalCell.score}")
+      false
+    } else
+      super.next()
 }

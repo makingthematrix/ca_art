@@ -61,19 +61,19 @@ abstract class World[C <: Cell[C], GC <: GlobalCell[C, GC]] extends GameContract
     }
   }
 
-  override def next(): Unit = {
+  override def next(): Boolean = {
     var t = System.currentTimeMillis
     val newBoard = auto.next()
-    logger.debug(s"--- auto next: ${System.currentTimeMillis - t}ms")
+    //logger.debug(s"--- auto next: ${System.currentTimeMillis - t}ms")
     if (currentTurn % args.step == 0) {
       updateBoard(newBoard)
       if (args.enforceGC) {
         t = System.currentTimeMillis
         System.gc()
-        logger.debug(s"--- garbage collection: ${System.currentTimeMillis - t}ms")
       }
     }
     currentTurn += 1L
+    true
   }
 
   override def init(): Unit = {
@@ -105,6 +105,6 @@ abstract class WorldNoGlobal[C <: Cell[C]] extends World[C, Empty[C]] {
 }
 
 trait GameContract {
-  def next(): Unit
+  def next(): Boolean
   def init(): Unit
 }
