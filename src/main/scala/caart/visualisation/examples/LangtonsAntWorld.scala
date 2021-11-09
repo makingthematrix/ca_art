@@ -19,5 +19,5 @@ final class LangtonsAntWorld(override protected val args: Arguments) extends Wor
   }
 
   override protected def processUserEvent(event: UserEvent): Unit =
-    event.pos.foreach(auto.addEvent(_, LangtonsAnt.CreateAnt))
+    event.pos.foreach(auto.eventHub ! (_, LangtonsAnt.CreateAnt))
 }

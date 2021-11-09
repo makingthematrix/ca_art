@@ -33,7 +33,7 @@ final case class Snake(override val pos: Pos2D,
   private def ifTreat =
     auto.findCell(pos.move(headDir.turnAround)) match {
       case Snake(_, _, Head(_)) =>
-        auto.addEvent(TreatFound)
+        auto.eventHub ! TreatFound
         Some(copy(cellType = Head(headDir)))
       case _ =>
         None
@@ -41,8 +41,8 @@ final case class Snake(override val pos: Pos2D,
 
   private def ifHead(dir: Dir2D) = {
     auto.findCell(pos.move(headDir)) match {
-      case Snake(_, _, Body(_, _))            => auto.addEvent(GameOver)
-      case Snake(_, _, Tail(_)) if treatFound => auto.addEvent(GameOver)
+      case Snake(_, _, Body(_, _))            => auto.eventHub ! GameOver
+      case Snake(_, _, Tail(_)) if treatFound => auto.eventHub ! GameOver
       case _ =>
     }
     Some(copy(cellType = Body(headDir, dir.turnAround)))
@@ -56,7 +56,7 @@ final case class Snake(override val pos: Pos2D,
 
   private def ifTail =
     if (treatFound) {
-      auto.addEvent(TreatEaten)
+      auto.eventHub ! TreatEaten
       None
     } else
       Some(copy(cellType = Empty))

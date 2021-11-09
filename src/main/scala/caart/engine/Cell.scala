@@ -31,10 +31,9 @@ object Cell {
 
   trait AutoContract[C <: Cell[C], GC <: GlobalCell[C, GC]] {
     val updateStrategy: UpdateStrategy.Type[C]
+    val eventHub: EventHub.AddEvents[C, GC]
 
     def globalCell: GC
-    def addEvent(pos: Pos2D, event: C#CE): Unit
-    def addEvent(event: GC#GCE): Unit
 
     def findCell(pos: Pos2D): C
     def neumann(pos: Pos2D): Map[Dir2D, C]

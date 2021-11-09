@@ -17,5 +17,5 @@ final class GameOfLifeWorld(override protected val args: Arguments) extends Worl
     }
 
   override protected def processUserEvent(event: UserEvent): Unit =
-    event.pos.foreach(auto.addEvent(_, GameOfLife.FlipCell))
+    event.pos.foreach(auto.eventHub ! (_, GameOfLife.FlipCell))
 }

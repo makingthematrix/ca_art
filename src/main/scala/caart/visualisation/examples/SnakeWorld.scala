@@ -43,7 +43,7 @@ final class SnakeWorld(override protected val args: Arguments) extends World[Sna
       case MoveRight if headDir == Dir2D.Down  => Some(TurnLeft)
       case _ => None
     }
-    turn.foreach(auto.addEvent)
+    turn.foreach(auto.eventHub ! _)
   }
 
   override def init(): Unit = {

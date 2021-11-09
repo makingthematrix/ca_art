@@ -16,10 +16,10 @@ final class ChaseWorld(override protected val args: Arguments) extends World[Cha
   override protected def processUserEvent(event: UserEvent): Unit = event match {
     case UserEvent(Some(pos), UserEventType.LeftClick) =>
       val color = RGB.rainbow(Random.nextInt(RGB.rainbow.size)).toCMYK
-      auto.addEvent(pos, Chase.CreateChaser(color))
+      auto.eventHub ! (pos, Chase.CreateChaser(color))
     case UserEvent(Some(pos), UserEventType.RightClick) =>
-      auto.addEvent(Chase.SetPlayer(pos))
-      auto.addEvent(pos, Chase.SetPlayerHere)
+      auto.eventHub ! Chase.SetPlayer(pos)
+      auto.eventHub ! (pos, Chase.SetPlayerHere)
     case _ =>
   }
 

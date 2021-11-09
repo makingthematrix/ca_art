@@ -5,7 +5,6 @@ import caart.engine.fields.{Dir2D, Pos2D}
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.collection.mutable
-import scala.util.chaining.scalaUtilChainingOps
 
 /** The main class of a cellular automaton.
   *
@@ -32,40 +31,23 @@ class Automaton[C <: Cell[C], GC <: GlobalCell[C, GC]](
   with Cell.AutoContract[C, GC]
   with GlobalCell.AutoContract[C, GC]
   with LazyLogging { self: Automaton[C, GC] =>
+  override val eventHub: EventHub[C, GC] = new EventHub
 
-  private var _cellEvents = List.empty[(Pos2D, C#CE)]
-  private var _globalEvents = List.empty[GC#GCE]
   private var _board: Board[C] = createBoard(dim, createCell(_, this))
   private var _globalCell: GC = createGlobalCell(this)
 
-  override def addEvent(pos: Pos2D, event: C#CE): Unit =
-    _cellEvents ::= (pos -> event)
-
-  override def addEvent(event: GC#GCE): Unit =
-    _globalEvents ::= event
-
   override final def globalCell: GC = _globalCell
 
-  final def cellEvents: Map[Pos2D, Iterable[C#CE]] =
-    _cellEvents.groupBy(_._1).map { case (pos, events) => (pos, events.map(_._2)) }
-
-  final def globalEvents: List[GC#GCE] = _globalEvents
-
-  final def oneCellEvents(pos: Pos2D): List[C#CE] =
-    _cellEvents.collect { case (p, event) if pos == p => event }
-
   final def updatedByEvents(cell: C): Option[C] = {
-    val events: List[C#CE] = oneCellEvents(cell.pos)
+    val events: List[C#CE] = eventHub.oneCellEvents(cell.pos)
     if (events.nonEmpty) cell.updateFromEvents(events) else None
   }
 
-  final def globalUpdatedByEvents: Option[GC] = globalCell.updateFromEvents(globalEvents)
+  final def globalUpdatedByEvents: Option[GC] = globalCell.updateFromEvents(eventHub.globalEvents)
 
   override def next(): Board[C] = {
-    _globalCell = _globalCell.next(_globalEvents.tap(_ => _globalEvents = Nil))
-    _board = _board.next {
-      if (_cellEvents.nonEmpty) cellEvents.tap(_ => _cellEvents = Nil) else Map.empty
-    }
+    _globalCell = _globalCell.next(eventHub.drainGlobalEvents())
+    _board = _board.next(eventHub.drainCellEvents())
     _board
   }
 
