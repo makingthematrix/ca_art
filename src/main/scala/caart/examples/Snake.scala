@@ -21,13 +21,17 @@ final case class Snake(override val pos: Pos2D,
 
   @inline private def headDir = auto.globalCell.headDir
   @inline private def treatFound = auto.globalCell.treatFound
-  @inline private def treatProbability = auto.globalCell.treatProbability
+  @inline private def showTreat = Random.nextDouble() < auto.globalCell.treatProbability
 
   private def ifEmpty =
     auto.findCell(pos.move(headDir.turnAround)) match {
-      case Snake(_, _, Head(_))                        => Some(copy(cellType = Head(headDir)))
-      case _ if Random.nextDouble() < treatProbability => Some(copy(cellType = Treat))
-      case _ => None
+      case Snake(_, _, Head(_)) =>
+        Some(copy(cellType = Head(headDir)))
+      case _ if showTreat =>
+        auto.eventHub ! NewTreat
+        Some(copy(cellType = Treat))
+      case _ =>
+        None
     }
 
   private def ifTreat =
@@ -66,13 +70,14 @@ final case class SnakeGlobal(headDir:          Dir2D   = Dir2D.Right,
                              score:            Int     = 0,
                              treatFound:       Boolean = false,
                              gameOver:         Boolean = false,
-                             treatProbability: Double  = 0.00005) extends GlobalCell.NoSelfUpdate[Snake, SnakeGlobal] {
+                             treatProbability: Double  = 0.0002) extends GlobalCell.NoSelfUpdate[Snake, SnakeGlobal] {
   import Snake._
   override type GCE = GlobalEvent
   override def updateFromEvents(events: Iterable[GlobalEvent]): Option[SnakeGlobal] = Some {
     events.foldLeft(this) {
       case (cell, GameOver)   => cell.copy(gameOver = true)
-      case (cell, TreatFound) => cell.copy(treatFound = true)
+      case (cell, NewTreat)   => cell.copy(treatProbability = treatProbability / 2.0)
+      case (cell, TreatFound) => cell.copy(treatFound = true, treatProbability = treatProbability * 2.0)
       case (cell, TreatEaten) => cell.copy(score = score + 1, treatFound = false)
       case (cell, TurnLeft)   => cell.copy(headDir = headDir.turnLeft)
       case (cell, TurnRight)  => cell.copy(headDir = headDir.turnRight)
@@ -94,6 +99,7 @@ object Snake extends Automaton.Creator[Snake, SnakeGlobal] {
   sealed trait GlobalEvent extends GlobalCell.Event
   case object TurnLeft     extends GlobalEvent
   case object TurnRight    extends GlobalEvent
+  case object NewTreat     extends GlobalEvent
   case object TreatEaten   extends GlobalEvent
   case object TreatFound   extends GlobalEvent
   case object GameOver     extends GlobalEvent

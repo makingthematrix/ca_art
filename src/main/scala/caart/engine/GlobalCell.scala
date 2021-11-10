@@ -18,6 +18,7 @@ object GlobalCell {
   trait Event
 
   trait AutoContract[C <: Cell[C], GC <: GlobalCell[C, GC]] {
+    val dim: Int
     val globalUpdateStrategy: GlobalUpdateStrategy.Type[C, GC]
     val eventHub: EventHub.AddEvents[C, GC]
 
@@ -25,6 +26,7 @@ object GlobalCell {
   }
 
   def noAutoContract[C <: Cell[C], GC <: GlobalCell[C, GC]]: AutoContract[C, GC] = new AutoContract[C, GC] {
+    override val dim: Int = 0
     override def board: Board[C] = Board.empty[C]
 
     override val globalUpdateStrategy: Type[C, GC] = GlobalUpdateStrategy.onlyEvents[C, GC]

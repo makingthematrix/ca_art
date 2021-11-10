@@ -32,6 +32,7 @@ object Cell {
   trait AutoContract[C <: Cell[C], GC <: GlobalCell[C, GC]] {
     val updateStrategy: UpdateStrategy.Type[C]
     val eventHub: EventHub.AddEvents[C, GC]
+    val dim: Int
 
     def globalCell: GC
 

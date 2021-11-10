@@ -21,7 +21,7 @@ import scala.collection.mutable
   * @constructor Takes the board edge size, a function for creating cells, and a function to create the board.
   */
 class Automaton[C <: Cell[C], GC <: GlobalCell[C, GC]](
-  val dim: Int,
+  override val dim: Int,
   private val createCell:  (Pos2D, Cell.AutoContract[C, GC]) => C,
   private val createBoard: (Int, Pos2D => C) => Board[C],
   private val createGlobalCell: GlobalCell.AutoContract[C, GC] => GC,

@@ -25,7 +25,7 @@ final class Game(args: Arguments) extends GameApplication with LazyLogging {
 
   private def run(): Unit =
     while(gameState.currentValue.contains(GameState.Play)) {
-      val t = System.currentTimeMillis
+      //val t = System.currentTimeMillis
       if (!world.next()) gameState ! GameState.End
       //logger.debug(s"the turn took ${System.currentTimeMillis - t}ms")
       if (args.delay > 0L) Thread.sleep(args.delay)
