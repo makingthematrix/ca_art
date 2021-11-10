@@ -21,9 +21,9 @@ final class LangtonsColorsWorld(override val args: Arguments) extends WorldNoGlo
     }
   }
 
-  override protected def processUserEvent(event: UserEvent): Unit = {
+  override protected def processUserEvent(event: UserEvent): Unit = event.pos.foreach { pos =>
     val dir = Dir2D.dirs4(Random.nextInt(Dir2D.dirs4.length))
     val color = CMYK.colors(Random.nextInt(CMYK.colors.length))
-    auto.addEvent(event.pos, LangtonsColors.CreateAnt(color, dir))
+    auto.eventHub ! (pos, LangtonsColors.CreateAnt(color, dir))
   }
 }

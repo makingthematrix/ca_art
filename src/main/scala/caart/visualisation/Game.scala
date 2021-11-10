@@ -1,6 +1,8 @@
 package caart.visualisation
 
 import caart.Arguments
+import caart.visualisation.Game.buildWorld
+import caart.visualisation.examples.{ChaseWorld, GameOfLifeWorld, LangtonsAntWorld, LangtonsColorsWorld, SnakeWorld}
 import com.almasb.fxgl.app.{ApplicationMode, GameApplication, GameSettings}
 import com.almasb.fxgl.dsl.FXGL
 import com.typesafe.scalalogging.LazyLogging
@@ -12,27 +14,32 @@ import javafx.scene.input.KeyCode
 final class Game(args: Arguments) extends GameApplication with LazyLogging {
   import com.wire.signals.Threading.defaultContext
 
-  private lazy val world = World(args)
+  private lazy val world = buildWorld(args)
 
   private val gameState = Signal[GameState](GameState.Pause)
   gameState.foreach {
     case GameState.Play => run()
+    case GameState.End => endGame()
     case _ =>
   }
 
   private def run(): Unit =
     while(gameState.currentValue.contains(GameState.Play)) {
-      val t = System.currentTimeMillis
-      world.next()
-      logger.debug(s"the turn took ${System.currentTimeMillis - t}ms")
+      //val t = System.currentTimeMillis
+      if (!world.next()) gameState ! GameState.End
+      //logger.debug(s"the turn took ${System.currentTimeMillis - t}ms")
       if (args.delay > 0L) Thread.sleep(args.delay)
     }
+
+  private def endGame(): Unit = {
+    Platform.runLater(() => Platform.exit())
+  }
 
   override def initSettings(gameSettings: GameSettings): Unit = {
     gameSettings.setWidth(args.windowSize)
     gameSettings.setHeight(args.windowSize)
     gameSettings.set3D(false)
-    gameSettings.setApplicationMode(ApplicationMode.DEVELOPER)
+    gameSettings.setApplicationMode(ApplicationMode.RELEASE)
     gameSettings.setGameMenuEnabled(true)
     gameSettings.setPixelsPerMeter(args.scale)
     gameSettings.setScaleAffectedOnResize(true)
@@ -48,7 +55,17 @@ final class Game(args: Arguments) extends GameApplication with LazyLogging {
     FXGL.onKeyUp(KeyCode.SPACE, () => gameState.mutate {
       case GameState.Pause => GameState.Play
       case GameState.Play  => GameState.Pause
+      case other => other
     })
   }
 }
 
+object Game {
+  def buildWorld(args: Arguments): GameContract = args.example match {
+    case Arguments.GameOfLifeExample     => new GameOfLifeWorld(args)
+    case Arguments.LangtonsAntExample    => new LangtonsAntWorld(args)
+    case Arguments.LangtonsColorsExample => new LangtonsColorsWorld(args)
+    case Arguments.ChaseExample          => new ChaseWorld(args)
+    case Arguments.SnakeExample          => new SnakeWorld(args)
+  }
+}

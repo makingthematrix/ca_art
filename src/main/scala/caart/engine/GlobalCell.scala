@@ -18,17 +18,22 @@ object GlobalCell {
   trait Event
 
   trait AutoContract[C <: Cell[C], GC <: GlobalCell[C, GC]] {
+    val dim: Int
     val globalUpdateStrategy: GlobalUpdateStrategy.Type[C, GC]
+    val eventHub: EventHub.AddEvents[C, GC]
 
     def board: Board[C]
-    def addEvent(pos: Pos2D, event: C#CE): Unit
   }
 
   def noAutoContract[C <: Cell[C], GC <: GlobalCell[C, GC]]: AutoContract[C, GC] = new AutoContract[C, GC] {
+    override val dim: Int = 0
     override def board: Board[C] = Board.empty[C]
-    override def addEvent(pos: Pos2D, event: C#CE): Unit = ()
 
     override val globalUpdateStrategy: Type[C, GC] = GlobalUpdateStrategy.onlyEvents[C, GC]
+    override val eventHub: EventHub.AddEvents[C, GC] = new EventHub.AddEvents[C, GC] {
+      override def !(event: (Pos2D, C#CE)): Unit = ()
+      override def !(event: GC#GCE): Unit = ()
+    }
   }
 
   final case class Empty[C <: Cell[C]] private() extends GlobalCell[C, Empty[C]] {

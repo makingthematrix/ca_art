@@ -6,8 +6,8 @@ import caart.examples.LangtonsAnt
 import caart.visualisation.{UserEvent, WorldNoGlobal}
 import javafx.scene.paint.Color
 
-final class LangtonsAntWorld(override val args: Arguments) extends WorldNoGlobal[LangtonsAnt] {
-  override val auto: AutomatonNoGlobal[LangtonsAnt] = LangtonsAnt.automatonNoGlobal(args.dim)
+final class LangtonsAntWorld(override protected val args: Arguments) extends WorldNoGlobal[LangtonsAnt] {
+  override protected val auto: AutomatonNoGlobal[LangtonsAnt] = LangtonsAnt.automatonNoGlobal(args.dim)
 
   override protected def toColor(cell: LangtonsAnt): Color = {
     val c = auto.updatedByEvents(cell).getOrElse(cell)
@@ -19,5 +19,5 @@ final class LangtonsAntWorld(override val args: Arguments) extends WorldNoGlobal
   }
 
   override protected def processUserEvent(event: UserEvent): Unit =
-    auto.addEvent(event.pos, LangtonsAnt.CreateAnt)
+    event.pos.foreach(auto.eventHub ! (_, LangtonsAnt.CreateAnt))
 }

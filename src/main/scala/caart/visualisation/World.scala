@@ -4,7 +4,6 @@ import caart.Arguments
 import caart.engine.GlobalCell.Empty
 import caart.engine.fields.Pos2D
 import caart.engine.{Automaton, AutomatonNoGlobal, Board, Cell, GlobalCell}
-import caart.visualisation.examples.{ChaseWorld, GameOfLifeWorld, LangtonsAntWorld, LangtonsColorsWorld}
 import com.almasb.fxgl.dsl.FXGL
 import com.typesafe.scalalogging.LazyLogging
 import com.wire.signals.ui.UiDispatchQueue.Ui
@@ -16,28 +15,29 @@ import javafx.scene.paint.Color
 import scala.concurrent.Future
 import scala.util.chaining.scalaUtilChainingOps
 
-abstract class World[C <: Cell[C], GC <: GlobalCell[C, GC]] extends LazyLogging {
-  def args: Arguments
-  def auto: Automaton[C, GC]
+abstract class World[C <: Cell[C], GC <: GlobalCell[C, GC]] extends GameContract with LazyLogging {
+  protected val args: Arguments
+  protected val auto: Automaton[C, GC]
   protected def toColor(c: C): Color
   protected def processUserEvent(event: UserEvent): Unit
 
-  private val onUserEvent: SourceStream[UserEvent] = EventStream[UserEvent]()
+  protected val onUserEvent: SourceStream[UserEvent] = EventStream[UserEvent]()
   onUserEvent.foreach { event =>
     processUserEvent(event)
-    val cell = auto.findCell(event.pos)
-    val color = toColor(cell)
-    Future {
-      val graphics = canvas.getGraphicsContext2D
-      graphics.setFill(color)
-      graphics.fillRect(cell.pos.x * args.scale, cell.pos.y * args.scale, args.scale, args.scale)
-    }(Ui)
+    event.pos.map(auto.findCell).foreach { cell =>
+      val color = toColor(cell)
+      Future {
+        val graphics = canvas.getGraphicsContext2D
+        graphics.setFill(color)
+        graphics.fillRect(cell.pos.x * args.scale, cell.pos.y * args.scale, args.scale, args.scale)
+      }(Ui)
+    }
   }
 
   private val drag = Signal(Option.empty[Pos2D])
-  drag.onUpdated.collect { case (Some(Some(prev)), _) => UserEvent(prev, UserEventType.LeftClick) }.pipeTo(onUserEvent)
+  drag.onUpdated.collect { case (Some(prev), _) => UserEvent(prev, UserEventType.LeftClick) }.pipeTo(onUserEvent)
 
-  private val canvas = new Canvas().tap { canvas =>
+  protected val canvas: Canvas = new Canvas().tap { canvas =>
     canvas.setWidth(args.windowSize.toDouble)
     canvas.setHeight(args.windowSize.toDouble)
   }
@@ -61,22 +61,22 @@ abstract class World[C <: Cell[C], GC <: GlobalCell[C, GC]] extends LazyLogging 
     }
   }
 
-  def next(): Unit = {
+  override def next(): Boolean = {
     var t = System.currentTimeMillis
     val newBoard = auto.next()
-    logger.debug(s"--- auto next: ${System.currentTimeMillis - t}ms")
+    //logger.debug(s"--- auto next: ${System.currentTimeMillis - t}ms")
     if (currentTurn % args.step == 0) {
       updateBoard(newBoard)
       if (args.enforceGC) {
         t = System.currentTimeMillis
         System.gc()
-        logger.debug(s"--- garbage collection: ${System.currentTimeMillis - t}ms")
       }
     }
     currentTurn += 1L
+    true
   }
 
-  def init(): Unit = {
+  override def init(): Unit = {
     FXGL.addUINode(canvas)
 
     canvas.setOnMouseDragged { (ev: MouseEvent) =>
@@ -87,8 +87,8 @@ abstract class World[C <: Cell[C], GC <: GlobalCell[C, GC]] extends LazyLogging 
     canvas.setOnMousePressed { (ev: MouseEvent) =>
       ev.setDragDetect(true)
       val p = Pos2D(ev.getSceneX.toInt / args.scale, ev.getSceneY.toInt / args.scale)
-      if (ev.getButton == MouseButton.PRIMARY) onUserEvent ! UserEvent(p, UserEventType.LeftClick)
-      else if (ev.getButton == MouseButton.SECONDARY) onUserEvent ! UserEvent(p, UserEventType.RightClick)
+      if (ev.getButton == MouseButton.PRIMARY) onUserEvent ! UserEvent(Some(p), UserEventType.LeftClick)
+      else if (ev.getButton == MouseButton.SECONDARY) onUserEvent ! UserEvent(Some(p), UserEventType.RightClick)
     }
 
     canvas.setOnMouseReleased { (_: MouseEvent) => drag ! None }
@@ -101,14 +101,10 @@ abstract class World[C <: Cell[C], GC <: GlobalCell[C, GC]] extends LazyLogging 
 }
 
 abstract class WorldNoGlobal[C <: Cell[C]] extends World[C, Empty[C]] {
-  override def auto: AutomatonNoGlobal[C]
+  override protected val auto: AutomatonNoGlobal[C]
 }
 
-object World {
-  def apply(args: Arguments): World[_, _] = args.example match {
-    case Arguments.GameOfLifeExample     => new GameOfLifeWorld(args)
-    case Arguments.LangtonsAntExample    => new LangtonsAntWorld(args)
-    case Arguments.LangtonsColorsExample => new LangtonsColorsWorld(args)
-    case Arguments.ChaseExample          => new ChaseWorld(args)
-  }
+trait GameContract {
+  def next(): Boolean
+  def init(): Unit
 }

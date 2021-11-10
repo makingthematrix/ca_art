@@ -2,6 +2,6 @@ package caart
 
 import javafx.application.Application
 
-object Main {
-  def main(args: Array[String]): Unit = Application.launch(classOf[Launcher], args: _*)
+object Main extends App {
+  Application.launch(classOf[Launcher], args: _*)
 }

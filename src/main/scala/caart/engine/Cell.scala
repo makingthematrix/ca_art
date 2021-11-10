@@ -25,24 +25,33 @@ trait Cell[C <: Cell[C]] { self: C =>
   @inline final def next(events: Iterable[C#CE]): C = auto.updateStrategy(self, events)
 }
 
-trait CellNoGlobal[C <: Cell[C]] extends Cell[C] { self: C =>
-  override type GC = Empty[C]
-  override val auto: Cell.AutoContractNoGlobal[C] // no change really, but maybe it will be better readable in IDE hints?...
-}
-
 object Cell {
   trait Event
+  final case class NoEvent() extends Event
 
   trait AutoContract[C <: Cell[C], GC <: GlobalCell[C, GC]] {
     val updateStrategy: UpdateStrategy.Type[C]
+    val eventHub: EventHub.AddEvents[C, GC]
+    val dim: Int
 
     def globalCell: GC
-    def addEvent(pos: Pos2D, event: C#CE): Unit
-    def addEvent(event: GC#GCE): Unit
 
+    def findCell(pos: Pos2D): C
     def neumann(pos: Pos2D): Map[Dir2D, C]
     def moore(pos: Pos2D): Map[Dir2D, C]
   }
 
   type AutoContractNoGlobal[C <: Cell[C]] = AutoContract[C, Empty[C]]
+
+  trait NoGlobal[C <: Cell[C]] extends Cell[C] { self: C =>
+    override type GC = Empty[C]
+    override val auto: Cell.AutoContractNoGlobal[C] // no change really, but maybe it will be better readable in IDE hints?...
+  }
+
+  trait NoEvents[C <: Cell[C]] extends Cell[C] { self: C =>
+    override type CE = Cell.NoEvent
+    override final def updateFromEvents(events: Iterable[C#CE]): Option[C] = None
+  }
+
+  trait CellOnlySelfUpdate[C <: Cell[C]] extends NoGlobal[C] with NoEvents[C] { self: C => }
 }
