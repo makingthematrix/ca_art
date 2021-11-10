@@ -3,17 +3,25 @@
 Hi there. 
 This repository consists of a few examples of Cellular Automata, the common part of the code ("the engine") and the graphical user interface made in JavaFX and FXGL.
 
-After compilation, you can run an example from the `sbt` shield, typing eg. `run example 1`. There are four of them:
-1. Game of Life
-2. Langton's Ant
-3. Langton's Ants in color
-4. Chase
+After compilation, you can run an example from the `sbt` shield. There are five of them:
+1. Game of Life ("life")
+2. Langton's Ant ("ant")
+3. Langton's Ants in color ("antc")
+4. Chase ("chase")
+5. Snake ("snake")
 
-Apart from the `example` keyword you can also use `dim` to change the default length of the board's edge (for the discussion wtf is the board and other concepts, see my talk, or simply read the Scaladoc comments in the code), and `scale` to change the size of the square which symbolizes a single cell on the screen. By default `dim` is set to 100 cells, and `scale` is set to 8 pixels which means that the whole board, when displayed, is 800x800 pixels. Sometimes you may also be interested in the keyword `step` which describes one per how many boards will be displayed on the screen (it speeds up the simulation a bit, but also makes the animation more rough).
-
+You can run each one by writing `run <example name>` in the sbt console or if you want more fine control over the example's configuration you can use:
+```
+>run example=[...] dim=[...] scale=[...] delay=[...] enforcegc=[...]
+```
+where the arguments are:
+ - `example` - the name of the example (no default, choose something)
+ - `dim` - the length of one side of the board (default = 100)
+ - `scale` - the length of one side of a cell (default = 8)
+ - `delay` - the forced delay between turns in milliseconds (default = 0)
 There is also `enforcegc`. The cellular automaton generates a new board every turn and discards the old one. This creates a lot of garbage to collect and if your JDK use a slow, unoptimized GC then after a few hundreds turns you will start to experience more and more hiccups. `enforcegc`, if set to `true`, enforces GC every turn. It results in slower simulations but it fixes the problem. Type `run example 1 enforcegc true` and see for yourself.  
 
-If you run the Game of Life example (with `run example 1`) you will see an empty, white window. This is the initial board. You can populate it with the left mouse clicks. When you're done, start the animation by hitting the space bar. You can always stop the simulation again (with the space bar) and edit the board. 
+If you run the Game of Life example (with `run life`) you will see an empty, white window. This is the initial board. You can populate it with the left mouse clicks. When you're done, start the animation by hitting the space bar. You can always stop the simulation again (with the space bar) and edit the board. 
 
 ### If you want to write your own cellular automata ...
 
