@@ -42,33 +42,7 @@ lazy val nativeImage =
       nativeImageInstalled := true
     )
 
-/*
-TODO:
-
-From https://github.com/kubukoz/steve:
-
-val nativeImageSettings: Seq[Setting[_]] = Seq(
-  Compile / mainClass := Some("steve.Main"),
-  nativeImageVersion := "21.2.0",
-  nativeImageOptions ++= Seq(
-    s"-H:ReflectionConfigurationFiles=${(Compile / resourceDirectory).value / "reflect-config.json"}",
-    s"-H:ResourceConfigurationFiles=${(Compile / resourceDirectory).value / "resource-config.json"}",
-    "-H:+ReportExceptionStackTraces",
-    "--no-fallback",
-    "--allow-incomplete-classpath",
-  ),
-  nativeImageAgentMerge := true,
-  nativeImageReady := { () => () },
-)
-
-Create reflect-config.json and resource-config.json based on by running nativeImageAgentOutputDir :
-https://github.com/scalameta/sbt-native-image#nativeimagerunagent
-
- */
-
 testFrameworks += new TestFramework("munit.Framework")
-
-resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/releases"
 
 Test / parallelExecution := true
 fork := true
